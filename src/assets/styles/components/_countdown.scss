@@ -1,0 +1,110 @@
+.countdown {
+  opacity: 0;
+  $delay-opacity: 0.2s;
+  $duration-opacity: 0.3s;
+  $duration-max-height: 0.35s;
+  border: none;
+
+  &::part(base) {
+    background-color: $color-primary;
+    border: none;
+    border-radius: 0px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+  }
+
+  &[data-hidden='false'] {
+    opacity: 1;
+
+    .countdown__inner {
+      overflow: hidden;
+      max-height: 100px;
+      opacity: 1;
+      transition: max-height $duration-max-height ease-in-out, opacity $duration-opacity ease-in-out $delay-opacity;
+    }
+  }
+
+  transition: opacity $duration-opacity ease-in-out;
+
+  &__token {
+    width: 72px;
+  }
+
+  &__inner {
+    opacity: 0;
+    max-height: 0;
+    display: flex;
+    gap: 0.5em;
+    align-items: center;
+  }
+
+  &__title {
+    margin-right: auto;
+    margin-left: 0.75em;
+    text-align: start;
+    text-transform: capitalize;
+    font-weight: 600;
+
+    h2 {
+      display: block;
+      font-size: 1rem;
+      color: $color-text;
+      margin-bottom: 5px;
+    }
+
+    > span {
+      font-size: 0.9rem;
+      color: darken($color-text-trinary, 10%);
+    }
+  }
+
+  .countdown__timer {
+    flex: 60px 0 1;
+    line-height: 1.2;
+
+    &__value {
+      font-weight: 800;
+      padding: 10px;
+      font-size: 1rem;
+      flex-basis: 50px;
+      height: 100%;
+      color: $color-text-secondary;
+      border: 1px solid $color-border;
+      border-radius: 4px;
+      border-color: $color-brand;
+      display: block;
+      box-shadow: inset 0 -1px 3px fade-out($color-border, 0.5);
+    }
+
+    &__label {
+      font-size: 0.8rem;
+      color: $color-text-secondary;
+      transition: font-size 0.1s ease-in-out;
+    }
+  }
+
+  &.done {
+    $faded-color-red: #ff5733;
+
+    .countdown__title {
+      > span {
+        color: $faded-color-red;
+      }
+    }
+
+    .countdown__timer {
+      &__value {
+        background-color: #fefcfe;
+        text-decoration: line-through;
+        text-decoration-color: $faded-color-red;
+        text-decoration-thickness: 2px;
+        opacity: 0.8;
+      }
+
+      &__label {
+        font-size: 0.75rem;
+        color: $faded-color-red;
+      }
+    }
+  }
+}

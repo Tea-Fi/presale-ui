@@ -1,0 +1,35 @@
+.event-modal {
+  &::part(panel) {
+    color: $color-danger;
+    background-color: $color-primary;
+  }
+
+  &::part(close-button__base) {
+    color: $color-text;
+
+    &:hover {
+      color: $color-brand;
+    }
+  }
+
+  &__info {
+    display: block;
+    text-align: left;
+  }
+  &__title {
+    color: $color-text;
+    margin-bottom: 10px;
+    font-size: 20px;
+  }
+  &__sub-title {
+    color: $color-text-secondary;
+    font-size: 14px;
+  }
+  &__close-btn {
+    &::part(base) {
+      background-color: $color-brand;
+      border: none;
+      transition: all 100ms ease-in-out 25ms;
+    }
+  }
+}

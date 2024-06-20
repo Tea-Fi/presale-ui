@@ -1,0 +1,27 @@
+.token-rate {
+  &::part(base) {
+    border-radius: 0px;
+    background-color: $color-primary;
+    border: none;
+  }
+  &::part(body) {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  &__name {
+    display: inline-flex;
+    align-items: center;
+    gap: 1em;
+    font-weight: 600;
+    img {
+      width: 72px;
+      border-radius: 33%;
+    }
+  }
+  &__value {
+    font-weight: 700;
+    color: $color-text-secondary;
+    font-size: 1.25rem;
+  }
+}

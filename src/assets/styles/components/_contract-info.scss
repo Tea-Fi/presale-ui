@@ -1,0 +1,32 @@
+.contract-info {
+  border: none;
+  background-color: $color-primary;
+  padding-inline: 20px;
+  display: block;
+  justify-content: flex-start;
+
+  .progress {
+    display: block;
+    justify-content: flex-start;
+
+    &__info {
+      display: flex;
+      justify-content: space-between;
+    }
+    &__bar {
+      &::part(indicator) {
+        background-color: $color-brand;
+      }
+      &::part(label) {
+        color: black;
+        font-weight: 700;
+      }
+      &::part(base) {
+        margin-top: -10px;
+        flex-wrap: wrap-reverse;
+        border-radius: 5px;
+        background-color: $color-input;
+      }
+    }
+  }
+}

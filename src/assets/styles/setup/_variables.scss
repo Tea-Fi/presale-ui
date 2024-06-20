@@ -1,0 +1,15 @@
+$bg-base: #1d1d1d;
+$bg-top-bar: #282828;
+$bg-popup: lighten($bg-base, 4%);
+$color-text: #ffffff;
+$color-text-secondary: darken($color-text, 30);
+$color-text-trinary: darken($color-text, 50);
+$color-primary: darken($bg-base, 4%);
+$color-input: #2e3136;
+$color-success: #52c41a;
+$color-placeholder: #cccece;
+$color-border: #e4e4e7;
+$color-danger: #ff4d4f;
+$color-disabled: #c3c7c7;
+$shadow: 0 -0.05em 1em 2px #0a100015;
+$color-brand: #f716a2;

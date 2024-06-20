@@ -1,0 +1,21 @@
+.main-layout {
+  --min-width: 400px;
+  --width: 1200px;
+  --gutter: minmax(24px, 1fr);
+  grid-template-columns: var(--gutter) minmax(var(--min-width), var(--width)) var(--gutter);
+  grid-template-rows: min-content auto;
+  min-height: 100dvh;
+
+  > *:not(.full-width) {
+    grid-column: 2;
+  }
+
+  > .full-width {
+    grid-column: 1 / -1;
+
+    .container {
+      margin: 0 auto;
+      max-width: var(--width);
+    }
+  }
+}

@@ -1,0 +1,8 @@
+.spinner {
+  font-size: 1.4rem;
+  margin-top: 10px;
+  &::part(base) {
+    --indicator-color: black;
+    --track-color: #505050;
+  }
+}

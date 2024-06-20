@@ -1,0 +1,19 @@
+@mixin font-face($src, $weight, $format) {
+  @font-face {
+    src: url($src) format("truetype");
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: $weight;
+  }
+}
+
+@include font-face("src/assets/fonts/Inter/static/Inter-Thin.ttf", 100, truetype);
+@include font-face("src/assets/fonts/Inter/static/Inter-ExtraLight.ttf", 200, truetype);
+@include font-face("src/assets/fonts/Inter/static/Inter-Light.ttf", 300, truetype);
+@include font-face("src/assets/fonts/Inter/static/Inter-Regular.ttf", 400, truetype);
+@include font-face("src/assets/fonts/Inter/static/Inter-Medium.ttf", 500, truetype);
+@include font-face("src/assets/fonts/Inter/static/Inter-SemiBold.ttf", 600, truetype);
+@include font-face("src/assets/fonts/Inter/static/Inter-Bold.ttf", 700, truetype);
+@include font-face("src/assets/fonts/Inter/static/Inter-ExtraBold.ttf", 800, truetype);
+@include font-face("src/assets/fonts/Inter/static/Inter-Black.ttf", 900, truetype);
+

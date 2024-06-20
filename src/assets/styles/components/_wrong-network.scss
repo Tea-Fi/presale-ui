@@ -1,0 +1,25 @@
+.wrong-network {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-radius: 4px;
+    width: 320px;
+    color: white;
+    padding: 20px;
+    background-color: #131313;
+    text-align: center;
+    .switch_btn {
+      &::part(base) {
+        margin-top: 16px;
+        background-color: $color-brand;
+        border: none;
+        transition: all 100ms ease-in-out 25ms;
+      }
+    }
+  }
+}
