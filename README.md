@@ -1,30 +1,33 @@
-# React + TypeScript + Vite
+# TeaPresale
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Prerequisite
 
-Currently, two official plugins are available:
+- NodeJs 18+.
+- run `npm install` to install dependencies.
+- create .env file configuration
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## .env file
 
-## Expanding the ESLint configuration
+create .env.development inside apps/ui directory and add the followings:
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+- VITE_WALLET_CONNECT_PROJECT_ID= Get it from <https://cloud.walletconnect.com/sign-in>
+- VITE_PUBLIC_INFURA_API= Get it from <https://app.infura.io/login>
+- VITE_PUBLIC_INFURA_URL= Get it from <https://app.infura.io/login>
 
-- Configure the top-level `parserOptions` property like this:
+## Development
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
-```
+Run `npm run start` to start the development server. Happy coding!
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+## Build for production
+
+Run `npm run build` to build the application. The build artifacts are stored in the dist/apps/privatesale directory. ready to be deployed.
+
+### Running production in local
+
+after building app, run thees commands :
+
+`cd dist/`
+
+then run below command in this directory :
+
+`npm run start`
