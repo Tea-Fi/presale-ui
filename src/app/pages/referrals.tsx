@@ -115,7 +115,7 @@ export const Referrals = () => {
           <ReactFlow
             nodes={nodes}
             edges={edges}
-            onNodeClick={(e) => onNodeClick(e.target.id)}
+            onNodeClick={(e: any) => onNodeClick(e.target.id)}
           >
             <Background />
             <Controls />
