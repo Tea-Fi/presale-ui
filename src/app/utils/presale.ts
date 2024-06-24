@@ -38,7 +38,7 @@ export async function enterPresaleUtil(value: string, referral: number, token: s
     await tx.wait();
     return {
       status: 'SUCCESS',
-      message: 'Transaction Approevd.',
+      message: 'Transaction Approved.',
       txid: tx,
     };
   } catch (e: any) {

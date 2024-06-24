@@ -1,423 +1,937 @@
 export const PRESALE_ABI = [
   {
-    inputs: [
-      { internalType: 'address', name: '_owner', type: 'address' },
-      { internalType: 'address[]', name: '_paymentTokens', type: 'address[]' },
-    ],
-    stateMutability: 'nonpayable',
-    type: 'constructor',
-  },
-  { inputs: [{ internalType: 'address', name: 'target', type: 'address' }], name: 'AddressEmptyCode', type: 'error' },
-  {
-    inputs: [{ internalType: 'address', name: 'account', type: 'address' }],
-    name: 'AddressInsufficientBalance',
-    type: 'error',
-  },
-  {
-    inputs: [
-      { internalType: 'address', name: 'spender', type: 'address' },
-      { internalType: 'uint256', name: 'allowance', type: 'uint256' },
-      { internalType: 'uint256', name: 'needed', type: 'uint256' },
-    ],
-    name: 'ERC20InsufficientAllowance',
-    type: 'error',
-  },
-  {
-    inputs: [
-      { internalType: 'address', name: 'sender', type: 'address' },
-      { internalType: 'uint256', name: 'balance', type: 'uint256' },
-      { internalType: 'uint256', name: 'needed', type: 'uint256' },
-    ],
-    name: 'ERC20InsufficientBalance',
-    type: 'error',
-  },
-  {
-    inputs: [{ internalType: 'address', name: 'approver', type: 'address' }],
-    name: 'ERC20InvalidApprover',
-    type: 'error',
-  },
-  {
-    inputs: [{ internalType: 'address', name: 'receiver', type: 'address' }],
-    name: 'ERC20InvalidReceiver',
-    type: 'error',
-  },
-  { inputs: [{ internalType: 'address', name: 'sender', type: 'address' }], name: 'ERC20InvalidSender', type: 'error' },
-  {
-    inputs: [{ internalType: 'address', name: 'spender', type: 'address' }],
-    name: 'ERC20InvalidSpender',
-    type: 'error',
-  },
-  { inputs: [], name: 'EnforcedPause', type: 'error' },
-  { inputs: [], name: 'ExpectedPause', type: 'error' },
-  { inputs: [], name: 'FailedInnerCall', type: 'error' },
-  {
-    inputs: [
-      { internalType: 'uint8', name: 'round', type: 'uint8' },
-      { internalType: 'uint256', name: 'amount', type: 'uint256' },
-      { internalType: 'uint256', name: 'available', type: 'uint256' },
-    ],
-    name: 'NotEnoughTokensLeft',
-    type: 'error',
-  },
-  { inputs: [{ internalType: 'address', name: 'owner', type: 'address' }], name: 'OwnableInvalidOwner', type: 'error' },
-  {
-    inputs: [{ internalType: 'address', name: 'account', type: 'address' }],
-    name: 'OwnableUnauthorizedAccount',
-    type: 'error',
+      "type": "constructor",
+      "inputs": [
+          {
+              "name": "_multisigWallet",
+              "type": "address",
+              "internalType": "address"
+          },
+          {
+              "name": "_uniswapRouterV2",
+              "type": "address",
+              "internalType": "contract IUniswapV2Router02"
+          },
+          {
+              "name": "tokensAvailableForPresale",
+              "type": "uint256",
+              "internalType": "uint256"
+          },
+          {
+              "name": "options",
+              "type": "tuple[]",
+              "internalType": "struct Presale.Option[]",
+              "components": [
+                  {
+                      "name": "tgeAmount",
+                      "type": "uint8",
+                      "internalType": "uint8"
+                  },
+                  {
+                      "name": "leftoverVesting",
+                      "type": "uint8",
+                      "internalType": "uint8"
+                  },
+                  {
+                      "name": "price",
+                      "type": "uint8",
+                      "internalType": "uint8"
+                  },
+                  {
+                      "name": "presaleToken",
+                      "type": "address",
+                      "internalType": "address"
+                  },
+                  {
+                      "name": "sold",
+                      "type": "uint256",
+                      "internalType": "uint256"
+                  },
+                  {
+                      "name": "soldInUsd",
+                      "type": "uint256",
+                      "internalType": "uint256"
+                  }
+              ]
+          }
+      ],
+      "stateMutability": "nonpayable"
   },
   {
-    inputs: [
-      { internalType: 'address', name: 'from', type: 'address' },
-      { internalType: 'address', name: 'to', type: 'address' },
-      { internalType: 'uint256', name: 'amount', type: 'uint256' },
-    ],
-    name: 'PaymentFailed',
-    type: 'error',
+      "type": "function",
+      "name": "MULTISIG_WALLET",
+      "inputs": [],
+      "outputs": [
+          {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+          }
+      ],
+      "stateMutability": "view"
   },
   {
-    inputs: [{ internalType: 'address', name: 'token', type: 'address' }],
-    name: 'PaymentTokenNotAuthorized',
-    type: 'error',
-  },
-  { inputs: [{ internalType: 'uint8', name: 'round', type: 'uint8' }], name: 'PreviousRoundActive', type: 'error' },
-  { inputs: [{ internalType: 'uint8', name: 'round', type: 'uint8' }], name: 'RoundAlreadyExists', type: 'error' },
-  { inputs: [{ internalType: 'uint8', name: 'round', type: 'uint8' }], name: 'RoundAlreadyStarted', type: 'error' },
-  { inputs: [{ internalType: 'uint8', name: 'round', type: 'uint8' }], name: 'RoundFinished', type: 'error' },
-  { inputs: [{ internalType: 'uint8', name: 'round', type: 'uint8' }], name: 'RoundNotSet', type: 'error' },
-  { inputs: [{ internalType: 'uint8', name: 'round', type: 'uint8' }], name: 'RoundNotStarted', type: 'error' },
-  {
-    inputs: [{ internalType: 'address', name: 'token', type: 'address' }],
-    name: 'SafeERC20FailedOperation',
-    type: 'error',
-  },
-  { inputs: [], name: 'WithdrawFailed', type: 'error' },
-  {
-    anonymous: false,
-    inputs: [{ indexed: true, internalType: 'address', name: 'token', type: 'address' }],
-    name: 'AddPaymentToken',
-    type: 'event',
+      "type": "function",
+      "name": "PERCENTAGE_RATE",
+      "inputs": [],
+      "outputs": [
+          {
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+          }
+      ],
+      "stateMutability": "view"
   },
   {
-    anonymous: false,
-    inputs: [
-      { indexed: true, internalType: 'address', name: 'owner', type: 'address' },
-      { indexed: true, internalType: 'address', name: 'spender', type: 'address' },
-      { indexed: false, internalType: 'uint256', name: 'value', type: 'uint256' },
-    ],
-    name: 'Approval',
-    type: 'event',
+      "type": "function",
+      "name": "TOKENS_AVAILABLE_FOR_PRESALE",
+      "inputs": [],
+      "outputs": [
+          {
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+          }
+      ],
+      "stateMutability": "view"
   },
   {
-    anonymous: false,
-    inputs: [
-      { indexed: true, internalType: 'address', name: 'buyer', type: 'address' },
-      { indexed: false, internalType: 'uint256', name: 'amount', type: 'uint256' },
-      { indexed: false, internalType: 'uint8', name: 'referral', type: 'uint8' },
-    ],
-    name: 'BuyTokens',
-    type: 'event',
+      "type": "function",
+      "name": "addPaymentToken",
+      "inputs": [
+          {
+              "name": "peggedToUsd",
+              "type": "bool",
+              "internalType": "bool"
+          },
+          {
+              "name": "token",
+              "type": "address",
+              "internalType": "address"
+          },
+          {
+              "name": "path",
+              "type": "address[]",
+              "internalType": "address[]"
+          }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
   },
   {
-    anonymous: false,
-    inputs: [
-      { indexed: true, internalType: 'address', name: 'previousOwner', type: 'address' },
-      { indexed: true, internalType: 'address', name: 'newOwner', type: 'address' },
-    ],
-    name: 'OwnershipTransferred',
-    type: 'event',
+      "type": "function",
+      "name": "buyExactPresaleTokens",
+      "inputs": [
+          {
+              "name": "optionId",
+              "type": "uint8",
+              "internalType": "uint8"
+          },
+          {
+              "name": "referrerId",
+              "type": "uint32",
+              "internalType": "uint32"
+          },
+          {
+              "name": "tokenSell",
+              "type": "address",
+              "internalType": "address"
+          },
+          {
+              "name": "buyAmount",
+              "type": "uint256",
+              "internalType": "uint256"
+          }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
   },
   {
-    anonymous: false,
-    inputs: [{ indexed: false, internalType: 'address', name: 'account', type: 'address' }],
-    name: 'Paused',
-    type: 'event',
+      "type": "function",
+      "name": "buyExactPresaleTokensETH",
+      "inputs": [
+          {
+              "name": "optionId",
+              "type": "uint8",
+              "internalType": "uint8"
+          },
+          {
+              "name": "referrerId",
+              "type": "uint32",
+              "internalType": "uint32"
+          },
+          {
+              "name": "buyAmount",
+              "type": "uint256",
+              "internalType": "uint256"
+          }
+      ],
+      "outputs": [],
+      "stateMutability": "payable"
   },
   {
-    anonymous: false,
-    inputs: [{ indexed: true, internalType: 'address', name: 'token', type: 'address' }],
-    name: 'RemovePaymentToken',
-    type: 'event',
+      "type": "function",
+      "name": "createNewOption",
+      "inputs": [
+          {
+              "name": "optionId",
+              "type": "uint8",
+              "internalType": "uint8"
+          },
+          {
+              "name": "tgeAmount",
+              "type": "uint8",
+              "internalType": "uint8"
+          },
+          {
+              "name": "leftoverVesting",
+              "type": "uint8",
+              "internalType": "uint8"
+          },
+          {
+              "name": "price",
+              "type": "uint8",
+              "internalType": "uint8"
+          }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
   },
   {
-    anonymous: false,
-    inputs: [{ indexed: true, internalType: 'uint8', name: 'round', type: 'uint8' }],
-    name: 'RoundStarted',
-    type: 'event',
+      "type": "function",
+      "name": "deleteOption",
+      "inputs": [
+          {
+              "name": "optionId",
+              "type": "uint8",
+              "internalType": "uint8"
+          }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
   },
   {
-    anonymous: false,
-    inputs: [
-      { indexed: true, internalType: 'uint8', name: 'round', type: 'uint8' },
-      { indexed: false, internalType: 'uint256', name: 'startTime', type: 'uint256' },
-      { indexed: false, internalType: 'uint256', name: 'duration', type: 'uint256' },
-      { indexed: false, internalType: 'uint256', name: 'size', type: 'uint256' },
-      { indexed: false, internalType: 'uint256', name: 'price', type: 'uint256' },
-    ],
-    name: 'SetRound',
-    type: 'event',
+      "type": "function",
+      "name": "getOptionInfo",
+      "inputs": [
+          {
+              "name": "optionId",
+              "type": "uint8",
+              "internalType": "uint8"
+          }
+      ],
+      "outputs": [
+          {
+              "name": "",
+              "type": "tuple",
+              "internalType": "struct Presale.Option",
+              "components": [
+                  {
+                      "name": "tgeAmount",
+                      "type": "uint8",
+                      "internalType": "uint8"
+                  },
+                  {
+                      "name": "leftoverVesting",
+                      "type": "uint8",
+                      "internalType": "uint8"
+                  },
+                  {
+                      "name": "price",
+                      "type": "uint8",
+                      "internalType": "uint8"
+                  },
+                  {
+                      "name": "presaleToken",
+                      "type": "address",
+                      "internalType": "address"
+                  },
+                  {
+                      "name": "sold",
+                      "type": "uint256",
+                      "internalType": "uint256"
+                  },
+                  {
+                      "name": "soldInUsd",
+                      "type": "uint256",
+                      "internalType": "uint256"
+                  }
+              ]
+          }
+      ],
+      "stateMutability": "view"
   },
   {
-    anonymous: false,
-    inputs: [
-      { indexed: true, internalType: 'address', name: 'from', type: 'address' },
-      { indexed: true, internalType: 'address', name: 'to', type: 'address' },
-      { indexed: false, internalType: 'uint256', name: 'value', type: 'uint256' },
-    ],
-    name: 'Transfer',
-    type: 'event',
+      "type": "function",
+      "name": "initOptions",
+      "inputs": [
+          {
+              "name": "optionIds",
+              "type": "uint8[]",
+              "internalType": "uint8[]"
+          }
+      ],
+      "outputs": [],
+      "stateMutability": "payable"
   },
   {
-    anonymous: false,
-    inputs: [{ indexed: false, internalType: 'address', name: 'account', type: 'address' }],
-    name: 'Unpaused',
-    type: 'event',
+      "type": "function",
+      "name": "inputPriceQuote",
+      "inputs": [
+          {
+              "name": "token",
+              "type": "address",
+              "internalType": "address"
+          },
+          {
+              "name": "amountsIn",
+              "type": "uint256",
+              "internalType": "uint256"
+          }
+      ],
+      "outputs": [
+          {
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+          }
+      ],
+      "stateMutability": "view"
   },
   {
-    anonymous: false,
-    inputs: [
-      { indexed: true, internalType: 'address', name: 'owner', type: 'address' },
-      { indexed: false, internalType: 'address', name: 'token', type: 'address' },
-      { indexed: false, internalType: 'uint256', name: 'amount', type: 'uint256' },
-    ],
-    name: 'Withdraw',
-    type: 'event',
+      "type": "function",
+      "name": "inputPriceQuoteReversed",
+      "inputs": [
+          {
+              "name": "token",
+              "type": "address",
+              "internalType": "address"
+          },
+          {
+              "name": "amountsIn",
+              "type": "uint256",
+              "internalType": "uint256"
+          }
+      ],
+      "outputs": [
+          {
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+          }
+      ],
+      "stateMutability": "view"
   },
   {
-    inputs: [],
-    name: 'PERCENTAGE_RATE',
-    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-    stateMutability: 'view',
-    type: 'function',
+      "type": "function",
+      "name": "isReferral",
+      "inputs": [
+          {
+              "name": "referral",
+              "type": "address",
+              "internalType": "address"
+          }
+      ],
+      "outputs": [
+          {
+              "name": "",
+              "type": "bool",
+              "internalType": "bool"
+          }
+      ],
+      "stateMutability": "view"
   },
   {
-    inputs: [{ internalType: 'address', name: 'token', type: 'address' }],
-    name: 'addPaymentToken',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
+      "type": "function",
+      "name": "owner",
+      "inputs": [],
+      "outputs": [
+          {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+          }
+      ],
+      "stateMutability": "view"
   },
   {
-    inputs: [
-      { internalType: 'address', name: 'owner', type: 'address' },
-      { internalType: 'address', name: 'spender', type: 'address' },
-    ],
-    name: 'allowance',
-    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-    stateMutability: 'view',
-    type: 'function',
+      "type": "function",
+      "name": "pause",
+      "inputs": [],
+      "outputs": [],
+      "stateMutability": "nonpayable"
   },
   {
-    inputs: [
-      { internalType: 'address', name: 'spender', type: 'address' },
-      { internalType: 'uint256', name: 'value', type: 'uint256' },
-    ],
-    name: 'approve',
-    outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
-    stateMutability: 'nonpayable',
-    type: 'function',
+      "type": "function",
+      "name": "paused",
+      "inputs": [],
+      "outputs": [
+          {
+              "name": "",
+              "type": "bool",
+              "internalType": "bool"
+          }
+      ],
+      "stateMutability": "view"
   },
   {
-    inputs: [{ internalType: 'address', name: 'account', type: 'address' }],
-    name: 'balanceOf',
-    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-    stateMutability: 'view',
-    type: 'function',
+      "type": "function",
+      "name": "referrals",
+      "inputs": [
+          {
+              "name": "referrerId",
+              "type": "uint32",
+              "internalType": "uint32"
+          }
+      ],
+      "outputs": [
+          {
+              "name": "isCreated",
+              "type": "bool",
+              "internalType": "bool"
+          },
+          {
+              "name": "referrals",
+              "type": "uint16",
+              "internalType": "uint16"
+          },
+          {
+              "name": "sold",
+              "type": "uint256",
+              "internalType": "uint256"
+          },
+          {
+              "name": "soldInUsd",
+              "type": "uint256",
+              "internalType": "uint256"
+          }
+      ],
+      "stateMutability": "view"
   },
   {
-    inputs: [
-      { internalType: 'uint256', name: 'amount', type: 'uint256' },
-      { internalType: 'uint8', name: 'referral', type: 'uint8' },
-      { internalType: 'address', name: 'tokenAddress', type: 'address' },
-    ],
-    name: 'buyTokens',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
+      "type": "function",
+      "name": "removePaymentToken",
+      "inputs": [
+          {
+              "name": "token",
+              "type": "address",
+              "internalType": "address"
+          }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
   },
   {
-    inputs: [],
-    name: 'currentRound',
-    outputs: [{ internalType: 'uint8', name: '', type: 'uint8' }],
-    stateMutability: 'view',
-    type: 'function',
+      "type": "function",
+      "name": "renounceOwnership",
+      "inputs": [],
+      "outputs": [],
+      "stateMutability": "nonpayable"
   },
   {
-    inputs: [],
-    name: 'decimals',
-    outputs: [{ internalType: 'uint8', name: '', type: 'uint8' }],
-    stateMutability: 'view',
-    type: 'function',
+      "type": "function",
+      "name": "saleOptions",
+      "inputs": [
+          {
+              "name": "optionId",
+              "type": "uint8",
+              "internalType": "uint8"
+          }
+      ],
+      "outputs": [
+          {
+              "name": "tgeAmount",
+              "type": "uint8",
+              "internalType": "uint8"
+          },
+          {
+              "name": "leftoverVesting",
+              "type": "uint8",
+              "internalType": "uint8"
+          },
+          {
+              "name": "price",
+              "type": "uint8",
+              "internalType": "uint8"
+          },
+          {
+              "name": "presaleToken",
+              "type": "address",
+              "internalType": "address"
+          },
+          {
+              "name": "sold",
+              "type": "uint256",
+              "internalType": "uint256"
+          },
+          {
+              "name": "soldInUsd",
+              "type": "uint256",
+              "internalType": "uint256"
+          }
+      ],
+      "stateMutability": "view"
   },
   {
-    inputs: [
-      { internalType: 'uint8', name: 'round', type: 'uint8' },
-      { internalType: 'uint256', name: 'startTime', type: 'uint256' },
-      { internalType: 'uint256', name: 'duration', type: 'uint256' },
-      { internalType: 'uint256', name: 'size', type: 'uint256' },
-      { internalType: 'uint256', name: 'price', type: 'uint256' },
-    ],
-    name: 'forceSetRound',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
+      "type": "function",
+      "name": "saleOptionsCount",
+      "inputs": [],
+      "outputs": [
+          {
+              "name": "",
+              "type": "uint8",
+              "internalType": "uint8"
+          }
+      ],
+      "stateMutability": "view"
   },
   {
-    inputs: [],
-    name: 'getPrice',
-    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-    stateMutability: 'view',
-    type: 'function',
+      "type": "function",
+      "name": "salePaymentTokens",
+      "inputs": [
+          {
+              "name": "token",
+              "type": "address",
+              "internalType": "address"
+          }
+      ],
+      "outputs": [
+          {
+              "name": "peggedToUsd",
+              "type": "bool",
+              "internalType": "bool"
+          },
+          {
+              "name": "allowed",
+              "type": "bool",
+              "internalType": "bool"
+          }
+      ],
+      "stateMutability": "view"
   },
   {
-    inputs: [],
-    name: 'getRoundEnd',
-    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-    stateMutability: 'view',
-    type: 'function',
+      "type": "function",
+      "name": "totalSold",
+      "inputs": [],
+      "outputs": [
+          {
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+          }
+      ],
+      "stateMutability": "view"
   },
   {
-    inputs: [],
-    name: 'getRoundSize',
-    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-    stateMutability: 'view',
-    type: 'function',
+      "type": "function",
+      "name": "totalSoldInUsd",
+      "inputs": [],
+      "outputs": [
+          {
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+          }
+      ],
+      "stateMutability": "view"
   },
   {
-    inputs: [],
-    name: 'getRoundSold',
-    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-    stateMutability: 'view',
-    type: 'function',
+      "type": "function",
+      "name": "transferOwnership",
+      "inputs": [
+          {
+              "name": "newOwner",
+              "type": "address",
+              "internalType": "address"
+          }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
   },
   {
-    inputs: [],
-    name: 'name',
-    outputs: [{ internalType: 'string', name: '', type: 'string' }],
-    stateMutability: 'view',
-    type: 'function',
+      "type": "function",
+      "name": "unpause",
+      "inputs": [],
+      "outputs": [],
+      "stateMutability": "nonpayable"
   },
   {
-    inputs: [],
-    name: 'owner',
-    outputs: [{ internalType: 'address', name: '', type: 'address' }],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  { inputs: [], name: 'pause', outputs: [], stateMutability: 'nonpayable', type: 'function' },
-  {
-    inputs: [],
-    name: 'paused',
-    outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
-    stateMutability: 'view',
-    type: 'function',
+      "type": "function",
+      "name": "withdraw",
+      "inputs": [
+          {
+              "name": "token",
+              "type": "address",
+              "internalType": "address"
+          }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
   },
   {
-    inputs: [{ internalType: 'address', name: 'token', type: 'address' }],
-    name: 'paymentTokens',
-    outputs: [{ internalType: 'bool', name: 'allowed', type: 'bool' }],
-    stateMutability: 'view',
-    type: 'function',
+      "type": "event",
+      "name": "AddPaymentToken",
+      "inputs": [
+          {
+              "name": "token",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+          }
+      ],
+      "anonymous": false
   },
   {
-    inputs: [{ internalType: 'uint8', name: 'referralId', type: 'uint8' }],
-    name: 'referrals',
-    outputs: [
-      { internalType: 'uint256', name: 'amountSold', type: 'uint256' },
-      { internalType: 'uint256', name: 'numOfReferrals', type: 'uint256' },
-    ],
-    stateMutability: 'view',
-    type: 'function',
+      "type": "event",
+      "name": "BuyTokens",
+      "inputs": [
+          {
+              "name": "optionId",
+              "type": "uint8",
+              "indexed": true,
+              "internalType": "uint8"
+          },
+          {
+              "name": "buyer",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+          },
+          {
+              "name": "tokenSold",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+          },
+          {
+              "name": "referrerId",
+              "type": "uint32",
+              "indexed": false,
+              "internalType": "uint32"
+          },
+          {
+              "name": "tokensSoldAmountInUsd",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+          },
+          {
+              "name": "tokenSoldAmount",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+          },
+          {
+              "name": "tokenSoldPrice",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+          },
+          {
+              "name": "tokenReceicedPrice",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+          },
+          {
+              "name": "tokenReceivedAmount",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+          }
+      ],
+      "anonymous": false
   },
   {
-    inputs: [{ internalType: 'address', name: 'token', type: 'address' }],
-    name: 'removePaymentToken',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  { inputs: [], name: 'renounceOwnership', outputs: [], stateMutability: 'nonpayable', type: 'function' },
-  {
-    inputs: [{ internalType: 'uint8', name: 'roundId', type: 'uint8' }],
-    name: 'rounds',
-    outputs: [
-      { internalType: 'uint256', name: 'startTime', type: 'uint256' },
-      { internalType: 'uint256', name: 'duration', type: 'uint256' },
-      { internalType: 'uint256', name: 'size', type: 'uint256' },
-      { internalType: 'uint256', name: 'price', type: 'uint256' },
-      { internalType: 'uint256', name: 'sold', type: 'uint256' },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      { internalType: 'uint8', name: 'round', type: 'uint8' },
-      { internalType: 'uint256', name: 'startTime', type: 'uint256' },
-      { internalType: 'uint256', name: 'duration', type: 'uint256' },
-      { internalType: 'uint256', name: 'size', type: 'uint256' },
-      { internalType: 'uint256', name: 'price', type: 'uint256' },
-    ],
-    name: 'setRound',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  { inputs: [], name: 'startNextRound', outputs: [], stateMutability: 'nonpayable', type: 'function' },
-  {
-    inputs: [],
-    name: 'symbol',
-    outputs: [{ internalType: 'string', name: '', type: 'string' }],
-    stateMutability: 'view',
-    type: 'function',
+      "type": "event",
+      "name": "OptionCreated",
+      "inputs": [
+          {
+              "name": "optionId",
+              "type": "uint8",
+              "indexed": true,
+              "internalType": "uint8"
+          },
+          {
+              "name": "presaleToken",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+          },
+          {
+              "name": "price",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+          }
+      ],
+      "anonymous": false
   },
   {
-    inputs: [],
-    name: 'totalSold',
-    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-    stateMutability: 'view',
-    type: 'function',
+      "type": "event",
+      "name": "OptionDeleted",
+      "inputs": [
+          {
+              "name": "optionId",
+              "type": "uint8",
+              "indexed": true,
+              "internalType": "uint8"
+          }
+      ],
+      "anonymous": false
   },
   {
-    inputs: [],
-    name: 'totalSupply',
-    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-    stateMutability: 'view',
-    type: 'function',
+      "type": "event",
+      "name": "OptionUpdated",
+      "inputs": [
+          {
+              "name": "optionId",
+              "type": "uint8",
+              "indexed": true,
+              "internalType": "uint8"
+          }
+      ],
+      "anonymous": false
   },
   {
-    inputs: [
-      { internalType: 'address', name: 'to', type: 'address' },
-      { internalType: 'uint256', name: 'value', type: 'uint256' },
-    ],
-    name: 'transfer',
-    outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
-    stateMutability: 'nonpayable',
-    type: 'function',
+      "type": "event",
+      "name": "OwnershipTransferred",
+      "inputs": [
+          {
+              "name": "previousOwner",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+          },
+          {
+              "name": "newOwner",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+          }
+      ],
+      "anonymous": false
   },
   {
-    inputs: [
-      { internalType: 'address', name: 'from', type: 'address' },
-      { internalType: 'address', name: 'to', type: 'address' },
-      { internalType: 'uint256', name: 'value', type: 'uint256' },
-    ],
-    name: 'transferFrom',
-    outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
-    stateMutability: 'nonpayable',
-    type: 'function',
+      "type": "event",
+      "name": "Paused",
+      "inputs": [
+          {
+              "name": "account",
+              "type": "address",
+              "indexed": false,
+              "internalType": "address"
+          }
+      ],
+      "anonymous": false
   },
   {
-    inputs: [{ internalType: 'address', name: 'newOwner', type: 'address' }],
-    name: 'transferOwnership',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
+      "type": "event",
+      "name": "PresaleTokenCreated",
+      "inputs": [
+          {
+              "name": "token",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+          }
+      ],
+      "anonymous": false
   },
-  { inputs: [], name: 'unpause', outputs: [], stateMutability: 'nonpayable', type: 'function' },
   {
-    inputs: [{ internalType: 'address', name: 'paymentToken', type: 'address' }],
-    name: 'withdraw',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
+      "type": "event",
+      "name": "RemovePaymentToken",
+      "inputs": [
+          {
+              "name": "token",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+          }
+      ],
+      "anonymous": false
   },
+  {
+      "type": "event",
+      "name": "Unpaused",
+      "inputs": [
+          {
+              "name": "account",
+              "type": "address",
+              "indexed": false,
+              "internalType": "address"
+          }
+      ],
+      "anonymous": false
+  },
+  {
+      "type": "event",
+      "name": "Withdraw",
+      "inputs": [
+          {
+              "name": "owner",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+          },
+          {
+              "name": "token",
+              "type": "address",
+              "indexed": false,
+              "internalType": "address"
+          },
+          {
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+          }
+      ],
+      "anonymous": false
+  },
+  {
+      "type": "error",
+      "name": "AddressEmptyCode",
+      "inputs": [
+          {
+              "name": "target",
+              "type": "address",
+              "internalType": "address"
+          }
+      ]
+  },
+  {
+      "type": "error",
+      "name": "AddressInsufficientBalance",
+      "inputs": [
+          {
+              "name": "account",
+              "type": "address",
+              "internalType": "address"
+          }
+      ]
+  },
+  {
+      "type": "error",
+      "name": "AddressMustBeDifferentFromAddressZero",
+      "inputs": []
+  },
+  {
+      "type": "error",
+      "name": "EnforcedPause",
+      "inputs": []
+  },
+  {
+      "type": "error",
+      "name": "ExpectedPause",
+      "inputs": []
+  },
+  {
+      "type": "error",
+      "name": "FailedInnerCall",
+      "inputs": []
+  },
+  {
+      "type": "error",
+      "name": "InsufficientFunds",
+      "inputs": []
+  },
+  {
+      "type": "error",
+      "name": "NotEnoughTokensLeft",
+      "inputs": [
+          {
+              "name": "amount",
+              "type": "uint256",
+              "internalType": "uint256"
+          },
+          {
+              "name": "available",
+              "type": "uint256",
+              "internalType": "uint256"
+          }
+      ]
+  },
+  {
+      "type": "error",
+      "name": "OptionCreationIsOverflow",
+      "inputs": []
+  },
+  {
+      "type": "error",
+      "name": "OptionIsAlreadyCreated",
+      "inputs": []
+  },
+  {
+      "type": "error",
+      "name": "OptionNotCreated",
+      "inputs": [
+          {
+              "name": "optionId",
+              "type": "uint8",
+              "internalType": "uint8"
+          }
+      ]
+  },
+  {
+      "type": "error",
+      "name": "OwnableInvalidOwner",
+      "inputs": [
+          {
+              "name": "owner",
+              "type": "address",
+              "internalType": "address"
+          }
+      ]
+  },
+  {
+      "type": "error",
+      "name": "OwnableUnauthorizedAccount",
+      "inputs": [
+          {
+              "name": "account",
+              "type": "address",
+              "internalType": "address"
+          }
+      ]
+  },
+  {
+      "type": "error",
+      "name": "PaymentTokenAlreadyAuthorized",
+      "inputs": [
+          {
+              "name": "token",
+              "type": "address",
+              "internalType": "address"
+          }
+      ]
+  },
+  {
+      "type": "error",
+      "name": "PaymentTokenNotAuthorized",
+      "inputs": [
+          {
+              "name": "token",
+              "type": "address",
+              "internalType": "address"
+          }
+      ]
+  },
+  {
+      "type": "error",
+      "name": "SafeERC20FailedOperation",
+      "inputs": [
+          {
+              "name": "token",
+              "type": "address",
+              "internalType": "address"
+          }
+      ]
+  },
+  {
+      "type": "error",
+      "name": "WithdrawFailed",
+      "inputs": []
+  }
 ];

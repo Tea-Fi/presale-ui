@@ -23,6 +23,7 @@ export const Login = () => {
   }
 
   useEffect(() => {
+    console.log("Status", status);
     switch (status) {
       case LoginStatus.LOGGED_IN:
         setDialogOpen(false);
