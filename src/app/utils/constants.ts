@@ -47,6 +47,23 @@ export const loginMapping: { [key: string]: Referral } = {
         fee: 200,
         wallet: "0x84076ad7edbaF2c12882C5C7F56cb39Ed2D505DF",
       },
+      TEST_SYNDIKA: { // Our test referrer, remove for production
+        id: 999,
+        fee: 900,
+        wallet: "0xe083846329683d68E73898347d5FD5F831C19b69",
+        subleads: {
+          MICHAEL: {
+            id: 2,
+            fee: 300,
+            wallet: "0x4D7289A51494dC59694f15306386c8ec76210299",
+          },
+          CRIS: {
+            id: 3,
+            fee: 200,
+            wallet: "0x84076ad7edbaF2c12882C5C7F56cb39Ed2D505DF",
+          },
+        },
+      }
     },
   },
 };

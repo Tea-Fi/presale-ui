@@ -1,20 +1,29 @@
-// import { useEffect, useState } from "react";
+import { useState } from "react";
 import { NavLink } from "react-router-dom";
 
 import { Wallet } from "./wallet";
 import teaSwap from "../../assets/icons/tea-swap.svg";
-// import { loginMapping } from "../utils/constants";
+import { useAccountEffect } from 'wagmi';
+import { getReferralCodeById, getReferralTreeByWallet, Referral } from '../utils/referrals';
 
 export const TopBar = () => {
-  // const [haveSubleds, setHaveSubleads] = useState(false);
+  const [referralCode, setReferralCode] = useState('');
+  const [referralTree, setReferralTree] = useState<Referral>();
 
-  // useEffect(() => {
-  //   const referral = window.localStorage.getItem("referral") || "0";
-  //   const exists = Object.values(loginMapping).find(
-  //     (el) => el.id === +referral
-  //   );
-  //   setHaveSubleads(Boolean(exists?.subleads?.length));
-  // }, []);
+  useAccountEffect({
+    onConnect({ address }) {
+      const referralTree = getReferralTreeByWallet(address);
+
+      if (referralTree !== undefined) {
+        setReferralTree(referralTree);
+        setReferralCode(getReferralCodeById(referralTree.id) as string);
+      }
+    },
+    onDisconnect() {
+      setReferralCode('');
+      setReferralTree(undefined);
+    },
+  })
 
   return (
     <div className="top-bar">
@@ -30,11 +39,11 @@ export const TopBar = () => {
             <li>
               <NavLink to="/claim">Claim</NavLink>
             </li>
-            {/* {haveSubleds && (
+            {referralTree != undefined && (
               <li>
-                <NavLink to="/referrals">Referrals</NavLink>
+                <NavLink to="/referrals">Referrals ({referralCode.toUpperCase()})</NavLink>
               </li>
-            )} */}
+            )}
           </ul>
         </nav>
         <Wallet />
