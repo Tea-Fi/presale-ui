@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import ReactFlow, { Background, Controls, Edge } from "reactflow";
 import "reactflow/dist/style.css";
 
@@ -15,6 +15,15 @@ export const Referrals = () => {
     []
   );
 
+  // useEffect({
+  //   const referralTree = getReferralTreeByWallet(address);
+
+  //   if (referralTree !== undefined) {
+  //     setReferralTree(referralTree);
+  //     setReferralCode(getReferralCodeById(referralTree.id) as string);
+  //   }
+  // });
+
   useAccountEffect({
     onConnect({ address }) {
       const referralTree = getReferralTreeByWallet(address);
@@ -30,15 +39,24 @@ export const Referrals = () => {
     },
   })
 
+  let edges: any = [];
+  let leftBranchingIndexes: { [key: number]: number } = {};
   const nodes = useMemo(() => {
+    if (referralTree == undefined) return [];
+
+    const NW = 270;
+    const NH = 35;
+    const NOFF = 10;
     const data = [];
+    edges = [];
+    leftBranchingIndexes = {};
 
     data.push({
-      id: "1",
+      id: referralCode,
       data: {
         label: (
           <div
-            id={"1"}
+            id={referralCode}
             style={{
               display: "flex",
               alignItems: "center",
@@ -52,72 +70,69 @@ export const Referrals = () => {
           </div>
         ),
       },
-      style: { width: 230 },
       connectable: false,
-      position: { x: 220, y: 16 },
+      style: { width: NW, height: NH },
+      position: { x: NOFF, y: NOFF },
     });
 
-    // const subleads = referralTree?.subleads?.length || 0;
-    // const initialLeft = (650 - (subleads * 150 + (subleads - 1) * 16)) / 2;
+    const pushSublead = (lead: Referral, code: string, parentCode: string, parentFee: number, level: number, leftIndex: number) => {   
+      leftBranchingIndexes[level] = leftBranchingIndexes[level] || 0;
+      
+      data.push({
+        id: code,
+        data: {
+          label: (
+            <div
+              id={code}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                whiteSpace: "nowrap",
+                cursor: "pointer",
+              }}
+            >
+              <img src={copyIcon} height="12px" />
+              &nbsp;&nbsp;
+              {getShortAccount(lead?.wallet)} | {code.toUpperCase()} | {(lead?.fee || 0) / 100}%
+            </div>
+          ),
+        },
+        connectable: false,
+        style: { width: NW, height: NH },
+        position: { x: NOFF + (NW * leftIndex) + (NW * leftBranchingIndexes[level]), y: 2 * level * NH + NOFF },
+      });
 
-    // referralTree?.subleads?.forEach((el, index) => {
-    //   const lead = Object.values(el)[0];
-    //   data.push({
-    //     id: `1-${index}`,
-    //     data: {
-    //       label: (
-    //         <div
-    //           id={`1-${index}`}
-    //           style={{
-    //             display: "flex",
-    //             alignItems: "center",
-    //             whiteSpace: "nowrap",
-    //             cursor: "pointer",
-    //           }}
-    //         >
-    //           {getShortAccount(lead?.wallet)} (you)&nbsp;
-    //           <img src={copyIcon} height="12px" />
-    //         </div>
-    //       ),
-    //     },
-    //     position: { x: initialLeft + index * (150 + 16), y: 100 },
-    //     connectable: false,
-    //   });
-    // });
+      edges.push({
+        id: `edge-${code}`,
+        source: parentCode,
+        target: code,
+        type: "straight",
+        label: ((lead?.fee || 0) / (parentFee / 100)).toFixed(2) + "%",
+      });
+
+      if (lead.subleads != undefined) {
+        let leftIndex = 0;
+        for (let subleadCode of Object.keys(lead.subleads)) {
+          pushSublead(lead.subleads[subleadCode], subleadCode, code, lead?.fee || 0, level + 1, leftIndex++);
+          leftBranchingIndexes[level + 1] += Object.keys(lead.subleads[subleadCode]?.subleads || {}).length;
+        }
+      }
+    };
+
+    if (referralTree.subleads != undefined) {
+      let leftIndex = 0;
+      for (let subleadCode of Object.keys(referralTree.subleads)) {
+        pushSublead(referralTree.subleads[subleadCode], subleadCode, referralCode, referralTree?.fee || 0, 1, leftIndex++);
+        leftBranchingIndexes[2] += Object.keys(referralTree.subleads[subleadCode]?.subleads || {}).length;
+      }
+    }
 
     return data;
-  }, [referralTree, getShortAccount]);
+  }, [referralTree, referralCode, getShortAccount]);
 
-  const edges: any = [];
-  // const edges = useMemo(() => {
-  //   const data = [] as Edge[];
-
-  //   referrals?.subleads?.forEach((_, index) => {
-  //     data.push({
-  //       id: `edge-${index}`,
-  //       source: "1",
-  //       target: `1-${index}`,
-  //       type: "step",
-  //     });
-  //   });
-
-  //   return data;
-  // }, [referrals, getShortAccount]);
-
-  const onNodeClick = (_id: string) => {};
-  // const onNodeClick = (id: string) => {
-  //   const isMe = id.split("-").length === 1;
-
-  //   if (isMe) {
-  //     window.navigator.clipboard.writeText(referralTree?.wallet || "");
-  //   } else {
-  //     const index = id.split("-")[1];
-
-  //     const wallet = Object.values(referrals?.subleads?.[+index] || {})[0]
-  //       .wallet;
-  //     window.navigator.clipboard.writeText(wallet || "");
-  //   }
-  // };
+  const onNodeClick = (id: string) => {
+    window.navigator.clipboard.writeText(id);
+  };
 
   return (
     <div className="referrals page">
@@ -128,6 +143,9 @@ export const Referrals = () => {
             nodes={nodes}
             edges={edges}
             onNodeClick={(e: any) => onNodeClick(e.target.id)}
+            fitView
+            zoomOnScroll={false}
+            preventScrolling={false}
           >
             <Background />
             <Controls />

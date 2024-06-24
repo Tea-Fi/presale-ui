@@ -56,11 +56,35 @@ export const loginMapping: { [key: string]: Referral } = {
             id: 2,
             fee: 300,
             wallet: "0x4D7289A51494dC59694f15306386c8ec76210299",
+            subleads: {
+              MICHAEL_SUB_1: {
+                id: 2,
+                fee: 30,
+                wallet: "0x4D7289A51494dC59694f15306386c8ec76210299",
+              },
+              MICHAEL_SUB_2: {
+                id: 3,
+                fee: 20,
+                wallet: "0x84076ad7edbaF2c12882C5C7F56cb39Ed2D505DF",
+              },
+            },
           },
           CRIS: {
             id: 3,
             fee: 200,
             wallet: "0x84076ad7edbaF2c12882C5C7F56cb39Ed2D505DF",
+            subleads: {
+              CRIS_SUB_1: {
+                id: 2,
+                fee: 30,
+                wallet: "0x4D7289A51494dC59694f15306386c8ec76210299",
+              },
+              CRIS_SUB_2: {
+                id: 3,
+                fee: 20,
+                wallet: "0x84076ad7edbaF2c12882C5C7F56cb39Ed2D505DF",
+              },
+            },
           },
         },
       }
