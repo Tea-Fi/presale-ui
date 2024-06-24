@@ -28,7 +28,7 @@ export interface Referral {
   id: number;
   fee?: number;
   wallet: string;
-  subleads?: { [key: string]: Referral }[];
+  subleads?: { [key: string]: Referral };
 }
 
 export const loginMapping: { [key: string]: Referral } = {
@@ -36,22 +36,18 @@ export const loginMapping: { [key: string]: Referral } = {
     id: 1,
     fee: 1500,
     wallet: "0xb305c1f2200a17E0502416B1746aB88C9B5C449f",
-    subleads: [
-      {
-        JELLY: {
-          id: 2,
-          fee: 300,
-          wallet: "0x4D7289A51494dC59694f15306386c8ec76210299",
-        },
+    subleads: {
+      JELLY: {
+        id: 2,
+        fee: 300,
+        wallet: "0x4D7289A51494dC59694f15306386c8ec76210299",
       },
-      {
-        RAFI: {
-          id: 3,
-          fee: 200,
-          wallet: "0x84076ad7edbaF2c12882C5C7F56cb39Ed2D505DF",
-        },
+      RAFI: {
+        id: 3,
+        fee: 200,
+        wallet: "0x84076ad7edbaF2c12882C5C7F56cb39Ed2D505DF",
       },
-    ],
+    },
   },
 };
 
