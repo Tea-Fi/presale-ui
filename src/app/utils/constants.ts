@@ -1,4 +1,5 @@
 type Currency = Record<number, string>;
+export type Address = `0x${string}`;
 
 export const USDT = {
   1: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
@@ -23,6 +24,7 @@ export const WBTC = {
 
 export const PRESALE_CONTRACT_ADDRESS =
   "0x8fc37dea525b06dd9f214bf06a4c544fa87c777d";
+
 
 export interface Referral {
   id: number;

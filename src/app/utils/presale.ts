@@ -1,7 +1,7 @@
 import { BrowserProvider, Contract, Eip1193Provider, ZeroAddress, ethers, formatUnits, parseUnits } from 'ethers';
 import { ERC20_ABI } from './erc20_abi';
 import { PRESALE_ABI } from './presale_abi';
-import { PRESALE_CONTRACT_ADDRESS, USDC } from './constants';
+import { Address, PRESALE_CONTRACT_ADDRESS, USDC, WETH } from './constants';
 
 export async function getTokenAllowance(tokenAddress: string, ownerAddress: string, spenderAddress: string) {
   // updated provider with custom url for better testnet experience
@@ -129,7 +129,7 @@ export async function getPresaleRoundInfo(round: number) {
 
 
 /**************************** Presale new ****************************/
-type Address = `0x${string}`;
+
 
 type TOption = {
   tgeAmount: bigint,
@@ -240,16 +240,16 @@ export async function buyExactPresaleTokens({
   try {
     let tx;
     if(!tokenSell || tokenSell === ZeroAddress) {
-      const WETH: Address = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
-
+      
+      const chainId = Number((await provider.getNetwork()).chainId);
       const {
         price,
       } = await getOptionInfo(optionId);
 
       const usdEquivalentedAmountInPresaleToken = buyAmount * price / 100n;
-      const amountInETH = await getInputPriceQuote(WETH, usdEquivalentedAmountInPresaleToken);
+      const amountInETH = await getInputPriceQuote(WETH[chainId] as Address, usdEquivalentedAmountInPresaleToken);
       
-      const amountToSell = await getInputPriceQuoteReversed(WETH, amountInETH);
+      const amountToSell = await getInputPriceQuoteReversed(WETH[chainId] as Address, amountInETH);
       tx = await presaleContract.buyExactPresaleTokensETH(
         optionId,
         referrerId,
