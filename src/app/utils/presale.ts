@@ -1,4 +1,4 @@
-import { BrowserProvider, Contract, Eip1193Provider, ethers, formatUnits, parseUnits } from 'ethers';
+import { BrowserProvider, Contract, Eip1193Provider, ZeroAddress, ethers, formatUnits, parseUnits } from 'ethers';
 import { ERC20_ABI } from './erc20_abi';
 import { PRESALE_ABI } from './presale_abi';
 import { PRESALE_CONTRACT_ADDRESS, USDC } from './constants';
@@ -125,4 +125,155 @@ export async function getPresaleRoundInfo(round: number) {
     price: Number(roundInfo[3]),
     sold: Number(roundInfo[4]),
   };
+}
+
+
+/**************************** Presale new ****************************/
+type Address = `0x${string}`;
+
+type TOption = {
+  tgeAmount: bigint,
+  leftoverVesting: bigint,
+  price: bigint,
+  presaleToken: Address,
+  sold: bigint,
+  soldInUsd: bigint,
+}
+
+type TReferral = {
+  isCreated: boolean,
+  referrals: bigint,
+  sold: bigint,
+  soldInUsd: bigint,
+}
+
+type TPaymentTokenType = {
+  peggedToUsd: boolean;
+  allowed: boolean;
+  path: Address[];
+}
+
+export async function getPercentageRate(): Promise<bigint> {
+  const provider = ethers.getDefaultProvider(import.meta.env.VITE_PUBLIC_INFURA_URL);
+  const presaleContract = new ethers.Contract(PRESALE_CONTRACT_ADDRESS, PRESALE_ABI, provider);
+
+  return await presaleContract.PERCENTAGE_RATE();
+}
+
+export async function getTokensAvailable(): Promise<bigint> {
+  const provider = ethers.getDefaultProvider(import.meta.env.VITE_PUBLIC_INFURA_URL);
+  const presaleContract = new ethers.Contract(PRESALE_CONTRACT_ADDRESS, PRESALE_ABI, provider);
+
+  return await presaleContract.TOKENS_AVAILABLE_FOR_PRESALE();
+}
+
+
+export async function getTotalSold(): Promise<bigint> {
+  const provider = ethers.getDefaultProvider(import.meta.env.VITE_PUBLIC_INFURA_URL);
+  const presaleContract = new ethers.Contract(PRESALE_CONTRACT_ADDRESS, PRESALE_ABI, provider);
+
+  return await presaleContract.totalSold();
+}
+
+export async function getSaleOptionsCout(): Promise<bigint> {
+  const provider = ethers.getDefaultProvider(import.meta.env.VITE_PUBLIC_INFURA_URL);
+  const presaleContract = new ethers.Contract(PRESALE_CONTRACT_ADDRESS, PRESALE_ABI, provider);
+
+  return await presaleContract.saleOptionsCount();
+}
+
+
+export async function getOptionInfo(optionId: number): Promise<TOption> {
+  // updated provider with custom url for better testnet experience
+  const provider = ethers.getDefaultProvider(import.meta.env.VITE_PUBLIC_INFURA_URL);
+  const presaleContract = new ethers.Contract(PRESALE_CONTRACT_ADDRESS, PRESALE_ABI, provider);
+  const optionInfo = await presaleContract.saleOptions(optionId) as TOption;
+  
+  return optionInfo;
+}
+
+export async function getReferralInfo(referralId: number): Promise<TReferral> {
+  // updated provider with custom url for better testnet experience
+  const provider = ethers.getDefaultProvider(import.meta.env.VITE_PUBLIC_INFURA_URL);
+  const presaleContract = new ethers.Contract(PRESALE_CONTRACT_ADDRESS, PRESALE_ABI, provider);
+  const referralInfo = await presaleContract.referrals(referralId) as TReferral;
+  
+  return referralInfo;
+}
+
+export async function getInputPriceQuote(token: Address, amountsIn: bigint): Promise<bigint> {
+  // updated provider with custom url for better testnet experience
+  const provider = ethers.getDefaultProvider(import.meta.env.VITE_PUBLIC_INFURA_URL);
+  const presaleContract = new ethers.Contract(PRESALE_CONTRACT_ADDRESS, PRESALE_ABI, provider);
+  const referralInfo = await presaleContract.inputPriceQuote(token, amountsIn) as bigint;
+  
+  return referralInfo;
+}
+
+export async function getInputPriceQuoteReversed(token: Address, amountsIn: bigint): Promise<bigint> {
+  // updated provider with custom url for better testnet experience
+  const provider = ethers.getDefaultProvider(import.meta.env.VITE_PUBLIC_INFURA_URL);
+  const presaleContract = new ethers.Contract(PRESALE_CONTRACT_ADDRESS, PRESALE_ABI, provider);
+  const referralInfo = await presaleContract.inputPriceQuoteReversed(token, amountsIn) as bigint;
+  
+  return referralInfo;
+}
+
+
+// used for ETH and Other tokens sells
+export async function buyExactPresaleTokens({
+    optionId,
+    referrerId,
+    tokenSell,
+    buyAmount,
+  }:{
+    optionId: number,
+    referrerId: number,
+    tokenSell: Address,
+    buyAmount: bigint,
+  }) {
+  // updated provider with custom url for better testnet experience
+  const provider = ethers.getDefaultProvider(import.meta.env.VITE_PUBLIC_INFURA_URL);
+  const presaleContract = new ethers.Contract(PRESALE_CONTRACT_ADDRESS, PRESALE_ABI, provider);
+  
+
+  try {
+    let tx;
+    if(!tokenSell || tokenSell === ZeroAddress) {
+      const WETH: Address = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
+
+      const {
+        price,
+      } = await getOptionInfo(optionId);
+
+      const usdEquivalentedAmountInPresaleToken = buyAmount * price / 100n;
+      const amountInETH = await getInputPriceQuote(WETH, usdEquivalentedAmountInPresaleToken);
+      
+      const amountToSell = await getInputPriceQuoteReversed(WETH, amountInETH);
+      tx = await presaleContract.buyExactPresaleTokensETH(
+        optionId,
+        referrerId,
+        buyAmount,
+        {
+          value: amountToSell
+        }
+      );
+    } else {
+      tx = await presaleContract.buyExactPresaleTokens(
+        optionId,
+        referrerId,
+        tokenSell,
+        buyAmount,
+      );
+    }
+
+    await tx.wait();
+    return {
+      status: 'SUCCESS',
+      message: 'Transaction is done',
+      txid: tx,
+    }; 
+  } catch (e) {
+    console.log(e);
+  }
 }
