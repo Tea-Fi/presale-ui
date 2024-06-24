@@ -9,7 +9,7 @@ export const loginMappingFlattened = (_loginMapping?: { [key: string]: Referral 
     }
     flattened[key] = workingLoginMapping[key];
   }
-  _loginMapping == undefined && console.log('flattened', flattened) // dev logs
+  // _loginMapping == undefined && console.log('flattened', flattened) // dev logs
   return flattened;
 }
 
