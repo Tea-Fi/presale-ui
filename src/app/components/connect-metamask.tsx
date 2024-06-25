@@ -1,4 +1,3 @@
-import React from 'react';
 import { SlButton, SlSpinner } from '@shoelace-style/shoelace/dist/react';
 import metaMaskFoxLogo from '../../assets/icons/metamask-fox.svg';
 import { useWalletContext } from '../context/wallet.context';

@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client';
-import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path';
+import { setBasePath } from '@shoelace-style/shoelace';
 import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@rainbow-me/rainbowkit/styles.css';
 import { darkTheme, getDefaultConfig, RainbowKitProvider } from '@rainbow-me/rainbowkit';

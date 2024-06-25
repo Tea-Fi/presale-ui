@@ -1,7 +1,7 @@
-import { BrowserProvider, Contract, Eip1193Provider, ZeroAddress, ethers, formatUnits, parseUnits } from 'ethers';
+import { Contract, ZeroAddress, ethers, parseUnits } from 'ethers';
 import { ERC20_ABI } from './erc20_abi';
 import { PRESALE_ABI } from './presale_abi';
-import { Address, PRESALE_CONTRACT_ADDRESS, USDC, WETH } from './constants';
+import { Address, PRESALE_CONTRACT_ADDRESS, WETH } from './constants';
 
 export async function getTokenAllowance(tokenAddress: string, ownerAddress: string, spenderAddress: string) {
   // updated provider with custom url for better testnet experience
@@ -147,7 +147,7 @@ type TReferral = {
   soldInUsd: bigint,
 }
 
-type TPaymentTokenType = {
+export type TPaymentTokenType = {
   peggedToUsd: boolean;
   allowed: boolean;
   path: Address[];
@@ -248,14 +248,14 @@ export async function buyExactPresaleTokens({
 
       const usdEquivalentedAmountInPresaleToken = buyAmount * price / 100n;
       const amountInETH = await getInputPriceQuote(WETH[chainId] as Address, usdEquivalentedAmountInPresaleToken);
-      
       const amountToSell = await getInputPriceQuoteReversed(WETH[chainId] as Address, amountInETH);
+
       tx = await presaleContract.buyExactPresaleTokensETH(
         optionId,
         referrerId,
         buyAmount,
         {
-          value: amountToSell
+          value: amountToSell,
         }
       );
     } else {

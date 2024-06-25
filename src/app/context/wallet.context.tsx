@@ -1,14 +1,14 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { FunctionComponent, ReactNode } from 'react';
-import { useConnectModal, useAccountModal, useChainModal } from '@rainbow-me/rainbowkit';
+import { useConnectModal } from '@rainbow-me/rainbowkit';
 
-import { AbstractProvider, BrowserProvider, JsonRpcProvider, JsonRpcSigner, ethers } from 'ethers';
+import { JsonRpcProvider, ethers } from 'ethers';
 import { ERC20_ABI } from '../utils/erc20_abi';
 import { USDT, USDC, WETH, WBTC } from '../utils/constants';
 import { CoinType } from '../pages/buy';
 import { useConnections, useConnectorClient } from 'wagmi';
 
-enum WalletEvents {
+export enum WalletEvents {
   REQUEST_ACCOUNTS = 'eth_requestAccounts',
   ACCOUNTS = 'eth_accounts',
   ACCOUNTS_CHANGED = 'accountsChanged',
@@ -131,15 +131,15 @@ export const WalletProvider: FunctionComponent<{ children: ReactNode }> = ({ chi
     setValues((values) => ({ ...values, account: null, status: WalletStatus.DISCONNECTED }));
   }, []);
 
-  async function getFormattedDecimalOfErc20TokenHolder(contractAddress: string) {
-    // updated provider with custom url for better testnet experience
-    const provider = new JsonRpcProvider(import.meta.env.VITE_PUBLIC_INFURA_URL);
-    const usdtErc20Contract = new ethers.Contract(contractAddress, ERC20_ABI, provider);
+  // async function getFormattedDecimalOfErc20TokenHolder(contractAddress: string) {
+  //   // updated provider with custom url for better testnet experience
+  //   const provider = new JsonRpcProvider(import.meta.env.VITE_PUBLIC_INFURA_URL);
+  //   const usdtErc20Contract = new ethers.Contract(contractAddress, ERC20_ABI, provider);
 
-    const numDecimals = await usdtErc20Contract.decimals();
+  //   const numDecimals = await usdtErc20Contract.decimals();
 
-    return numDecimals;
-  }
+  //   return numDecimals;
+  // }
 
   async function getFormattedBalanceOfErc20TokenHolder(contractAddress: string, address: string, numDecimals: number) {
     // updated provider with custom url for better testnet experience
