@@ -1,36 +1,44 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import ReactFlow, { Background, Controls, Edge } from "reactflow";
+import ReactFlow, { Background, Controls } from "reactflow";
 import "reactflow/dist/style.css";
 
-import { useAccountEffect } from 'wagmi';
+import { useAccount, useAccountEffect } from 'wagmi';
 import { getReferralCodeById, getReferralTreeByWallet, Referral } from '../utils/referrals';
 import copyIcon from "../../assets/icons/copy.png";
 
 export const Referrals = () => {
   const [referralCode, setReferralCode] = useState('');
   const [referralTree, setReferralTree] = useState<Referral>();
+  const { address, isConnected } = useAccount();
 
   const getShortAccount = useCallback(
     (account = "") => `${account.slice(0, 6)}...${account.slice(-4)}`,
     []
   );
 
-  // useEffect({
-  //   const referralTree = getReferralTreeByWallet(address);
-
-  //   if (referralTree !== undefined) {
-  //     setReferralTree(referralTree);
-  //     setReferralCode(getReferralCodeById(referralTree.id) as string);
-  //   }
-  // });
-
-  useAccountEffect({
-    onConnect({ address }) {
+  useEffect(() => {
+    if (isConnected && address != undefined) {
       const referralTree = getReferralTreeByWallet(address);
-
+  
       if (referralTree !== undefined) {
         setReferralTree(referralTree);
         setReferralCode(getReferralCodeById(referralTree.id) as string);
+      }
+    }
+  }, [address, isConnected]);
+
+  useAccountEffect({
+    onConnect({ address }) {
+      const refTree = getReferralTreeByWallet(address);
+
+      if (refTree !== undefined) {
+        const refCode = getReferralCodeById(refTree.id) as string;
+
+        if (referralTree == undefined || referralTree.id != refTree.id) {
+          setReferralTree(refTree);
+        } else if (referralCode == undefined || referralCode != refCode) {
+          setReferralCode(refCode);
+        }
       }
     },
     onDisconnect() {
