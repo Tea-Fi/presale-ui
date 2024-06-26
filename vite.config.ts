@@ -15,4 +15,10 @@ export default defineConfig({
     host: true,
     origin: "http://0.0.0.0:8080",
   },
+  build: {
+    modulePreload: {
+      polyfill: false,
+    },
+    
+  }
 });

@@ -15,7 +15,7 @@ import ethereumIcon from '../../assets/icons/ethereum.svg';
 import { CoinInput } from '../components/coin-input';
 import { TokenRate } from '../components/token-rate';
 import teaLogo from '../../assets/icons/tea-logo.svg';
-import { enterPresaleUtil, getPresaleRoundSold, getPresaleUserBalance, setTokenApprove } from '../utils/presale';
+import { enterPresaleUtil, getPresaleRoundSold, setTokenApprove } from '../utils/presale';
 import { USDC, USDT, WBTC, WETH, investmentInfo } from '../utils/constants';
 import Spinner from '../components/spinner';
 import { useEventContext } from '../context/event.context';
