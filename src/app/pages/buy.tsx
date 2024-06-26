@@ -74,8 +74,8 @@ export const Buy = () => {
     if (account) {
       const result = await getPresaleRoundSold();
       remainingTea.current = result.roundSize - result.roundSold;
-      const userBalance = await getPresaleUserBalance(account);
-      userTeaPurchased.current = userBalance;
+      // const userBalance = await getPresaleUserBalance(account);
+      // userTeaPurchased.current = userBalance;
       updateUserBalance();
     }
   };
@@ -85,8 +85,8 @@ export const Buy = () => {
       try {
         // const result = await getPresaleRoundSold();
         // remainingTea.current = result.roundSize - result.roundSold;
-        const userBalance = await getPresaleUserBalance(account as string);
-        userTeaPurchased.current = userBalance;
+        // const userBalance = await getPresaleUserBalance(account as string);
+        // userTeaPurchased.current = userBalance;
         setLoading(false);
       } catch (error) {
         console.error(error);
