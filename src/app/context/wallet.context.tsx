@@ -5,7 +5,7 @@ import { useConnectModal } from '@rainbow-me/rainbowkit';
 import { JsonRpcProvider, ethers } from 'ethers';
 import { ERC20_ABI } from '../utils/erc20_abi';
 import { USDT, USDC, WETH, WBTC } from '../utils/constants';
-import { CoinType } from '../pages/buy';
+// import { CoinType } from '../pages/buy';
 import { useConnections, useConnectorClient } from 'wagmi';
 
 export enum WalletEvents {

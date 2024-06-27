@@ -1,4 +1,4 @@
-import { BrowserProvider, Contract, ZeroAddress, ethers, parseUnits } from 'ethers';
+import { Contract, ZeroAddress, ethers, parseUnits } from 'ethers';
 import { ERC20_ABI } from './erc20_abi';
 import { PRESALE_ABI } from './presale_abi';
 import { Address, PRESALE_CONTRACT_ADDRESS, WETH } from './constants';

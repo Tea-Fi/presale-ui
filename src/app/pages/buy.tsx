@@ -15,10 +15,10 @@ import ethereumIcon from '../../assets/icons/ethereum.svg';
 import { CoinInput } from '../components/coin-input';
 import { TokenRate } from '../components/token-rate';
 import teaLogo from '../../assets/icons/tea-logo.svg';
-import { buyExactPresaleTokens, getOptionInfo, setTokenApprove } from '../utils/presale';
+import { buyExactPresaleTokens, getOptionInfo } from '../utils/presale';
 import { PRESALE_CONTRACT_ADDRESS, USDC, USDT, WBTC, WETH, investmentInfo } from '../utils/constants';
 import Spinner from '../components/spinner';
-import { useEventContext } from '../context/event.context';
+// import { useEventContext } from '../context/event.context';
 import { InvestmentOptions } from '../components/investment-options';
 import { Contract } from 'ethers';
 import { Address, erc20Abi } from 'viem';
@@ -31,10 +31,10 @@ export const Buy = () => {
   const [selectedCoin, setSelectedCoin] = useState<CoinType>('usdt');
   const [amount, setAmount] = useState<string>();
   const [amountInTea, setAmountInTea] = useState<string>();
-  const [eventTitle, setEventTitle] = useState<string>('');
-  const { paymentAssets, account, updateUserBalance, chainId } = useWalletContext();
-  const { showModal, setEventInfo } = useEventContext();
-  const [submitting, setSubmitting] = useState<boolean>(false);
+  const [eventTitle] = useState<string>('');
+  const { paymentAssets, account, chainId } = useWalletContext();
+  // const { showModal, setEventInfo } = useEventContext();
+  const [submitting] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [investment, setInvestment] = useState('');
 
@@ -98,15 +98,15 @@ export const Buy = () => {
   //   );
   // }, [amount, paymentAssets, selectedCoin, amountInTea, submitting]);
 
-  const updateInfo = async () => {
-    if (account) {
-      // const result = await getOptionInfo();
-      // remainingTea.current = result.roundSize - result.roundSold;
-      // const userBalance = await getPresaleUserBalance(account);
-      // userTeaPurchased.current = userBalance;
-      updateUserBalance();
-    }
-  };
+  // const updateInfo = async () => {
+  //   if (account) {
+  //     // const result = await getOptionInfo();
+  //     // remainingTea.current = result.roundSize - result.roundSold;
+  //     // const userBalance = await getPresaleUserBalance(account);
+  //     // userTeaPurchased.current = userBalance;
+  //     updateUserBalance();
+  //   }
+  // };
 
   useEffect(() => {
     const handleStart = async () => {
@@ -181,78 +181,78 @@ export const Buy = () => {
     }
   }, [investment, price, amount, amountInTea]);
 
-  const handleApprove = async () => {
-    try {
-      const decimal = paymentAssets[selectedCoin]?.decimal;
-      if (!amount || !decimal) {
-        return;
-      }
-      setEventTitle('Waiting For Transaction (1/3) Approval...');
-      eventModalRef.current?.show();
-      await setTokenApprove(mappedCoins[selectedCoin].contract, '0', decimal);
-      setEventTitle('Waiting For Transaction (2/3) Approval...');
-      await setTokenApprove(mappedCoins[selectedCoin].contract, amount, decimal);
-      return true;
-    } catch (err: any) {
-      eventModalRef.current?.hide();
-      let message = 'Transaction rejected.';
-      if (err?.code == 'ACTION_REJECTED') {
-        message = 'Transaction Rejected by user';
-      }
-      setEventInfo({
-        title: 'Transaction Failed',
-        subTitle: message,
-      });
-      showModal();
-      return false;
-    }
-  };
+  // const handleApprove = async () => {
+  //   try {
+  //     const decimal = paymentAssets[selectedCoin]?.decimal;
+  //     if (!amount || !decimal) {
+  //       return;
+  //     }
+  //     setEventTitle('Waiting For Transaction (1/3) Approval...');
+  //     eventModalRef.current?.show();
+  //     await setTokenApprove(mappedCoins[selectedCoin].contract, '0', decimal);
+  //     setEventTitle('Waiting For Transaction (2/3) Approval...');
+  //     await setTokenApprove(mappedCoins[selectedCoin].contract, amount, decimal);
+  //     return true;
+  //   } catch (err: any) {
+  //     eventModalRef.current?.hide();
+  //     let message = 'Transaction rejected.';
+  //     if (err?.code == 'ACTION_REJECTED') {
+  //       message = 'Transaction Rejected by user';
+  //     }
+  //     setEventInfo({
+  //       title: 'Transaction Failed',
+  //       subTitle: message,
+  //     });
+  //     showModal();
+  //     return false;
+  //   }
+  // };
 
-  const enterPresale = async () => {
-    try {
-      if (!amount || !amountInTea || !paymentAssets[selectedCoin]?.decimal) {
-        return;
-      }
-      setSubmitting(true);
-      if (selectedCoin !== 'eth') {
-        const approveResult = await handleApprove();
-        if (!approveResult) {
-          setSubmitting(false);
-          return;
-        }
-      }
-      setEventTitle('Waiting For Transaction (3/3) Approval...');
-      eventModalRef.current?.show();
-      const res = await enterPresaleUtil(
-        amountInTea,
-        Number(window.localStorage.getItem('referral')),
-        mappedCoins[selectedCoin].contract
-      );
-      updateInfo();
-      if (res.status === 'SUCCESS') {
-        setEventTitle('Transaction Approved ✅');
-        setTimeout(() => {
-          eventModalRef.current?.hide();
-        }, 4000);
-      } else {
-        eventModalRef.current?.hide();
-        setEventInfo({
-          title: 'Transaction Failed',
-          subTitle: res.message,
-        });
-        showModal();
-      }
-      setSubmitting(false);
-    } catch (err: any) {
-      eventModalRef.current?.hide();
-      setEventInfo({
-        title: 'Transaction Failed',
-        subTitle: err.message,
-      });
-      showModal();
-      setSubmitting(false);
-    }
-  };
+  // const enterPresale = async () => {
+  //   try {
+  //     if (!amount || !amountInTea || !paymentAssets[selectedCoin]?.decimal) {
+  //       return;
+  //     }
+  //     setSubmitting(true);
+  //     if (selectedCoin !== 'eth') {
+  //       const approveResult = await handleApprove();
+  //       if (!approveResult) {
+  //         setSubmitting(false);
+  //         return;
+  //       }
+  //     }
+  //     setEventTitle('Waiting For Transaction (3/3) Approval...');
+  //     eventModalRef.current?.show();
+  //     const res = await enterPresaleUtil(
+  //       amountInTea,
+  //       Number(window.localStorage.getItem('referral')),
+  //       mappedCoins[selectedCoin].contract
+  //     );
+  //     updateInfo();
+  //     if (res.status === 'SUCCESS') {
+  //       setEventTitle('Transaction Approved ✅');
+  //       setTimeout(() => {
+  //         eventModalRef.current?.hide();
+  //       }, 4000);
+  //     } else {
+  //       eventModalRef.current?.hide();
+  //       setEventInfo({
+  //         title: 'Transaction Failed',
+  //         subTitle: res.message,
+  //       });
+  //       showModal();
+  //     }
+  //     setSubmitting(false);
+  //   } catch (err: any) {
+  //     eventModalRef.current?.hide();
+  //     setEventInfo({
+  //       title: 'Transaction Failed',
+  //       subTitle: err.message,
+  //     });
+  //     showModal();
+  //     setSubmitting(false);
+  //   }
+  // };
 
   useEffect(() => {
     const handleOptionBalance = async () => {

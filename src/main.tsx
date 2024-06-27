@@ -4,7 +4,7 @@ import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@rainbow-me/rainbowkit/styles.css';
 import { darkTheme, getDefaultConfig, RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { WagmiProvider } from 'wagmi';
-import { mainnet, sepolia, Chain } from 'wagmi/chains';
+import { mainnet, sepolia } from 'wagmi/chains';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 
 import './assets/styles/main.scss';
@@ -15,10 +15,10 @@ import { EventModalProvider } from './app/context/event.context';
 
 setBasePath('https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.14.0/cdn/');
 
-const SUPPORTED_NETWORKS = {
-  11155111: sepolia,
-  1: mainnet,
-} as Record<string, Chain>;
+// const SUPPORTED_NETWORKS = {
+//   11155111: sepolia,
+//   1: mainnet,
+// } as Record<string, Chain>;
 
 const config = getDefaultConfig({
   appName: 'TeaSwapUI',
