@@ -4,7 +4,7 @@ import bigDecimal from 'js-big-decimal';
 
 // import { Token, CurrencyAmount } from '@uniswap/sdk-core';
 // import { Pair } from '@uniswap/v2-sdk';
-import { MaxUint256, ethers } from 'ethers';
+import { MaxUint256, ZeroAddress, ethers } from 'ethers';
 
 // import { PAIR_ABI } from '../utils/pair-abi';
 import { useWalletContext } from '../context/wallet.context';
@@ -44,7 +44,7 @@ export const Buy = () => {
 
   const mappedCoins = useMemo(
     () => ({
-      eth: { icon: ethereumIcon, label: 'ETH', value: 'eth', contract: chainId ? WETH[chainId] : '' },
+      eth: { icon: ethereumIcon, label: 'ETH', value: 'eth', contract: chainId ? ZeroAddress : ZeroAddress },
       usdt: { icon: tetherIcon, label: 'USDT', value: 'usdt', contract: chainId ? USDT[chainId] : '' },
       usdc: { icon: usdcIcon, label: 'USDC', value: 'usdc', contract: chainId ? USDC[chainId] : '' },
       weth: { icon: ethereumIcon, label: 'WETH', value: 'weth', contract: chainId ? WETH[chainId] : '' },

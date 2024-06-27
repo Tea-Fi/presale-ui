@@ -294,6 +294,8 @@ export async function buyExactPresaleTokens({
     signer
   );
 
+
+
   try {
     let tx;
     if(!tokenSell || tokenSell === ZeroAddress) {
@@ -301,16 +303,15 @@ export async function buyExactPresaleTokens({
         price,
       } = await getOptionInfo(optionId);
 
-      const usdEquivalentedAmountInPresaleToken = buyAmount * price / 100n;
-      const amountInETH = await getInputPriceQuote(WETH[chainId] as Address, usdEquivalentedAmountInPresaleToken);
-      const amountToSell = await getInputPriceQuoteReversed(WETH[chainId] as Address, amountInETH);
+      const usdEquivalentedAmountInPresaleToken = buyAmount * price / BigInt(1e14);
+      const amountInETH = await getInputPriceQuoteReversed(tokenSell, usdEquivalentedAmountInPresaleToken);
 
       tx = await presaleContract.buyExactPresaleTokensETH(
         optionId,
         referrerId,
         buyAmount,
         {
-          value: amountToSell,
+          value: amountInETH,
         }
       );
     } else {
