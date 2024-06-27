@@ -285,13 +285,14 @@ export async function buyExactPresaleTokens({
     buyAmount: bigint,
   }) {
   // updated provider with custom url for better testnet experience
-  const provider = ethers.getDefaultProvider(import.meta.env.VITE_PUBLIC_INFURA_URL);
+  const provider = new ethers.BrowserProvider((window as any).ethereum);
+  const signer = await provider.getSigner()
   const chainId = Number((await provider.getNetwork()).chainId);
 
   const presaleContract = new ethers.Contract(
     PRESALE_CONTRACT_ADDRESS[chainId],
     PRESALE_ABI,
-    provider
+    signer
   );
 
 
@@ -316,6 +317,7 @@ export async function buyExactPresaleTokens({
         }
       );
     } else {
+      console.log(optionId)
       tx = await presaleContract.buyExactPresaleTokens(
         optionId,
         referrerId,

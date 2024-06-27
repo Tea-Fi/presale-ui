@@ -29,7 +29,7 @@ export interface WalletContext {
   connect: () => void;
   disconnect: () => void;
   updateUserBalance: () => void;
-  paymentAssets: Record<CoinType, null | Currency>;
+  paymentAssets: any;
   unsupportedChain: boolean;
 }
 

@@ -4,7 +4,7 @@ import bigDecimal from 'js-big-decimal';
 
 import { ChainId, Token, CurrencyAmount } from '@uniswap/sdk-core';
 import { Pair, Route } from '@uniswap/v2-sdk';
-import { JsonRpcProvider, ethers } from 'ethers';
+import { JsonRpcProvider, MaxUint256, ethers } from 'ethers';
 
 import { PAIR_ABI } from '../utils/pair-abi';
 import { useWalletContext } from '../context/wallet.context';
@@ -15,18 +15,20 @@ import ethereumIcon from '../../assets/icons/ethereum.svg';
 import { CoinInput } from '../components/coin-input';
 import { TokenRate } from '../components/token-rate';
 import teaLogo from '../../assets/icons/tea-logo.svg';
-import { getOptionInfo, setTokenApprove } from '../utils/presale';
-import { USDC, USDT, WBTC, WETH, investmentInfo } from '../utils/constants';
+import { buyExactPresaleTokens, getOptionInfo, setTokenApprove } from '../utils/presale';
+import { PRESALE_CONTRACT_ADDRESS, USDC, USDT, WBTC, WETH, investmentInfo } from '../utils/constants';
 import Spinner from '../components/spinner';
 import { useEventContext } from '../context/event.context';
 import { InvestmentOptions } from '../components/investment-options';
+import { Contract } from 'ethers';
+import { Address, erc20Abi } from 'viem';
 
 export type CoinType = 'eth' | 'usdt' | 'usdc' | 'weth' | 'wbtc';
-const coins: CoinType[] = ['usdc', 'usdt', 'eth', 'weth', 'wbtc'];
+const coins: CoinType[] = ['usdt', 'weth', 'wbtc'];
 
 export const Buy = () => {
   const eventModalRef = useRef<any>(null);
-  const [selectedCoin, setSelectedCoin] = useState<CoinType>('usdc');
+  const [selectedCoin, setSelectedCoin] = useState<CoinType>('usdt');
   const [amount, setAmount] = useState<string>();
   const [amountInTea, setAmountInTea] = useState<string>();
   const [eventTitle, setEventTitle] = useState<string>('');
@@ -36,7 +38,6 @@ export const Buy = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [investment, setInvestment] = useState('');
 
-  const remainingTea = useRef(1000);
   const userTeaPurchased = useRef(0);
   const [price, setPrice] = useState(0);
 
@@ -51,12 +52,39 @@ export const Buy = () => {
     [chainId]
   );
 
+
+  useEffect(() => {
+    const getBalances = async () => {
+      const provider = ethers.getDefaultProvider(import.meta.env.VITE_PUBLIC_INFURA_URL);
+
+      const token = new Contract(
+        mappedCoins[selectedCoin].contract,
+        erc20Abi,
+        provider
+      );
+      const [balance, decimals] = await Promise.all([
+        token.balanceOf(account),
+        token.decimals(),
+      ]);
+
+      return [balance, decimals];
+
+    }
+
+    getBalances().then((args: any) => {
+      paymentAssets[selectedCoin].balance = (Number(args[0]) / 10**Number(args[1])).toLocaleString();
+      paymentAssets[selectedCoin].decimal = args[1].toString();
+    });
+  }, [selectedCoin]);
+
   const formattedBalance = useMemo(() => {
     if (!paymentAssets[selectedCoin]?.balance) {
       return '--';
     }
     return `Balance: ${paymentAssets[selectedCoin]?.balance} ${mappedCoins[selectedCoin]?.label}`;
   }, [paymentAssets, selectedCoin]);
+
+
 
   // const buyButtonDisabled = useMemo(() => {
   //   return (
@@ -226,6 +254,27 @@ export const Buy = () => {
     }
   };
 
+  useEffect(() => {
+    const handleOptionBalance = async () => {
+      const provider = new ethers.BrowserProvider((window as any).ethereum);
+      const signer = await provider.getSigner();
+      const optionInfo = await getOptionInfo(investmentInfo[investment].id + 1);
+
+
+      const teaToken = new Contract(
+        optionInfo.presaleToken,
+        erc20Abi,
+        signer
+      );
+
+      
+      userTeaPurchased.current = +(Number(await teaToken.balanceOf(account)) / 10e18).toFixed(2);
+
+    }
+
+    handleOptionBalance();
+  }, [selectedCoin]);
+
 
 
   return (
@@ -319,7 +368,49 @@ export const Buy = () => {
             {submitting ? <Spinner /> : 'BUY TEA'}
           </SlButton> */}
 
-          <SlButton onClick={async () => await getOptionInfo(investmentInfo[investment].id)} variant="primary" className="buy__btn">
+          <SlButton onClick={async () => {
+            const provider = new ethers.BrowserProvider((window as any).ethereum);
+            const signer = await provider.getSigner();
+
+            const token = new Contract(
+              mappedCoins[selectedCoin].contract,
+              erc20Abi,
+              signer
+            );
+
+            
+
+            
+            const presale = PRESALE_CONTRACT_ADDRESS[chainId ?? 1];
+   
+            if(await token.allowance(account, presale) === 0n) {
+              const tx = await token.approve(
+                presale, 
+                MaxUint256,
+              );
+
+              await tx.wait();
+            }
+
+            const optionId = investmentInfo[investment].id + 1
+            await buyExactPresaleTokens({
+              optionId: optionId,
+              referrerId: 0,
+              tokenSell: mappedCoins[selectedCoin].contract as Address,
+              buyAmount: BigInt(10e18),
+            });
+
+            const optionInfo = await getOptionInfo(optionId)
+
+            const teaToken = new Contract(
+              optionInfo.presaleToken,
+              erc20Abi,
+              signer
+            );
+
+
+            userTeaPurchased.current = +(Number(await teaToken.balanceOf(account)) / 10e18).toFixed(2);
+          }} variant="primary" className="buy__btn">
             {submitting ? <Spinner /> : 'BUY TEA'}
           </SlButton>
           
