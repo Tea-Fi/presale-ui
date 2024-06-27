@@ -21,7 +21,7 @@ import Spinner from '../components/spinner';
 import { useEventContext } from '../context/event.context';
 import { InvestmentOptions } from '../components/investment-options';
 import { Contract } from 'ethers';
-import { Address, erc20Abi, parseEther } from 'viem';
+import { Address, erc20Abi } from 'viem';
 
 export type CoinType = 'eth' | 'usdt' | 'usdc' | 'weth' | 'wbtc';
 const coins: CoinType[] = ['eth', 'usdc', 'usdt', 'weth', 'wbtc'];
@@ -37,7 +37,7 @@ export const Buy = () => {
   const { showModal, setEventInfo } = useEventContext();
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
-  const [investment, setInvestment] = useState('');
+  const [investment, setInvestment] = useState(Object.keys(investmentInfo)[0]);
 
   const userTeaPurchased = useRef(0);
   const [price, setPrice] = useState(0);
@@ -306,7 +306,7 @@ export const Buy = () => {
           </div>
           {/* <Countdown roundInfo={roundInfo} isActive={isActive} setIsActive={setIsActive} /> */}
           <TokenRate />
-          <InvestmentOptions value={investment} onChange={setInvestment} />
+          <InvestmentOptions investmentOptions={Object.keys(investmentInfo)} value={investment} onChange={setInvestment} />
           {investment && (
             <div className="investment-info">
               <div className="label">{investmentInfo[investment].tge}</div>
