@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { SlCard, SlSelect, SlOption, SlIcon, SlButton, SlAlert } from '@shoelace-style/shoelace/dist/react';
 import bigDecimal from 'js-big-decimal';
 
@@ -21,7 +21,7 @@ import Spinner from '../components/spinner';
 import { useEventContext } from '../context/event.context';
 import { InvestmentOptions } from '../components/investment-options';
 import { Contract } from 'ethers';
-import { Address, erc20Abi, parseEther } from 'viem';
+import { Address, erc20Abi } from 'viem';
 
 export type CoinType = 'eth' | 'usdt' | 'usdc' | 'weth' | 'wbtc';
 const coins: CoinType[] = ['eth', 'usdc', 'usdt', 'weth', 'wbtc'];
@@ -37,10 +37,12 @@ export const Buy = () => {
   const { showModal, setEventInfo } = useEventContext();
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
-  const [investment, setInvestment] = useState('');
+  const [investment, setInvestment] = useState(Object.keys(investmentInfo)[0]);
 
   const userTeaPurchased = useRef(0);
   const [price, setPrice] = useState(0);
+
+  const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
   const mappedCoins = useMemo(
     () => ({
@@ -55,27 +57,30 @@ export const Buy = () => {
 
 
   useEffect(() => {
+    if (account == null) return;
+
     const provider = ethers.getDefaultProvider(import.meta.env.VITE_PUBLIC_INFURA_URL);
-    const token = new Contract(
-      mappedCoins[selectedCoin].contract,
-      erc20Abi,
-      provider
-    );
+    const getBalance = async () => {
+      if (selectedCoin == 'eth') {
+        setSelectedCoinIsAllowed(true);
+        return [await provider.getBalance(account), 18];
+      }
 
-    const getBalances = async () => {
+      const token = new Contract(
+        mappedCoins[selectedCoin].contract,
+        erc20Abi,
+        provider
+      );
       const presale = PRESALE_CONTRACT_ADDRESS[chainId ?? 1];
-
       setSelectedCoinIsAllowed(await token.allowance(account, presale) > 0);
-
       const [balance, decimals] = await Promise.all([
         token.balanceOf(account),
         token.decimals(),
       ]);
-
       return [balance, decimals];
     }
 
-    getBalances().then((args: any) => {
+    getBalance().then((args: any) => {
       paymentAssets[selectedCoin].balance = (Number(args[0]) / 10**Number(args[1])).toLocaleString();
       paymentAssets[selectedCoin].decimal = args[1].toString();
     });
@@ -102,6 +107,7 @@ export const Buy = () => {
     );
 
     userTeaPurchased.current = +(Number(await teaToken.balanceOf(account)) / 1e18).toFixed(2);
+    forceUpdate();
   }
 
   const buyButtonDisabled = useMemo(() => {
@@ -201,8 +207,6 @@ export const Buy = () => {
     if (amountInTea == undefined) return false;
     setSubmitting(true);
 
-    console.log(parseEther(amountInTea));
-
     const provider = new ethers.BrowserProvider((window as any).ethereum);
     const signer = await provider.getSigner();
     const presale = PRESALE_CONTRACT_ADDRESS[chainId ?? 1];
@@ -271,6 +275,9 @@ export const Buy = () => {
       subTitle: result.message,
     });
     showModal();
+
+    setAmount('');
+    setAmountInTea('');
     handleOptionBalance();
     return true;
   };
@@ -299,7 +306,7 @@ export const Buy = () => {
           </div>
           {/* <Countdown roundInfo={roundInfo} isActive={isActive} setIsActive={setIsActive} /> */}
           <TokenRate />
-          <InvestmentOptions value={investment} onChange={setInvestment} />
+          <InvestmentOptions investmentOptions={Object.keys(investmentInfo)} value={investment} onChange={setInvestment} />
           {investment && (
             <div className="investment-info">
               <div className="label">{investmentInfo[investment].tge}</div>
@@ -315,17 +322,17 @@ export const Buy = () => {
                   value={selectedCoin}
                   onSlInput={(e) => {
                     setSelectedCoin((e.target as HTMLSelectElement).value as CoinType);
-                    setAmount('0');
-                    setAmountInTea('0');
+                    setAmount('');
+                    setAmountInTea('');
                   }}
                   className="select-coin"
                 >
-                  <img className="select-coin__icon" slot="prefix" src={mappedCoins[selectedCoin]?.icon} alt="Tether" />
+                  <img className="select-coin__icon" slot="prefix" src={mappedCoins[selectedCoin]?.icon} alt={mappedCoins[selectedCoin]?.label} />
                   {coins
                     .map((key) => mappedCoins[key])
                     .map(({ icon, label, value }) => (
                       <SlOption value={value} key={value}>
-                        <img className="coin-icon" slot="prefix" src={icon} alt="Tether" />
+                        <img className="coin-icon" slot="prefix" src={icon} alt={label}  />
                         {label}
                       </SlOption>
                     ))}
@@ -336,7 +343,7 @@ export const Buy = () => {
                 <small className="amount__balance">{formattedBalance}</small>
                 <CoinInput
                   disabled={!investment}
-                  value={bigDecimal.round(amount, paymentAssets[selectedCoin]?.decimal)}
+                  value={amount /*bigDecimal.round(amount, paymentAssets[selectedCoin]?.decimal)*/}
                   onChangeValue={(value) => {
                     setAmount(value);
                     setAmountInTea(`${(+value * price) / +investment}`);
