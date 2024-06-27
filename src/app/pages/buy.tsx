@@ -21,7 +21,7 @@ import Spinner from '../components/spinner';
 import { useEventContext } from '../context/event.context';
 import { InvestmentOptions } from '../components/investment-options';
 import { Contract } from 'ethers';
-import { Address, erc20Abi } from 'viem';
+import { Address, erc20Abi, parseEther } from 'viem';
 
 export type CoinType = 'eth' | 'usdt' | 'usdc' | 'weth' | 'wbtc';
 const coins: CoinType[] = ['usdt', 'weth', 'wbtc'];
@@ -101,7 +101,8 @@ export const Buy = () => {
       signer
     );
 
-    userTeaPurchased.current = +(Number(await teaToken.balanceOf(account)) / 10e18).toFixed(2);
+    // 78 812 500 000 000 000 000
+    userTeaPurchased.current = +(Number(await teaToken.balanceOf(account)) / 1e18).toFixed(2);
   }
 
   const buyButtonDisabled = useMemo(() => {
@@ -192,6 +193,8 @@ export const Buy = () => {
     if (amountInTea == undefined) return false;
     setSubmitting(true);
 
+    console.log(parseEther(amountInTea));
+
     const provider = new ethers.BrowserProvider((window as any).ethereum);
     const signer = await provider.getSigner();
     const presale = PRESALE_CONTRACT_ADDRESS[chainId ?? 1];
@@ -203,6 +206,8 @@ export const Buy = () => {
         signer
       );
 
+
+      // check alloance status and aprove tokens
       if (await token.allowance(account, presale) === 0n) {
         setEventTitle('Allow spending ' + selectedCoin.toUpperCase());
         eventModalRef.current?.show();
