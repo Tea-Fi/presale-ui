@@ -304,7 +304,10 @@ export async function buyExactPresaleTokens({
       } = await getOptionInfo(optionId);
 
       const usdEquivalentedAmountInPresaleToken = buyAmount * price / BigInt(1e14);
-      const amountInETH = await getInputPriceQuoteReversed(tokenSell, usdEquivalentedAmountInPresaleToken);
+      const amountInETH = await getInputPriceQuoteReversed(
+        tokenSell,
+        usdEquivalentedAmountInPresaleToken
+      );
 
       tx = await presaleContract.buyExactPresaleTokensETH(
         optionId,
@@ -336,4 +339,9 @@ export async function buyExactPresaleTokens({
       txid: null,
     };
   }
+}
+
+
+export async function getQuoteAmountsIn() {
+  
 }
