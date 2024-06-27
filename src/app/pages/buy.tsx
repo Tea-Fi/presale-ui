@@ -65,7 +65,7 @@ export const Buy = () => {
     const getBalances = async () => {
       const presale = PRESALE_CONTRACT_ADDRESS[chainId ?? 1];
 
-      setSelectedCoinIsAllowed(await token.allowance(account, presale) > 0);
+      setSelectedCoinIsAllowed(selectedCoin == 'eth' || await token.allowance(account, presale) > 0);
 
       const [balance, decimals] = await Promise.all([
         token.balanceOf(account),
@@ -315,17 +315,17 @@ export const Buy = () => {
                   value={selectedCoin}
                   onSlInput={(e) => {
                     setSelectedCoin((e.target as HTMLSelectElement).value as CoinType);
-                    setAmount('0');
-                    setAmountInTea('0');
+                    setAmount('');
+                    setAmountInTea('');
                   }}
                   className="select-coin"
                 >
-                  <img className="select-coin__icon" slot="prefix" src={mappedCoins[selectedCoin]?.icon} alt="Tether" />
+                  <img className="select-coin__icon" slot="prefix" src={mappedCoins[selectedCoin]?.icon} alt={mappedCoins[selectedCoin]?.label} />
                   {coins
                     .map((key) => mappedCoins[key])
                     .map(({ icon, label, value }) => (
                       <SlOption value={value} key={value}>
-                        <img className="coin-icon" slot="prefix" src={icon} alt="Tether" />
+                        <img className="coin-icon" slot="prefix" src={icon} alt={label}  />
                         {label}
                       </SlOption>
                     ))}
@@ -336,7 +336,7 @@ export const Buy = () => {
                 <small className="amount__balance">{formattedBalance}</small>
                 <CoinInput
                   disabled={!investment}
-                  value={bigDecimal.round(amount, paymentAssets[selectedCoin]?.decimal)}
+                  value={amount /*bigDecimal.round(amount, paymentAssets[selectedCoin]?.decimal)*/}
                   onChangeValue={(value) => {
                     setAmount(value);
                     setAmountInTea(`${(+value * price) / +investment}`);
