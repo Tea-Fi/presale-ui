@@ -275,6 +275,9 @@ export const Buy = () => {
       subTitle: result.message,
     });
     showModal();
+
+    setAmount('');
+    setAmountInTea('');
     handleOptionBalance();
     return true;
   };
