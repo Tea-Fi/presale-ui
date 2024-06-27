@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { SlCard, SlSelect, SlOption, SlIcon, SlButton, SlAlert } from '@shoelace-style/shoelace/dist/react';
 import bigDecimal from 'js-big-decimal';
 
@@ -42,6 +42,8 @@ export const Buy = () => {
   const userTeaPurchased = useRef(0);
   const [price, setPrice] = useState(0);
 
+  const [, forceUpdate] = useReducer((x) => x + 1, 0);
+
   const mappedCoins = useMemo(
     () => ({
       eth: { icon: ethereumIcon, label: 'ETH', value: 'eth', contract: chainId ? WETH[chainId] : '' },
@@ -55,27 +57,30 @@ export const Buy = () => {
 
 
   useEffect(() => {
+    if (account == null) return;
+
     const provider = ethers.getDefaultProvider(import.meta.env.VITE_PUBLIC_INFURA_URL);
-    const token = new Contract(
-      mappedCoins[selectedCoin].contract,
-      erc20Abi,
-      provider
-    );
+    const getBalance = async () => {
+      if (selectedCoin == 'eth') {
+        setSelectedCoinIsAllowed(true);
+        return [await provider.getBalance(account), 18];
+      }
 
-    const getBalances = async () => {
+      const token = new Contract(
+        mappedCoins[selectedCoin].contract,
+        erc20Abi,
+        provider
+      );
       const presale = PRESALE_CONTRACT_ADDRESS[chainId ?? 1];
-
-      setSelectedCoinIsAllowed(selectedCoin == 'eth' || await token.allowance(account, presale) > 0);
-
+      setSelectedCoinIsAllowed(await token.allowance(account, presale) > 0);
       const [balance, decimals] = await Promise.all([
         token.balanceOf(account),
         token.decimals(),
       ]);
-
       return [balance, decimals];
     }
 
-    getBalances().then((args: any) => {
+    getBalance().then((args: any) => {
       paymentAssets[selectedCoin].balance = (Number(args[0]) / 10**Number(args[1])).toLocaleString();
       paymentAssets[selectedCoin].decimal = args[1].toString();
     });
@@ -102,6 +107,7 @@ export const Buy = () => {
     );
 
     userTeaPurchased.current = +(Number(await teaToken.balanceOf(account)) / 1e18).toFixed(2);
+    forceUpdate();
   }
 
   const buyButtonDisabled = useMemo(() => {
@@ -200,8 +206,6 @@ export const Buy = () => {
   const enterPresale = async () => {
     if (amountInTea == undefined) return false;
     setSubmitting(true);
-
-    console.log(parseEther(amountInTea));
 
     const provider = new ethers.BrowserProvider((window as any).ethereum);
     const signer = await provider.getSigner();
