@@ -26,7 +26,6 @@ export const WBTC = {
   11155111: "0x96fe19aa67A55f2e2361d81c2dF5f0cD96E344CF",
 } as Currency;
 
-
 export const PRESALE_CONTRACT_ADDRESS = {
   1: ZeroAddress,
   11155111: "0x1F1eC59b85eBAD05C1F6a5101f740c175232D341",
