@@ -15,7 +15,7 @@ import ethereumIcon from '../../assets/icons/ethereum.svg';
 import { CoinInput } from '../components/coin-input';
 import { TokenRate } from '../components/token-rate';
 import teaLogo from '../../assets/icons/tea-logo.svg';
-import { buyExactPresaleTokens, getInputPriceQuote, getOptionInfo } from '../utils/presale';
+import { buyExactPresaleTokens, getInputPriceQuote, getOptionInfo, getQuoteAmountsInForTeaTokens } from '../utils/presale';
 import { PRESALE_CONTRACT_ADDRESS, USDC, USDT, WBTC, WETH, investmentInfo } from '../utils/constants';
 import Spinner from '../components/spinner';
 import { useEventContext } from '../context/event.context';
@@ -134,27 +134,6 @@ export const Buy = () => {
     }
   }, [account]);
 
-  // const createPair = useCallback(async (first: Token, second: Token) => {
-  //   const pairAddress = Pair.getAddress(first, second);
-
-  //   const provider = new JsonRpcProvider(import.meta.env.VITE_PUBLIC_INFURA_URL);
-
-  //   const pairContract = new ethers.Contract(pairAddress, PAIR_ABI, provider);
-
-  //   const reserves = await pairContract['getReserves']();
-
-  //   const [reserve0, reserve1] = reserves;
-
-  //   const tokens = [first, second];
-  //   const [token0, token1] = tokens[0].sortsBefore(tokens[1]) ? tokens : [tokens[1], tokens[0]];
-
-  //   const pair = new Pair(
-  //     CurrencyAmount.fromRawAmount(token0, Number(reserve0)),
-  //     CurrencyAmount.fromRawAmount(token1, Number(reserve1))
-  //   );
-
-  //   return pair;
-  // }, []);
 
   useEffect(() => {
     if (account && selectedCoin) {
@@ -165,19 +144,6 @@ export const Buy = () => {
             return;
           }
           const decimal = paymentAssets[selectedCoin]?.decimal || 18;
-          
-          /******** make errors ********/
-          // const InputToken = new Token(
-          //   chainId ?? ChainId.SEPOLIA,
-          //   mappedCoins[selectedCoin].contract,
-          //   decimal
-          // );
-          
-          // const USDT = new Token(chainId === 1 ? ChainId.MAINNET : ChainId.SEPOLIA, mappedCoins.usdt.contract, 6);
-          // const pair = await createPair(InputToken, USDT);
-          // const route = new Route([pair], InputToken, USDT);
-          // const price = route.midPrice.toSignificant(6);
-
           const tokenPrice = await getInputPriceQuote(
             mappedCoins[selectedCoin].contract as Address,
             BigInt(10**decimal)
@@ -343,7 +309,7 @@ export const Buy = () => {
                 <small className="amount__balance">{formattedBalance}</small>
                 <CoinInput
                   disabled={!investment}
-                  value={amount /*bigDecimal.round(amount, paymentAssets[selectedCoin]?.decimal)*/}
+                  value={amount}
                   onChangeValue={(value) => {
                     setAmount(value);
                     setAmountInTea(`${(+value * price) / +investment}`);
@@ -365,9 +331,18 @@ export const Buy = () => {
                 <CoinInput
                   disabled={!investment}
                   value={bigDecimal.round(amountInTea, 4)}
-                  onChangeValue={(value) => {
+                  onChangeValue={async (value) => {
                     setAmount(`${(+value * +investment) / price}`);
                     setAmountInTea(value);
+                    
+                    
+                    await getQuoteAmountsInForTeaTokens(
+                      mappedCoins[selectedCoin].contract as `0x${string}`,
+                      value,
+                      price,
+                      paymentAssets[selectedCoin].decimal
+                    )
+                    
                   }}
                 />
               </div>

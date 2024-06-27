@@ -2,6 +2,7 @@ import { Contract, ZeroAddress, ethers, parseEther, parseUnits } from 'ethers';
 import { ERC20_ABI } from './erc20_abi';
 import { PRESALE_ABI } from './presale_abi';
 import { Address, PRESALE_CONTRACT_ADDRESS, WETH } from './constants';
+import { erc20Abi } from 'viem';
 
 export async function getTokenAllowance(tokenAddress: string, ownerAddress: string, spenderAddress: string) {
   // updated provider with custom url for better testnet experience
@@ -250,9 +251,9 @@ export async function getInputPriceQuote(token: Address, amountsIn: bigint): Pro
     PRESALE_ABI,
     provider
   );
-  const referralInfo = await presaleContract.inputPriceQuote(token, amountsIn) as bigint;
+  const priceQuote = await presaleContract.inputPriceQuote(token, amountsIn) as bigint;
   
-  return referralInfo;
+  return priceQuote;
 }
 
 export async function getInputPriceQuoteReversed(token: Address, amountsIn: bigint): Promise<bigint> {
@@ -342,6 +343,15 @@ export async function buyExactPresaleTokens({
 }
 
 
-export async function getQuoteAmountsIn() {
+export async function getQuoteAmountsInForTeaTokens(
+  tokenSell: Address,
+  amountsInHuman: string,
+  tokenSellPrice: number,
+  decimals: string,
+) {
+  // console.log(tokenSellPrice)
+  console.log(+amountsInHuman * 0.16 / tokenSellPrice)
+  return +amountsInHuman / tokenSellPrice;
   
+
 }
