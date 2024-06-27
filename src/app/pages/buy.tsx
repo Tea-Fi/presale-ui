@@ -18,7 +18,7 @@ import teaLogo from '../../assets/icons/tea-logo.svg';
 import { buyExactPresaleTokens, getOptionInfo } from '../utils/presale';
 import { PRESALE_CONTRACT_ADDRESS, USDC, USDT, WBTC, WETH, investmentInfo } from '../utils/constants';
 import Spinner from '../components/spinner';
-// import { useEventContext } from '../context/event.context';
+import { useEventContext } from '../context/event.context';
 import { InvestmentOptions } from '../components/investment-options';
 import { Contract } from 'ethers';
 import { Address, erc20Abi } from 'viem';
@@ -29,12 +29,13 @@ const coins: CoinType[] = ['usdt', 'weth', 'wbtc'];
 export const Buy = () => {
   const eventModalRef = useRef<any>(null);
   const [selectedCoin, setSelectedCoin] = useState<CoinType>('usdt');
+  const [selectedCoinIsAllowed, setSelectedCoinIsAllowed] = useState(false);
   const [amount, setAmount] = useState<string>();
   const [amountInTea, setAmountInTea] = useState<string>();
-  const [eventTitle] = useState<string>('');
+  const [eventTitle, setEventTitle] = useState<string>('');
   const { paymentAssets, account, chainId } = useWalletContext();
-  // const { showModal, setEventInfo } = useEventContext();
-  const [submitting] = useState<boolean>(false);
+  const { showModal, setEventInfo } = useEventContext();
+  const [submitting, setSubmitting] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [investment, setInvestment] = useState('');
 
@@ -54,21 +55,24 @@ export const Buy = () => {
 
 
   useEffect(() => {
-    const getBalances = async () => {
-      const provider = ethers.getDefaultProvider(import.meta.env.VITE_PUBLIC_INFURA_URL);
+    const provider = ethers.getDefaultProvider(import.meta.env.VITE_PUBLIC_INFURA_URL);
+    const token = new Contract(
+      mappedCoins[selectedCoin].contract,
+      erc20Abi,
+      provider
+    );
 
-      const token = new Contract(
-        mappedCoins[selectedCoin].contract,
-        erc20Abi,
-        provider
-      );
+    const getBalances = async () => {
+      const presale = PRESALE_CONTRACT_ADDRESS[chainId ?? 1];
+
+      setSelectedCoinIsAllowed(await token.allowance(account, presale) > 0);
+
       const [balance, decimals] = await Promise.all([
         token.balanceOf(account),
         token.decimals(),
       ]);
 
       return [balance, decimals];
-
     }
 
     getBalances().then((args: any) => {
@@ -84,19 +88,17 @@ export const Buy = () => {
     return `Balance: ${paymentAssets[selectedCoin]?.balance} ${mappedCoins[selectedCoin]?.label}`;
   }, [paymentAssets, selectedCoin]);
 
-
-
-  // const buyButtonDisabled = useMemo(() => {
-  //   return (
-  //     !amount ||
-  //     !amountInTea ||
-  //     paymentAssets[selectedCoin] === null ||
-  //     loading ||
-  //     submitting ||
-  //     Number(amount) > Number(paymentAssets[selectedCoin]?.balance) ||
-  //     remainingTea.current < +amountInTea
-  //   );
-  // }, [amount, paymentAssets, selectedCoin, amountInTea, submitting]);
+  const buyButtonDisabled = useMemo(() => {
+    return (
+      !amount ||
+      !amountInTea ||
+      paymentAssets[selectedCoin] === null ||
+      loading ||
+      submitting ||
+      Number(amount) > Number(paymentAssets[selectedCoin]?.balance) /*||
+      remainingTea.current < +amountInTea*/
+    );
+  }, [amount, paymentAssets, selectedCoin, amountInTea, submitting]);
 
   // const updateInfo = async () => {
   //   if (account) {
@@ -181,78 +183,88 @@ export const Buy = () => {
     }
   }, [investment, price, amount, amountInTea]);
 
-  // const handleApprove = async () => {
-  //   try {
-  //     const decimal = paymentAssets[selectedCoin]?.decimal;
-  //     if (!amount || !decimal) {
-  //       return;
-  //     }
-  //     setEventTitle('Waiting For Transaction (1/3) Approval...');
-  //     eventModalRef.current?.show();
-  //     await setTokenApprove(mappedCoins[selectedCoin].contract, '0', decimal);
-  //     setEventTitle('Waiting For Transaction (2/3) Approval...');
-  //     await setTokenApprove(mappedCoins[selectedCoin].contract, amount, decimal);
-  //     return true;
-  //   } catch (err: any) {
-  //     eventModalRef.current?.hide();
-  //     let message = 'Transaction rejected.';
-  //     if (err?.code == 'ACTION_REJECTED') {
-  //       message = 'Transaction Rejected by user';
-  //     }
-  //     setEventInfo({
-  //       title: 'Transaction Failed',
-  //       subTitle: message,
-  //     });
-  //     showModal();
-  //     return false;
-  //   }
-  // };
+  const enterPresale = async () => {
+    if (amountInTea == undefined) return false;
+    setSubmitting(true);
 
-  // const enterPresale = async () => {
-  //   try {
-  //     if (!amount || !amountInTea || !paymentAssets[selectedCoin]?.decimal) {
-  //       return;
-  //     }
-  //     setSubmitting(true);
-  //     if (selectedCoin !== 'eth') {
-  //       const approveResult = await handleApprove();
-  //       if (!approveResult) {
-  //         setSubmitting(false);
-  //         return;
-  //       }
-  //     }
-  //     setEventTitle('Waiting For Transaction (3/3) Approval...');
-  //     eventModalRef.current?.show();
-  //     const res = await enterPresaleUtil(
-  //       amountInTea,
-  //       Number(window.localStorage.getItem('referral')),
-  //       mappedCoins[selectedCoin].contract
-  //     );
-  //     updateInfo();
-  //     if (res.status === 'SUCCESS') {
-  //       setEventTitle('Transaction Approved ✅');
-  //       setTimeout(() => {
-  //         eventModalRef.current?.hide();
-  //       }, 4000);
-  //     } else {
-  //       eventModalRef.current?.hide();
-  //       setEventInfo({
-  //         title: 'Transaction Failed',
-  //         subTitle: res.message,
-  //       });
-  //       showModal();
-  //     }
-  //     setSubmitting(false);
-  //   } catch (err: any) {
-  //     eventModalRef.current?.hide();
-  //     setEventInfo({
-  //       title: 'Transaction Failed',
-  //       subTitle: err.message,
-  //     });
-  //     showModal();
-  //     setSubmitting(false);
-  //   }
-  // };
+    const provider = new ethers.BrowserProvider((window as any).ethereum);
+    const signer = await provider.getSigner();
+    const presale = PRESALE_CONTRACT_ADDRESS[chainId ?? 1];
+
+    if(selectedCoin !== 'eth') {
+      const token = new Contract(
+        mappedCoins[selectedCoin].contract,
+        erc20Abi,
+        signer
+      );
+
+      if (await token.allowance(account, presale) === 0n) {
+        setEventTitle('Allow spending ' + selectedCoin.toUpperCase());
+        eventModalRef.current?.show();
+        
+        try {
+          const tx = await token.approve(
+            presale, 
+            MaxUint256,
+          );
+          await tx.wait();
+        } catch (err: any) {
+          eventModalRef.current?.hide();
+          setSubmitting(false);
+          let message = 'Transaction rejected.';
+          if (err?.code == 'ACTION_REJECTED') {
+            message = 'Transaction Rejected by user';
+          }
+          setEventInfo({
+            title: 'Transaction Failed',
+            subTitle: message,
+          });
+          showModal();
+          return false; // cancel operation
+        }
+        eventModalRef.current?.hide();
+      }
+    }
+
+    setEventTitle('Purchasing $TEA');
+    eventModalRef.current?.show();
+    const optionId = investmentInfo[investment].id + 1
+    const result = await buyExactPresaleTokens({
+      optionId: optionId,
+      referrerId: Number(window.localStorage.getItem('referral')),
+      tokenSell: mappedCoins[selectedCoin].contract as Address,
+      buyAmountHuman: amountInTea,
+    });
+
+    if (result.status === 'ERROR') {
+      eventModalRef.current?.hide();
+      setSubmitting(false);
+      setEventInfo({
+        title: 'Transaction Failed!',
+        subTitle: result.message,
+      });
+      showModal();
+      return false; // failed operation
+    }
+
+    eventModalRef.current?.hide();
+    setSubmitting(false);
+    setEventInfo({
+      title: 'Transaction Succeed!',
+      subTitle: result.message,
+    });
+    showModal();
+
+    const optionInfo = await getOptionInfo(optionId);
+    const teaToken = new Contract(
+      optionInfo.presaleToken,
+      erc20Abi,
+      signer
+    );
+    userTeaPurchased.current = +(Number(await teaToken.balanceOf(account)) / 10e18).toFixed(2);
+
+    return true;
+  };
 
   useEffect(() => {
     const handleOptionBalance = async () => {
@@ -260,22 +272,17 @@ export const Buy = () => {
       const signer = await provider.getSigner();
       const optionInfo = await getOptionInfo(investmentInfo[investment].id + 1);
 
-
       const teaToken = new Contract(
         optionInfo.presaleToken,
         erc20Abi,
         signer
       );
 
-      
       userTeaPurchased.current = +(Number(await teaToken.balanceOf(account)) / 10e18).toFixed(2);
-
     }
 
     handleOptionBalance();
   }, [selectedCoin]);
-
-
 
   return (
     <div className="buy page">
@@ -313,8 +320,8 @@ export const Buy = () => {
                   value={selectedCoin}
                   onSlInput={(e) => {
                     setSelectedCoin((e.target as HTMLSelectElement).value as CoinType);
-                    setAmount('');
-                    setAmountInTea('');
+                    setAmount('0');
+                    setAmountInTea('0');
                   }}
                   className="select-coin"
                 >
@@ -364,56 +371,9 @@ export const Buy = () => {
               </div>
             </SlCard>
           </SlCard>
-          {/* <SlButton onClick={enterPresale} disabled={buyButtonDisabled} variant="primary" className="buy__btn">
-            {submitting ? <Spinner /> : 'BUY TEA'}
-          </SlButton> */}
-
-          <SlButton onClick={async () => {
-            const provider = new ethers.BrowserProvider((window as any).ethereum);
-            const signer = await provider.getSigner();
-
-            const token = new Contract(
-              mappedCoins[selectedCoin].contract,
-              erc20Abi,
-              signer
-            );
-
-            
-
-            
-            const presale = PRESALE_CONTRACT_ADDRESS[chainId ?? 1];
-   
-            if(await token.allowance(account, presale) === 0n) {
-              const tx = await token.approve(
-                presale, 
-                MaxUint256,
-              );
-
-              await tx.wait();
-            }
-
-            const optionId = investmentInfo[investment].id + 1
-            await buyExactPresaleTokens({
-              optionId: optionId,
-              referrerId: 0,
-              tokenSell: mappedCoins[selectedCoin].contract as Address,
-              buyAmount: BigInt(10e18),
-            });
-
-            const optionInfo = await getOptionInfo(optionId)
-
-            const teaToken = new Contract(
-              optionInfo.presaleToken,
-              erc20Abi,
-              signer
-            );
-
-
-            userTeaPurchased.current = +(Number(await teaToken.balanceOf(account)) / 10e18).toFixed(2);
-          }} variant="primary" className="buy__btn">
-            {submitting ? <Spinner /> : 'BUY TEA'}
+          <SlButton onClick={enterPresale} disabled={buyButtonDisabled} variant="primary" className="buy__btn">
+            {submitting ? <Spinner /> : (selectedCoinIsAllowed ? 'Buy $TEA' : "Allow " + selectedCoin.toUpperCase())}
           </SlButton>
-          
         </>
       )}
     </div>

@@ -1,4 +1,4 @@
-import { Contract, ZeroAddress, ethers, parseUnits } from 'ethers';
+import { Contract, ZeroAddress, ethers, parseEther, parseUnits } from 'ethers';
 import { ERC20_ABI } from './erc20_abi';
 import { PRESALE_ABI } from './presale_abi';
 import { Address, PRESALE_CONTRACT_ADDRESS, WETH } from './constants';
@@ -222,7 +222,6 @@ export async function getOptionInfo(optionId: number): Promise<TOption> {
 
   const optionInfo = await presaleContract.saleOptions(optionId) as TOption;
 
-  console.log(optionInfo);
   return optionInfo;
 }
 
@@ -271,23 +270,23 @@ export async function getInputPriceQuoteReversed(token: Address, amountsIn: bigi
   return referralInfo;
 }
 
-
 // used for ETH and Other tokens sells
 export async function buyExactPresaleTokens({
     optionId,
     referrerId,
     tokenSell,
-    buyAmount,
+    buyAmountHuman,
   }:{
     optionId: number,
     referrerId: number,
     tokenSell: Address,
-    buyAmount: bigint,
+    buyAmountHuman: string,
   }) {
   // updated provider with custom url for better testnet experience
   const provider = new ethers.BrowserProvider((window as any).ethereum);
   const signer = await provider.getSigner()
   const chainId = Number((await provider.getNetwork()).chainId);
+  const buyAmount = parseEther(buyAmountHuman);
 
   const presaleContract = new ethers.Contract(
     PRESALE_CONTRACT_ADDRESS[chainId],
@@ -295,11 +294,9 @@ export async function buyExactPresaleTokens({
     signer
   );
 
-
   try {
     let tx;
     if(!tokenSell || tokenSell === ZeroAddress) {
-
       const {
         price,
       } = await getOptionInfo(optionId);
@@ -317,7 +314,6 @@ export async function buyExactPresaleTokens({
         }
       );
     } else {
-      console.log(optionId)
       tx = await presaleContract.buyExactPresaleTokens(
         optionId,
         referrerId,
@@ -329,10 +325,14 @@ export async function buyExactPresaleTokens({
     await tx.wait();
     return {
       status: 'SUCCESS',
-      message: 'Transaction is done',
+      message: 'Successfull $TEA purchase',
       txid: tx,
     }; 
   } catch (e) {
-    console.log(e);
+    return {
+      status: 'ERROR',
+      message: 'Error while purchasing $TEA',
+      txid: null,
+    };
   }
 }
