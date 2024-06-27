@@ -131,6 +131,7 @@ export const Buy = () => {
     };
     if (account) {
       handleStart();
+      handleOptionBalance();
     }
   }, [account]);
 
