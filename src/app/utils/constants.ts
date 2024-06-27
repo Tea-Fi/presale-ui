@@ -101,17 +101,17 @@ export const loginMapping: { [key: string]: Referral } = {
 
 export const investmentInfo = {
   "0.16": {
-    id: 0,
+    id: 1,
     tge: "10% - released at TGE",
     vested: "90% - vested linearly over 12 months",
   },
   "0.2": {
-    id: 1,
+    id: 2,
     tge: "20% - released at TGE",
     vested: "80% - vested linearly over 6 months",
   },
   "0.24": {
-    id: 2,
+    id: 3,
     tge: "50% - released at TGE",
     vested: "50% - vested linearly over 2 months",
   },

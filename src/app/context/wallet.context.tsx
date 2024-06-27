@@ -146,9 +146,12 @@ export const WalletProvider: FunctionComponent<{ children: ReactNode }> = ({ chi
     const provider = new JsonRpcProvider(import.meta.env.VITE_PUBLIC_INFURA_URL);
     const usdtErc20Contract = new ethers.Contract(contractAddress, ERC20_ABI, provider);
 
-    const balance = await usdtErc20Contract.balanceOf(address);
-
-    return Number(ethers.formatUnits(balance, numDecimals));
+    try {
+      const balance = await usdtErc20Contract.balanceOf(address);
+      return Number(ethers.formatUnits(balance, numDecimals));
+    } catch (_) {
+      return 0;
+    }
   }
 
   // const initAccountsListener = useCallback(() => {

@@ -88,6 +88,22 @@ export const Buy = () => {
     return `Balance: ${paymentAssets[selectedCoin]?.balance} ${mappedCoins[selectedCoin]?.label}`;
   }, [paymentAssets, selectedCoin]);
 
+  const handleOptionBalance = async () => {
+    if (investment == undefined || investmentInfo[investment] == undefined) return;
+
+    const provider = new ethers.BrowserProvider((window as any).ethereum);
+    const signer = await provider.getSigner();
+    const optionInfo = await getOptionInfo(investmentInfo[investment].id);
+
+    const teaToken = new Contract(
+      optionInfo.presaleToken,
+      erc20Abi,
+      signer
+    );
+
+    userTeaPurchased.current = +(Number(await teaToken.balanceOf(account)) / 10e18).toFixed(2);
+  }
+
   const buyButtonDisabled = useMemo(() => {
     return (
       !amount ||
@@ -95,28 +111,13 @@ export const Buy = () => {
       paymentAssets[selectedCoin] === null ||
       loading ||
       submitting ||
-      Number(amount) > Number(paymentAssets[selectedCoin]?.balance) /*||
-      remainingTea.current < +amountInTea*/
+      Number(amount) > Number(paymentAssets[selectedCoin]?.balance)
     );
   }, [amount, paymentAssets, selectedCoin, amountInTea, submitting]);
-
-  // const updateInfo = async () => {
-  //   if (account) {
-  //     // const result = await getOptionInfo();
-  //     // remainingTea.current = result.roundSize - result.roundSold;
-  //     // const userBalance = await getPresaleUserBalance(account);
-  //     // userTeaPurchased.current = userBalance;
-  //     updateUserBalance();
-  //   }
-  // };
 
   useEffect(() => {
     const handleStart = async () => {
       try {
-        // const result = await getPresaleRoundSold();
-        // remainingTea.current = result.roundSize - result.roundSold;
-        // const userBalance = await getPresaleUserBalance(account as string);
-        // userTeaPurchased.current = userBalance;
         setLoading(false);
       } catch (error) {
         console.error(error);
@@ -170,7 +171,11 @@ export const Buy = () => {
 
           setPrice(+price);
         } catch (error) {
-          console.error(error);
+          setEventInfo({
+            title: 'Initialization Error!',
+            subTitle: 'Unable to obtain ' + selectedCoin.toUpperCase() + ' price...',
+          });
+          showModal();
         }
       };
       fetchPrice();
@@ -228,9 +233,8 @@ export const Buy = () => {
 
     setEventTitle('Purchasing $TEA');
     eventModalRef.current?.show();
-    const optionId = investmentInfo[investment].id + 1
     const result = await buyExactPresaleTokens({
-      optionId: optionId,
+      optionId: investmentInfo[investment].id,
       referrerId: Number(window.localStorage.getItem('referral')),
       tokenSell: mappedCoins[selectedCoin].contract as Address,
       buyAmountHuman: amountInTea,
@@ -254,35 +258,13 @@ export const Buy = () => {
       subTitle: result.message,
     });
     showModal();
-
-    const optionInfo = await getOptionInfo(optionId);
-    const teaToken = new Contract(
-      optionInfo.presaleToken,
-      erc20Abi,
-      signer
-    );
-    userTeaPurchased.current = +(Number(await teaToken.balanceOf(account)) / 10e18).toFixed(2);
-
+    handleOptionBalance();
     return true;
   };
 
   useEffect(() => {
-    const handleOptionBalance = async () => {
-      const provider = new ethers.BrowserProvider((window as any).ethereum);
-      const signer = await provider.getSigner();
-      const optionInfo = await getOptionInfo(investmentInfo[investment].id + 1);
-
-      const teaToken = new Contract(
-        optionInfo.presaleToken,
-        erc20Abi,
-        signer
-      );
-
-      userTeaPurchased.current = +(Number(await teaToken.balanceOf(account)) / 10e18).toFixed(2);
-    }
-
     handleOptionBalance();
-  }, [selectedCoin]);
+  }, [investment]);
 
   return (
     <div className="buy page">
