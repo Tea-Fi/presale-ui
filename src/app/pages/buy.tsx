@@ -1,12 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { SlCard, SlSelect, SlOption, SlIcon, SlButton, SlAlert } from '@shoelace-style/shoelace/dist/react';
 import bigDecimal from 'js-big-decimal';
 
-import { ChainId, Token, CurrencyAmount } from '@uniswap/sdk-core';
-import { Pair, Route } from '@uniswap/v2-sdk';
-import { JsonRpcProvider, MaxUint256, ethers } from 'ethers';
+// import { Token, CurrencyAmount } from '@uniswap/sdk-core';
+// import { Pair } from '@uniswap/v2-sdk';
+import { MaxUint256, ethers } from 'ethers';
 
-import { PAIR_ABI } from '../utils/pair-abi';
+// import { PAIR_ABI } from '../utils/pair-abi';
 import { useWalletContext } from '../context/wallet.context';
 import tetherIcon from '../../assets/icons/tether.svg';
 import usdcIcon from '../../assets/icons/usd-coin-usdc-logo.svg';
@@ -15,7 +15,7 @@ import ethereumIcon from '../../assets/icons/ethereum.svg';
 import { CoinInput } from '../components/coin-input';
 import { TokenRate } from '../components/token-rate';
 import teaLogo from '../../assets/icons/tea-logo.svg';
-import { buyExactPresaleTokens, getOptionInfo } from '../utils/presale';
+import { buyExactPresaleTokens, getInputPriceQuote, getOptionInfo } from '../utils/presale';
 import { PRESALE_CONTRACT_ADDRESS, USDC, USDT, WBTC, WETH, investmentInfo } from '../utils/constants';
 import Spinner from '../components/spinner';
 import { useEventContext } from '../context/event.context';
@@ -24,7 +24,7 @@ import { Contract } from 'ethers';
 import { Address, erc20Abi, parseEther } from 'viem';
 
 export type CoinType = 'eth' | 'usdt' | 'usdc' | 'weth' | 'wbtc';
-const coins: CoinType[] = ['usdt', 'weth', 'wbtc'];
+const coins: CoinType[] = ['eth', 'usdc', 'usdt', 'weth', 'wbtc'];
 
 export const Buy = () => {
   const eventModalRef = useRef<any>(null);
@@ -101,7 +101,6 @@ export const Buy = () => {
       signer
     );
 
-    // 78 812 500 000 000 000 000
     userTeaPurchased.current = +(Number(await teaToken.balanceOf(account)) / 1e18).toFixed(2);
   }
 
@@ -129,27 +128,27 @@ export const Buy = () => {
     }
   }, [account]);
 
-  const createPair = useCallback(async (first: Token, second: Token) => {
-    const pairAddress = Pair.getAddress(first, second);
+  // const createPair = useCallback(async (first: Token, second: Token) => {
+  //   const pairAddress = Pair.getAddress(first, second);
 
-    const provider = new JsonRpcProvider(import.meta.env.VITE_PUBLIC_INFURA_URL);
+  //   const provider = new JsonRpcProvider(import.meta.env.VITE_PUBLIC_INFURA_URL);
 
-    const pairContract = new ethers.Contract(pairAddress, PAIR_ABI, provider);
+  //   const pairContract = new ethers.Contract(pairAddress, PAIR_ABI, provider);
 
-    const reserves = await pairContract['getReserves']();
+  //   const reserves = await pairContract['getReserves']();
 
-    const [reserve0, reserve1] = reserves;
+  //   const [reserve0, reserve1] = reserves;
 
-    const tokens = [first, second];
-    const [token0, token1] = tokens[0].sortsBefore(tokens[1]) ? tokens : [tokens[1], tokens[0]];
+  //   const tokens = [first, second];
+  //   const [token0, token1] = tokens[0].sortsBefore(tokens[1]) ? tokens : [tokens[1], tokens[0]];
 
-    const pair = new Pair(
-      CurrencyAmount.fromRawAmount(token0, Number(reserve0)),
-      CurrencyAmount.fromRawAmount(token1, Number(reserve1))
-    );
+  //   const pair = new Pair(
+  //     CurrencyAmount.fromRawAmount(token0, Number(reserve0)),
+  //     CurrencyAmount.fromRawAmount(token1, Number(reserve1))
+  //   );
 
-    return pair;
-  }, []);
+  //   return pair;
+  // }, []);
 
   useEffect(() => {
     if (account && selectedCoin) {
@@ -160,17 +159,26 @@ export const Buy = () => {
             return;
           }
           const decimal = paymentAssets[selectedCoin]?.decimal || 18;
-          const InputToken = new Token(
-            chainId === 1 ? ChainId.MAINNET : ChainId.SEPOLIA,
-            mappedCoins[selectedCoin].contract,
-            decimal
-          );
-          const USDT = new Token(chainId === 1 ? ChainId.MAINNET : ChainId.SEPOLIA, mappedCoins.usdt.contract, 6);
-          const pair = await createPair(InputToken, USDT);
-          const route = new Route([pair], InputToken, USDT);
-          const price = route.midPrice.toSignificant(6);
+          
+          /******** make errors ********/
+          // const InputToken = new Token(
+          //   chainId ?? ChainId.SEPOLIA,
+          //   mappedCoins[selectedCoin].contract,
+          //   decimal
+          // );
+          
+          // const USDT = new Token(chainId === 1 ? ChainId.MAINNET : ChainId.SEPOLIA, mappedCoins.usdt.contract, 6);
+          // const pair = await createPair(InputToken, USDT);
+          // const route = new Route([pair], InputToken, USDT);
+          // const price = route.midPrice.toSignificant(6);
 
-          setPrice(+price);
+          const tokenPrice = await getInputPriceQuote(
+            mappedCoins[selectedCoin].contract as Address,
+            BigInt(10**decimal)
+          );
+          const priceToHuman = Number(tokenPrice) / 10**6;
+
+          setPrice(priceToHuman);
         } catch (error) {
           setEventInfo({
             title: 'Initialization Error!',
