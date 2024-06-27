@@ -1,4 +1,8 @@
+import { ZeroAddress } from "ethers";
+
 type Currency = Record<number, string>;
+type ChainAddress = Record<number, string>;
+
 export type Address = `0x${string}`;
 
 export const USDT = {
@@ -22,9 +26,11 @@ export const WBTC = {
   11155111: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
 } as Currency;
 
-export const PRESALE_CONTRACT_ADDRESS =
-  "0x8fc37dea525b06dd9f214bf06a4c544fa87c777d";
 
+export const PRESALE_CONTRACT_ADDRESS = {
+  1: ZeroAddress,
+  11155111: "0x1F1eC59b85eBAD05C1F6a5101f740c175232D341",
+} as ChainAddress;
 
 export interface Referral {
   id: number;
@@ -96,15 +102,18 @@ export const loginMapping: { [key: string]: Referral } = {
 
 export const investmentInfo = {
   "0.16": {
+    id: 0,
     tge: "10% - released at TGE",
     vested: "90% - vested linearly over 12 months",
   },
   "0.2": {
+    id: 1,
     tge: "20% - released at TGE",
     vested: "80% - vested linearly over 6 months",
   },
   "0.24": {
+    id: 2,
     tge: "50% - released at TGE",
     vested: "50% - vested linearly over 2 months",
   },
-} as Record<string, { tge: string; vested: string }>;
+} as Record<string, { id: number, tge: string; vested: string }>;

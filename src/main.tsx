@@ -23,7 +23,10 @@ const SUPPORTED_NETWORKS = {
 const config = getDefaultConfig({
   appName: 'TeaSwapUI',
   projectId: import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID,
-  chains: [SUPPORTED_NETWORKS[import.meta.env.VITE_PUBLIC_SUPPORTED_NETWORK]],
+  chains: [
+    mainnet,
+    sepolia
+  ],
   ssr: false, // If your dApp uses server side rendering (SSR)
 });
 

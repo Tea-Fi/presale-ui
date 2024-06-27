@@ -15,7 +15,7 @@ import ethereumIcon from '../../assets/icons/ethereum.svg';
 import { CoinInput } from '../components/coin-input';
 import { TokenRate } from '../components/token-rate';
 import teaLogo from '../../assets/icons/tea-logo.svg';
-import { enterPresaleUtil, getPresaleRoundSold, setTokenApprove } from '../utils/presale';
+import { getOptionInfo, setTokenApprove } from '../utils/presale';
 import { USDC, USDT, WBTC, WETH, investmentInfo } from '../utils/constants';
 import Spinner from '../components/spinner';
 import { useEventContext } from '../context/event.context';
@@ -58,22 +58,22 @@ export const Buy = () => {
     return `Balance: ${paymentAssets[selectedCoin]?.balance} ${mappedCoins[selectedCoin]?.label}`;
   }, [paymentAssets, selectedCoin]);
 
-  const buyButtonDisabled = useMemo(() => {
-    return (
-      !amount ||
-      !amountInTea ||
-      paymentAssets[selectedCoin] === null ||
-      loading ||
-      submitting ||
-      Number(amount) > Number(paymentAssets[selectedCoin]?.balance) ||
-      remainingTea.current < +amountInTea
-    );
-  }, [amount, paymentAssets, selectedCoin, amountInTea, submitting]);
+  // const buyButtonDisabled = useMemo(() => {
+  //   return (
+  //     !amount ||
+  //     !amountInTea ||
+  //     paymentAssets[selectedCoin] === null ||
+  //     loading ||
+  //     submitting ||
+  //     Number(amount) > Number(paymentAssets[selectedCoin]?.balance) ||
+  //     remainingTea.current < +amountInTea
+  //   );
+  // }, [amount, paymentAssets, selectedCoin, amountInTea, submitting]);
 
   const updateInfo = async () => {
     if (account) {
-      const result = await getPresaleRoundSold();
-      remainingTea.current = result.roundSize - result.roundSold;
+      // const result = await getOptionInfo();
+      // remainingTea.current = result.roundSize - result.roundSold;
       // const userBalance = await getPresaleUserBalance(account);
       // userTeaPurchased.current = userBalance;
       updateUserBalance();
@@ -226,6 +226,8 @@ export const Buy = () => {
     }
   };
 
+
+
   return (
     <div className="buy page">
       {loading ? (
@@ -312,13 +314,15 @@ export const Buy = () => {
                 />
               </div>
             </SlCard>
-            {remainingTea.current < +(amountInTea || 0) && (
-              <div className="max-allowed">Maximum allowed to buy - {remainingTea.current} TEA</div>
-            )}
           </SlCard>
-          <SlButton onClick={enterPresale} disabled={buyButtonDisabled} variant="primary" className="buy__btn">
+          {/* <SlButton onClick={enterPresale} disabled={buyButtonDisabled} variant="primary" className="buy__btn">
+            {submitting ? <Spinner /> : 'BUY TEA'}
+          </SlButton> */}
+
+          <SlButton onClick={async () => await getOptionInfo(investmentInfo[investment].id)} variant="primary" className="buy__btn">
             {submitting ? <Spinner /> : 'BUY TEA'}
           </SlButton>
+          
         </>
       )}
     </div>
