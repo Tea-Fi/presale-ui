@@ -28,7 +28,7 @@ export const WBTC = {
 
 export const PRESALE_CONTRACT_ADDRESS = {
   1: ZeroAddress,
-  11155111: "0xe909B24b8C4B5FF792C099688867958e9b4400a2",
+  11155111: "0xBc82665669C4eBFc2d8d8b4a4Fed92a62b7306b4",
 } as ChainAddress;
 
 export interface Referral {
