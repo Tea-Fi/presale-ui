@@ -344,14 +344,74 @@ export async function buyExactPresaleTokens({
 
 
 export async function getQuoteAmountsInForTeaTokens(
+  optionId: number,
   tokenSell: Address,
   amountsInHuman: string,
-  tokenSellPrice: number,
-  decimals: string,
 ) {
-  // console.log(tokenSellPrice)
-  console.log(+amountsInHuman * 0.16 / tokenSellPrice)
-  return +amountsInHuman / tokenSellPrice;
-  
+  const provider = new ethers.BrowserProvider((window as any).ethereum);
+
+  const [network, signer] = await Promise.all([
+    provider.getNetwork(),
+    provider.getSigner(),
+  ]);
+
+  const chainId = Number(network.chainId);
+
+  const presaleContract = new ethers.Contract(
+    PRESALE_CONTRACT_ADDRESS[chainId],
+    PRESALE_ABI,
+    signer
+  );
+
+  const payAmount = await presaleContract.getExactPayAmount(
+    optionId,
+    tokenSell,
+    parseEther(amountsInHuman),
+  );
+
+  return payAmount;
+}
+
+
+export async function getQuoteAmountsOutForTeaTokens(
+  optionId: number,
+  tokenSell: Address,
+  amountsInHuman: string,
+) {
+  const provider = new ethers.BrowserProvider((window as any).ethereum);
+  let decimals = 18;
+  if(tokenSell !== ZeroAddress) {
+    const token = new Contract(
+      tokenSell,
+      erc20Abi,
+      provider
+    );
+    
+    decimals = Number(await token.decimals());
+  }
+  const [network, signer] = await Promise.all([
+    provider.getNetwork(),
+    provider.getSigner(),
+  ]);
+
+  const chainId = Number(network.chainId);
+
+  const presaleContract = new ethers.Contract(
+    PRESALE_CONTRACT_ADDRESS[chainId],
+    PRESALE_ABI,
+    signer
+  );
+
+
+
+  const receiveAmount = await presaleContract.getExactReceiveAmount(
+    optionId,
+    tokenSell,
+    parseUnits(amountsInHuman, Number(decimals)),
+  );
+
+  console.log(receiveAmount)
+
+  return receiveAmount;
 
 }

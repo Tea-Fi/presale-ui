@@ -15,7 +15,7 @@ import ethereumIcon from '../../assets/icons/ethereum.svg';
 import { CoinInput } from '../components/coin-input';
 import { TokenRate } from '../components/token-rate';
 import teaLogo from '../../assets/icons/tea-logo.svg';
-import { buyExactPresaleTokens, getInputPriceQuote, getOptionInfo, getQuoteAmountsInForTeaTokens } from '../utils/presale';
+import { buyExactPresaleTokens, getInputPriceQuote, getOptionInfo, getQuoteAmountsInForTeaTokens, getQuoteAmountsOutForTeaTokens } from '../utils/presale';
 import { PRESALE_CONTRACT_ADDRESS, USDC, USDT, WBTC, WETH, investmentInfo } from '../utils/constants';
 import Spinner from '../components/spinner';
 import { useEventContext } from '../context/event.context';
@@ -311,9 +311,17 @@ export const Buy = () => {
                 <CoinInput
                   disabled={!investment}
                   value={amount}
-                  onChangeValue={(value) => {
+                  onChangeValue={async (value) => {
+                    const amountsIn = await getQuoteAmountsOutForTeaTokens(
+                      investmentInfo[investment].id,
+                      mappedCoins[selectedCoin].contract as `0x${string}`,
+                      value
+                    );
+                    
+                    const amountToHuman = Number(amountsIn) / 1e18;
+
                     setAmount(value);
-                    setAmountInTea(`${(+value * price) / +investment}`);
+                    setAmountInTea(amountToHuman.toString());
                   }}
                 />
               </div>
@@ -333,17 +341,16 @@ export const Buy = () => {
                   disabled={!investment}
                   value={bigDecimal.round(amountInTea, 4)}
                   onChangeValue={async (value) => {
-                    setAmount(`${(+value * +investment) / price}`);
-                    setAmountInTea(value);
-                    
-                    
-                    await getQuoteAmountsInForTeaTokens(
+                    const amountsIn = await getQuoteAmountsInForTeaTokens(
+                      investmentInfo[investment].id,
                       mappedCoins[selectedCoin].contract as `0x${string}`,
-                      value,
-                      price,
-                      paymentAssets[selectedCoin].decimal
-                    )
+                      value
+                    );
                     
+                    const amountToHuman = Number(amountsIn) / 1e18;
+
+                    setAmount(amountToHuman.toString());
+                    setAmountInTea(value);
                   }}
                 />
               </div>

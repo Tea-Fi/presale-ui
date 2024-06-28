@@ -11,7 +11,7 @@ export const USDT = {
 } as Currency;
 export const USDC = {
   1: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-  11155111: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+  11155111: "0x8E9bea05153669522837213116C58977251d80F7",
 } as Currency;
 export const ETH = {
   1: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
@@ -28,7 +28,7 @@ export const WBTC = {
 
 export const PRESALE_CONTRACT_ADDRESS = {
   1: ZeroAddress,
-  11155111: "0xBc82665669C4eBFc2d8d8b4a4Fed92a62b7306b4",
+  11155111: "0xC7fBDc3a7840461bdDa8a83b183023f0636cdF7E",
 } as ChainAddress;
 
 export interface Referral {
