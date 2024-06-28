@@ -1,7 +1,7 @@
 import { Contract, ZeroAddress, ethers, parseEther, parseUnits } from 'ethers';
 import { ERC20_ABI } from './erc20_abi';
 import { PRESALE_ABI } from './presale_abi';
-import { Address, PRESALE_CONTRACT_ADDRESS, WETH } from './constants';
+import { Address, PRESALE_CONTRACT_ADDRESS } from './constants';
 import { erc20Abi } from 'viem';
 
 export async function getTokenAllowance(tokenAddress: string, ownerAddress: string, spenderAddress: string) {
@@ -295,8 +295,6 @@ export async function buyExactPresaleTokens({
     signer
   );
 
-
-
   try {
     let tx;
     if(!tokenSell || tokenSell === ZeroAddress) {
@@ -402,16 +400,11 @@ export async function getQuoteAmountsOutForTeaTokens(
     signer
   );
 
-
-
   const receiveAmount = await presaleContract.getExactReceiveAmount(
     optionId,
     tokenSell,
     parseUnits(amountsInHuman, Number(decimals)),
   );
 
-  console.log(receiveAmount)
-
   return receiveAmount;
-
 }

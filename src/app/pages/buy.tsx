@@ -73,6 +73,7 @@ export const Buy = () => {
       );
       const presale = PRESALE_CONTRACT_ADDRESS[chainId ?? 1];
       setSelectedCoinIsAllowed(await token.allowance(account, presale) > 0);
+
       const [balance, decimals] = await Promise.all([
         token.balanceOf(account),
         token.decimals(),
@@ -122,19 +123,11 @@ export const Buy = () => {
   }, [amount, paymentAssets, selectedCoin, amountInTea, submitting]);
 
   useEffect(() => {
-    const handleStart = async () => {
-      try {
-        setLoading(false);
-      } catch (error) {
-        console.error(error);
-      }
-    };
     if (account) {
-      handleStart();
+      setLoading(false);
       handleOptionBalance();
     }
   }, [account]);
-
 
   useEffect(() => {
     if (account && selectedCoin) {
@@ -150,8 +143,7 @@ export const Buy = () => {
             BigInt(10**decimal)
           );
           const priceToHuman = Number(tokenPrice) / 10**6;
-
-          setPrice(priceToHuman);
+          setPrice(Number(priceToHuman.toFixed(2)));
         } catch (error) {
           setEventInfo({
             title: 'Initialization Error!',
@@ -163,12 +155,6 @@ export const Buy = () => {
       fetchPrice();
     }
   }, [account, selectedCoin]);
-
-  useEffect(() => {
-    if ([investment, price, amount, amountInTea].every((el) => Boolean(el))) {
-      setAmountInTea(`${(+(amount || 0) * price) / +investment}`);
-    }
-  }, [investment, price, amount, amountInTea]);
 
   const enterPresale = async () => {
     if (amountInTea == undefined) return false;
@@ -250,6 +236,8 @@ export const Buy = () => {
   };
 
   useEffect(() => {
+    setAmount('');
+    setAmountInTea('');
     handleOptionBalance();
   }, [investment]);
 
@@ -312,15 +300,14 @@ export const Buy = () => {
                   disabled={!investment}
                   value={amount}
                   onChangeValue={async (value) => {
+                    setAmount(value);
+
                     const amountsIn = await getQuoteAmountsOutForTeaTokens(
                       investmentInfo[investment].id,
                       mappedCoins[selectedCoin].contract as `0x${string}`,
                       value
                     );
-                    
-                    const amountToHuman = Number(amountsIn) / 1e18;
-
-                    setAmount(value);
+                    const amountToHuman = amountsIn / BigInt(1e18);
                     setAmountInTea(amountToHuman.toString());
                   }}
                 />
@@ -339,18 +326,17 @@ export const Buy = () => {
 
                 <CoinInput
                   disabled={!investment}
-                  value={bigDecimal.round(amountInTea, 4)}
+                  value={bigDecimal.round(amountInTea, 2)}
                   onChangeValue={async (value) => {
+                    setAmountInTea(value);
+
                     const amountsIn = await getQuoteAmountsInForTeaTokens(
                       investmentInfo[investment].id,
                       mappedCoins[selectedCoin].contract as `0x${string}`,
                       value
                     );
-                    
-                    const amountToHuman = Number(amountsIn) / 1e18;
-
+                    const amountToHuman = amountsIn / BigInt(1e18);
                     setAmount(amountToHuman.toString());
-                    setAmountInTea(value);
                   }}
                 />
               </div>

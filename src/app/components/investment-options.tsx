@@ -19,7 +19,7 @@ export const InvestmentOptions = ({ investmentOptions, onChange, value }: Props)
         className="select-investment"
       >
         {investmentOptions.map((opt: string) => (
-          <SlOption value={opt}>{opt}$</SlOption>
+          <SlOption value={opt} key={opt}>{opt}$</SlOption>
         ))}
       </SlSelect>
     </div>
