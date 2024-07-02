@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { SlButton } from '@shoelace-style/shoelace/dist/react';
 
-import { useWalletContext } from '../context/wallet.context';
+import { useWalletContext } from '../providers/wallet.context';
 
 export const ConnectWallet = () => {
   const { connect } = useWalletContext();

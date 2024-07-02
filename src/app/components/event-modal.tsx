@@ -1,6 +1,6 @@
 import { forwardRef } from 'react';
 import { SlButton, SlDialog } from '@shoelace-style/shoelace/dist/react';
-import { EventContext } from '../context/event.context';
+import { EventContext } from '../providers/event.context';
 
 export const EventModal = forwardRef(({ eventInfo, hideModal }: EventContext, ref: any) => {
   return (

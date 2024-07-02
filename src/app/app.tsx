@@ -4,9 +4,10 @@ import { Login } from "./pages/login";
 import { Buy } from "./pages/buy";
 import { Claim } from "./pages/claim";
 import { NotFound } from "./pages/not-found";
-import { useWalletContext } from "./context/wallet.context";
+import { useWalletContext } from "./providers/wallet.context";
 import { WrongNetwork } from "./components/wrong-network";
 import { Referrals } from "./pages/referrals";
+import { Options } from "./pages/options";
 
 export function App() {
   const { chainId, unsupportedChain } = useWalletContext();
@@ -21,6 +22,7 @@ export function App() {
         <Route element={<Layout />}>
           <Route path="/" element={<Login />} />
           <Route path="/buy" element={<Buy />} />
+          <Route path="/options" element={<Options />} />
           <Route path="/claim" element={<Claim />} />
           <Route path="/referrals" element={<Referrals />} />
           <Route path="*" element={<NotFound />} />

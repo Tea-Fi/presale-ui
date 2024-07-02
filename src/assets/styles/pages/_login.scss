@@ -1,10 +1,18 @@
 .login {
-  height: 100%;
-  padding: 2em 0;
-  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
 
   .submit {
+    margin-top: -20px;
+    max-width: 400px;
+    width: 400px;
+
     &::part(base) {
+      padding: 5px;
       background-color: $color-brand;
       border: none;
       border-radius: 10px;
@@ -20,7 +28,10 @@
       }
     }
   }
+
+
   form {
+    margin-top: -100px;
     display: flex;
     flex-direction: column;
     align-items: center;

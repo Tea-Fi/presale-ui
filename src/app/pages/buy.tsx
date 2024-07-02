@@ -7,7 +7,7 @@ import bigDecimal from 'js-big-decimal';
 import { MaxUint256, ZeroAddress, ethers } from 'ethers';
 
 // import { PAIR_ABI } from '../utils/pair-abi';
-import { useWalletContext } from '../context/wallet.context';
+import { useWalletContext } from '../providers/wallet.context';
 import tetherIcon from '../../assets/icons/tether.svg';
 import usdcIcon from '../../assets/icons/usd-coin-usdc-logo.svg';
 import wbtcIcon from '../../assets/icons/wbtc.svg';
@@ -18,7 +18,7 @@ import teaLogo from '../../assets/icons/tea-logo.svg';
 import { buyExactPresaleTokens, getInputPriceQuote, getOptionInfo, getQuoteAmountsInForTeaTokens, getQuoteAmountsOutForTeaTokens } from '../utils/presale';
 import { PRESALE_CONTRACT_ADDRESS, USDC, USDT, WBTC, WETH, investmentInfo } from '../utils/constants';
 import Spinner from '../components/spinner';
-import { useEventContext } from '../context/event.context';
+import { useEventContext } from '../providers/event.context';
 import { InvestmentOptions } from '../components/investment-options';
 import { Contract } from 'ethers';
 import { Address, erc20Abi } from 'viem';
