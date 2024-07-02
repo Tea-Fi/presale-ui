@@ -42,7 +42,7 @@ export const TopBar = ({
 
       <div className="inline-flex items-center gap-2 min-w-[100px] h-16 w-fit bg-black text-white rounded-full p-3 border dark:border-white/[0.2]">
         <NavLink 
-          to="/buy"
+          to="/options"
           className={cn(
             "rounded-full h-full min-w-16 items-center inline-flex justify-center",
             isBuyPageActive ? 'border border-white/[0.2]' : ''

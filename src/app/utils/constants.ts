@@ -42,7 +42,7 @@ export const loginMapping: { [key: string]: Referral } = {
   DIPSI: {
     id: 1,
     fee: 1500,
-    wallet: "0xb305c1f2200a17E0502416B1746aB88C9B5C449f",
+    wallet: "0xe083846329683d68E73898347d5FD5F831C19b69",
     subleads: {
       JELLY: {
         id: 2,
@@ -54,47 +54,6 @@ export const loginMapping: { [key: string]: Referral } = {
         fee: 200,
         wallet: "0x84076ad7edbaF2c12882C5C7F56cb39Ed2D505DF",
       },
-      TEST_SYNDIKA: { // Our test referrer, remove for production
-        id: 999,
-        fee: 900,
-        wallet: "0xe083846329683d68E73898347d5FD5F831C19b69",
-        subleads: {
-          MICHAEL: {
-            id: 9991,
-            fee: 300,
-            wallet: "0x4D7289A51494dC59694f15306386c8ec76210299",
-            subleads: {
-              MICHAEL_SUB_1: {
-                id: 9992,
-                fee: 30,
-                wallet: "0x4D7289A51494dC59694f15306386c8ec76210299",
-              },
-              MICHAEL_SUB_2: {
-                id: 9993,
-                fee: 20,
-                wallet: "0x84076ad7edbaF2c12882C5C7F56cb39Ed2D505DF",
-              },
-            },
-          },
-          CRIS: {
-            id: 9994,
-            fee: 200,
-            wallet: "0x84076ad7edbaF2c12882C5C7F56cb39Ed2D505DF",
-            subleads: {
-              CRIS_SUB_1: {
-                id: 9995,
-                fee: 30,
-                wallet: "0x4D7289A51494dC59694f15306386c8ec76210299",
-              },
-              CRIS_SUB_2: {
-                id: 9996,
-                fee: 20,
-                wallet: "0x84076ad7edbaF2c12882C5C7F56cb39Ed2D505DF",
-              },
-            },
-          },
-        },
-      }
     },
   },
 };

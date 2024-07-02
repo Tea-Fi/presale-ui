@@ -1,12 +1,8 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { SlCard, SlSelect, SlOption, SlIcon, SlButton, SlAlert } from '@shoelace-style/shoelace/dist/react';
 import bigDecimal from 'js-big-decimal';
-
-// import { Token, CurrencyAmount } from '@uniswap/sdk-core';
-// import { Pair } from '@uniswap/v2-sdk';
 import { MaxUint256, ZeroAddress, ethers } from 'ethers';
 
-// import { PAIR_ABI } from '../utils/pair-abi';
 import { useWalletContext } from '../providers/wallet.context';
 import tetherIcon from '../../assets/icons/tether.svg';
 import usdcIcon from '../../assets/icons/usd-coin-usdc-logo.svg';
@@ -19,7 +15,6 @@ import { buyExactPresaleTokens, getInputPriceQuote, getOptionInfo, getQuoteAmoun
 import { PRESALE_CONTRACT_ADDRESS, USDC, USDT, WBTC, WETH, investmentInfo } from '../utils/constants';
 import Spinner from '../components/spinner';
 import { useEventContext } from '../providers/event.context';
-import { InvestmentOptions } from '../components/investment-options';
 import { Contract } from 'ethers';
 import { Address, erc20Abi } from 'viem';
 
@@ -27,6 +22,9 @@ export type CoinType = 'eth' | 'usdt' | 'usdc' | 'weth' | 'wbtc';
 const coins: CoinType[] = ['eth', 'usdc', 'usdt', 'weth', 'wbtc'];
 
 export const Buy = () => {
+  const search = window.location.search;
+  const urlParams = new URLSearchParams(search);
+
   const eventModalRef = useRef<any>(null);
   const [selectedCoin, setSelectedCoin] = useState<CoinType>('usdt');
   const [selectedCoinIsAllowed, setSelectedCoinIsAllowed] = useState(false);
@@ -37,7 +35,7 @@ export const Buy = () => {
   const { showModal, setEventInfo } = useEventContext();
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
-  const [investment, setInvestment] = useState(Object.keys(investmentInfo)[0]);
+  const [investment] = useState(urlParams.get('opt') || Object.keys(investmentInfo)[0]);
 
   const userTeaPurchased = useRef(0);
   const [price, setPrice] = useState(0);
@@ -54,7 +52,6 @@ export const Buy = () => {
     }),
     [chainId]
   );
-
 
   useEffect(() => {
     if (account == null) return;
@@ -126,6 +123,8 @@ export const Buy = () => {
     if (account) {
       setLoading(false);
       handleOptionBalance();
+    } else {
+      console.log('PLEASE CONNECT YOUR WALLET');
     }
   }, [account]);
 
@@ -235,19 +234,12 @@ export const Buy = () => {
     return true;
   };
 
-  useEffect(() => {
-    setAmount('');
-    setAmountInTea('');
-    handleOptionBalance();
-  }, [investment]);
-
   return (
     <div className="buy page">
       {loading ? (
         <div className="loading">
           <div className="loading__inner">
             <img src={teaLogo} alt="Tea" slot="prefix" className="loading__logo" />
-
             <Spinner />
           </div>
         </div>
@@ -259,11 +251,10 @@ export const Buy = () => {
               {eventTitle}
             </SlAlert>
           </div>
-          {/* <Countdown roundInfo={roundInfo} isActive={isActive} setIsActive={setIsActive} /> */}
           <TokenRate />
-          <InvestmentOptions investmentOptions={Object.keys(investmentInfo)} value={investment} onChange={setInvestment} />
           {investment && (
             <div className="investment-info">
+              <div className="label">Price: ${investment} / $TEA</div>
               <div className="label">{investmentInfo[investment].tge}</div>
               <div className="label">{investmentInfo[investment].vested}</div>
             </div>
@@ -298,7 +289,7 @@ export const Buy = () => {
                 <small className="amount__balance">{formattedBalance}</small>
                 <CoinInput
                   disabled={!investment}
-                  value={amount}
+                  value={bigDecimal.round(amount, 4)}
                   onChangeValue={async (value) => {
                     setAmount(value);
 
@@ -307,7 +298,7 @@ export const Buy = () => {
                       mappedCoins[selectedCoin].contract as `0x${string}`,
                       value
                     );
-                    const amountToHuman = amountsIn / BigInt(1e18);
+                    const amountToHuman = Number(amountsIn.toString()) / 1e18;
                     setAmountInTea(amountToHuman.toString());
                   }}
                 />
@@ -335,7 +326,7 @@ export const Buy = () => {
                       mappedCoins[selectedCoin].contract as `0x${string}`,
                       value
                     );
-                    const amountToHuman = amountsIn / BigInt(1e18);
+                    const amountToHuman = Number(amountsIn.toString()) / 1e6;
                     setAmount(amountToHuman.toString());
                   }}
                 />

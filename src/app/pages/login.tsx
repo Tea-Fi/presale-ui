@@ -51,10 +51,6 @@ export const Login = () => {
                 <VanishInput 
                     placeholders={[
                       "Place your referrer ID...",
-                      "Look at this examples",
-                      "DIPSI",
-                      "SYNDICA",
-                      "OTHER",
                     ]}
                     onChange={(e) => {
                       const { value } = e.target as HTMLInputElement;

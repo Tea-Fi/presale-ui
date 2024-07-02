@@ -11,20 +11,8 @@ export const Options = () => {
     );
 };
 
-export const projects = [
-    {
-        title: "0.16$",
-        description: `${investmentInfo["0.16"].vested}. ${investmentInfo["0.16"].tge}`,
-        link: "/buy",
-    },
-    {
-        title: "0.20$",
-        description: investmentInfo["0.2"].vested,
-        link: "/buy",
-    },
-    {
-        title: "0.24$",
-        description: investmentInfo["0.24"].vested,
-        link: "/buy",
-    },
-];
+export const projects = Object.keys(investmentInfo).map(price => ({
+    title: `$${price} / $TEA`,
+    description: `${investmentInfo[price].tge} and ${investmentInfo[price].vested}`,
+    link: `/buy?opt=${price}#buy`,
+}));

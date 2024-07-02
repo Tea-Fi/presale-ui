@@ -16,9 +16,9 @@ export const wagmiConfig = createConfig(
 			[mainnet.id]: http(
 				`https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_PROVIDER_KEY}`
 			),
-            [sepolia.id]: http(
-                `https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_PROVIDER_KEY}`
-            ),
+			[sepolia.id]: http(
+				`https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_PROVIDER_KEY}`
+			),
 		},
 
 		// Required API Keys
@@ -27,8 +27,8 @@ export const wagmiConfig = createConfig(
 		// Required App Info
 		appName: 'Teaswap',
 		// Optional App Info
-		appDescription: 'Teaswap presale option',
-		appUrl: 'https://website.io',
-		appIcon: 'https://icon.io'
+		appDescription: 'Teaswap presale',
+		appUrl: 'https://presale.tea-fi.com',
+		appIcon: 'https://presale.tea-fi.com/favicon.svg'
 	})
 );
