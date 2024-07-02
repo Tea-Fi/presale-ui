@@ -18,11 +18,9 @@ export const Layout = () => {
   }
 
   return (
-    <div className="main-layout dark">
+    <main className='flex flex-col min-h-screen min-v-screen dark'>
       {status === LoginStatus.LOGGED_IN && <TopBar />}
-      <main>
-        <Outlet />
-      </main>
-    </div>
+      <Outlet />
+    </main>
   );
 };

@@ -1,23 +1,30 @@
-import { OptionCard } from "../components/option-card";
+import { CardHoverEffect } from "../components/ui"; 
 import { investmentInfo } from "../utils/constants";
-const optionKeys = [
-    "0.16",
-    "0.2",
-    "0.24"
-];
 
 export const Options = () => {
     return (
-        <div className="flex flex-col gap-5 mt-5">
-            {optionKeys.map((option, index) => 
-                <OptionCard
-                    key={index}
-                    title={`Option #${investmentInfo[option].id}`}
-                    price={option}
-                    tgeDescription={investmentInfo[option].tge}
-                    vestedDescription={investmentInfo[option].vested}
-                />
-            )}
+        <div className="inline-flex grow justify-center w-full items-center">
+            <div className="w-96">
+                <CardHoverEffect items={projects}/>
+            </div>
         </div>
     );
 };
+
+export const projects = [
+    {
+        title: "0.16$",
+        description: `${investmentInfo["0.16"].vested}. ${investmentInfo["0.16"].tge}`,
+        link: "/buy",
+    },
+    {
+        title: "0.20$",
+        description: investmentInfo["0.2"].vested,
+        link: "/buy",
+    },
+    {
+        title: "0.24$",
+        description: investmentInfo["0.24"].vested,
+        link: "/buy",
+    },
+];
