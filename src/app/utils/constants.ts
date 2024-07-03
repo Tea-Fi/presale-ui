@@ -1,10 +1,13 @@
 import { ZeroAddress } from "ethers";
+import { zeroAddress } from 'viem';
 
 type Currency = Record<number, string>;
 type ChainAddress = Record<number, string>;
 
-export type Address = `0x${string}`;
-
+export const ETH = {
+  1: zeroAddress,
+  11155111: zeroAddress,
+} as Currency;
 export const USDT = {
   1: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
   11155111: "0xF7EBb99705D2561b430b341dF3E87f03af87160a",
@@ -13,13 +16,9 @@ export const USDC = {
   1: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
   11155111: "0x8E9bea05153669522837213116C58977251d80F7",
 } as Currency;
-export const ETH = {
-  1: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-  11155111: "0x305E0ccd817b39C330380cd81FC9d1ace89a3471",
-} as Currency;
 export const WETH = {
   1: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-  11155111: "0xD3bB06CF751692257A36C1229d6Ba2bBEb4F757D",
+  11155111: "0x305E0ccd817b39C330380cd81FC9d1ace89a3471",
 } as Currency;
 export const WBTC = {
   1: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
@@ -38,26 +37,6 @@ export interface Referral {
   referral?: string;
   subleads?: { [key: string]: Referral };
 }
-
-// export const loginMapping: { [key: string]: Referral } = {
-//   DIPSI: {
-//     id: 1,
-//     fee: 1500,
-//     wallet: "0xe083846329683d68E73898347d5FD5F831C19b69",
-//     subleads: {
-//       JELLY: {
-//         id: 2,
-//         fee: 300,
-//         wallet: "0x4D7289A51494dC59694f15306386c8ec76210299",
-//       },
-//       RAFI: {
-//         id: 3,
-//         fee: 200,
-//         wallet: "0x84076ad7edbaF2c12882C5C7F56cb39Ed2D505DF",
-//       },
-//     },
-//   },
-// };
 
 export const investmentInfo = {
   "0.16": {

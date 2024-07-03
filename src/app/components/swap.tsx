@@ -4,10 +4,9 @@ import { TeaTokenLogoAsset } from '../../assets/icons';
 import { ArrowDownUpIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { cn, parseHumanReadable } from '../utils';
-import { getBalance, getAccount } from '@wagmi/core';
+import { getBalance, getAccount, getChainId } from '@wagmi/core';
 
-
-import { ChainId, Token, wagmiConfig } from '../config';
+import { Token, wagmiConfig } from '../config';
 import { Address, erc20Abi, maxUint256, parseUnits, zeroAddress } from 'viem';
 import { buyExactPresaleTokens, getInputPriceQuote, getOptionInfo, getQuoteAmountsInForTeaTokens, getQuoteAmountsOutForTeaTokens } from '../utils/presale';
 import { PRESALE_CONTRACT_ADDRESS, investmentInfo } from '../utils/constants';
@@ -37,11 +36,12 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const account = getAccount(wagmiConfig);
+    const chainId = getChainId(wagmiConfig);
     const result = useReadContract({
         abi: erc20Abi,
         config: wagmiConfig,
         address: selectedToken.address,
-        args: [account.address as Address, PRESALE_CONTRACT_ADDRESS[ChainId.SEPOLIA] as Address],
+        args: [account.address as Address, PRESALE_CONTRACT_ADDRESS[chainId] as Address],
         functionName: 'allowance',
     });
 
@@ -62,7 +62,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
             abi: erc20Abi,
             functionName: 'approve',
             args: [
-                PRESALE_CONTRACT_ADDRESS[ChainId.SEPOLIA] as Address,
+                PRESALE_CONTRACT_ADDRESS[chainId] as Address,
                 maxUint256,
             ],
         });
