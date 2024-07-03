@@ -72,11 +72,17 @@ export const createReferral = async (code: string, payload: CreateReferralPayloa
 
 const getReferralTree = async (query: string): Promise<Referral | undefined> => {
   try {
-    const tree = await api.get(`${API_URL}/leads/tree?${query}`)
-      .then(res => typeof res.data === 'string' ? JSON.parse(res.data) : res.data)
-      .then(res => res as Referral);
+    const response = await api.get(`${API_URL}/leads/tree?${query}`)
 
-    return tree;
+    if (response.status !== 200) {
+      throw new Error('Code not found');
+    }
+
+    const result = typeof response.data === 'string' 
+      ? JSON.parse(response.data)
+      : response.data;
+
+    return result;
   } catch (err) {
     return;
   }
