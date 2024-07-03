@@ -301,7 +301,7 @@ const SwapInput = ({
             <div className='inline-flex gap-2 w-full h-10'>
                 <Input
                     value={value}
-                    onKeyDown={(e) => {
+                    onKeyDown={(e: any) => {
                         const value = e.target.value;
                         const pattern = /^\d*\.?\d*$/;
                         const isPatternTested = pattern.test(value);
@@ -311,8 +311,6 @@ const SwapInput = ({
                         ) {
                             e.preventDefault();
                         }
-                        console.log(pattern.test(value))
-                        console.log(value)
                     }}
                     type="tel"
                     onChange={onType}
