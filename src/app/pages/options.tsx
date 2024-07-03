@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { CardHoverEffect } from "../components/ui"; 
-import { investmentInfo } from "../utils/constants";
 import { getOptionInfo, getSaleOptionsCout, getTokensAvailable } from "../utils/presale";
 import { parseHumanReadable } from "../utils";
-import { parseEther } from "viem";
+
 
 export const Options = () => {
     const [projectInfos, setProjectInfos] = useState<any>();

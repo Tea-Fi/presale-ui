@@ -45,8 +45,11 @@ export const SwapContainer = ({tokenList}:{tokenList: Token[]}) => {
     });
 
     const {
+        // @ts-ignore
         isPending,
+        // @ts-ignore
         isSuccess,
+        // @ts-ignore
         isError,
         writeContract
     } = useWriteContract();
