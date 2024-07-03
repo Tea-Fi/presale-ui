@@ -1,6 +1,6 @@
 import { API_URL } from "../config/env";
 import { api } from "./api";
-import { /*loginMapping,*/ Referral } from "./constants";
+import { Referral } from "./constants";
 
 export type { Referral } from "./constants";
 
@@ -9,18 +9,6 @@ export interface CreateReferralPayload {
   referralCode: string;
   fee: number;
 }
-
-// export const loginMappingFlattened = (_loginMapping?: { [key: string]: Referral }): { [key: string]: Referral } => {
-//   const workingLoginMapping = _loginMapping || loginMapping;
-//   let flattened: { [key: string]: Referral } = {};
-//   for (let key of Object.keys(workingLoginMapping)) {
-//     if (workingLoginMapping[key]?.subleads != undefined) {
-//       flattened = Object.assign(flattened, loginMappingFlattened(workingLoginMapping[key].subleads));
-//     }
-//     flattened[key] = workingLoginMapping[key];
-//   }
-//   return flattened;
-// }
 
 export const validCode = async (code: string): Promise<boolean> => {
   try {
@@ -58,17 +46,6 @@ export const createReferral = async (code: string, payload: CreateReferralPayloa
 
   return result as Referral;
 }
-
-// export const getReferralCodeById = (id: number | string): string | undefined => { 
-//   const _id = parseInt(id as string, 10);
-//   const referralsTree = loginMappingFlattened();
-
-//   for (let key of Object.keys(referralsTree)) {
-//     if (referralsTree[key].id == _id) {
-//       return key;
-//     }
-//   }
-// }
 
 const getReferralTree = async (query: string): Promise<Referral | undefined> => {
   try {

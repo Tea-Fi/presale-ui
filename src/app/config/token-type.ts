@@ -1,8 +1,7 @@
 import { Address } from "viem";
-import { Address as LocalAddress } from "../utils/constants";
 
 export type Token = {
-    address: Address | LocalAddress | string,
+    address: Address,
     symbol: string,
     decimals: number,
     imageUrl?: string,

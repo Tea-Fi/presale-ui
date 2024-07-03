@@ -171,7 +171,7 @@ export const ReferralForm: React.FC<Props> = (props) => {
                 {error && <div className="referral-form__error">{error}</div>}
 
                 <Button type="submit" disabled={isSubmitting}>
-                  Submit
+                  Create Sublead
                 </Button>
               </Form>
             </div>

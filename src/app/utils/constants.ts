@@ -1,7 +1,7 @@
 import { ZeroAddress } from "ethers";
-import { zeroAddress } from 'viem';
+import { zeroAddress, Address } from 'viem';
 
-type Currency = Record<number, string>;
+type Currency = Record<number, Address>;
 type ChainAddress = Record<number, string>;
 
 export const ETH = {

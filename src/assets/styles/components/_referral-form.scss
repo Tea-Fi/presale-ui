@@ -63,6 +63,10 @@
 
     text-align: left;
 
+    input {
+        width: 100%;
+    }
+
     .referral-form-field__input {
         border-radius: 0.5rem;
         background-color: $color-input;
