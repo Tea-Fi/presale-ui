@@ -2,6 +2,7 @@ import { cn } from "../../utils/cn";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import { Progress } from "./progress";
+import Spinner from "../spinner";
 
 export const CardHoverEffect = ({
   items,
@@ -56,8 +57,8 @@ export const CardHoverEffect = ({
 
             <div className="flex flex-col gap-3 mt-4">
               <div className="inline-flex justify-between text-zinc-400 text-sm">
-                <span>{item.value?.toLocaleString("en-US") ?? 0}</span>
-                <span>{item.max?.toLocaleString("en-US") ?? 100}</span>
+                <span>{item.value == null ? <Spinner/> : item.value?.toLocaleString("en-US")}</span>
+                <span>{item.max == null ? <Spinner/> : item.max?.toLocaleString("en-US")}</span>
               </div>
 
               <Progress value={item.value}  max={item.max}/>

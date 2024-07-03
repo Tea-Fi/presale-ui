@@ -12,8 +12,7 @@ import { Address, erc20Abi, maxUint256, parseUnits, zeroAddress } from 'viem';
 import { buyExactPresaleTokens, getInputPriceQuote, getOptionInfo, getQuoteAmountsInForTeaTokens, getQuoteAmountsOutForTeaTokens } from '../utils/presale';
 import { PRESALE_CONTRACT_ADDRESS, investmentInfo } from '../utils/constants';
 import { useReadContract, useWriteContract } from 'wagmi';
-
-
+import Spinner from './spinner';
 
 export const SwapContainer = ({tokenList}:{tokenList: Token[]}) => {
     const search = window.location.search;
@@ -28,13 +27,12 @@ export const SwapContainer = ({tokenList}:{tokenList: Token[]}) => {
     const [isTypingForTokenBuy, setIsTypingForTokenBuy] = useState<boolean>(false);
     const [isTypingForTokenSell, setIsTypingForTokenSell] = useState<boolean>(false);
     
-    
     const [teaBalance, setTeaBalance] = useState<string | number>(0);
 
     const [selectedToken, setSelectedToken] = useState<Token>(tokenList[0]);
     const [selectedTokenPrice, setSelectedTokenPrice] = useState<string | number>(0);
     
-    const [tokenIsApproved, setTokenIsApproved] = useState<boolean>(false);
+    const [tokenIsApproved, setTokenIsApproved] = useState<boolean>(true);
 
     const account = getAccount(wagmiConfig);
     const result = useReadContract({
@@ -56,8 +54,8 @@ export const SwapContainer = ({tokenList}:{tokenList: Token[]}) => {
     } = useWriteContract();
 
 
-    const approveToken = (token: Address) => {
-        writeContract({
+    const approveToken = async (token: Address) => {
+        return await writeContract({
             address: token,
             abi: erc20Abi,
             functionName: 'approve',
@@ -69,74 +67,83 @@ export const SwapContainer = ({tokenList}:{tokenList: Token[]}) => {
     }
 
     const handleBuy = async (token: Address, value: string) => {
+        console.log('token', token)
+        console.log('value', value)
         return await buyExactPresaleTokens({
             optionId: investmentInfo[investment].id,
-            referrerId: Number(window.localStorage.getItem('referral')),
+            referrerId: Number(window.localStorage.getItem('referral') || '0'),
             tokenSell: token,
             buyAmountHuman: value,
         });
-    }
+    };
+
+    const getSelectedTokenBalance = async () => {
+        const balance = await getBalance(wagmiConfig, {
+            address: account.address ?? zeroAddress,
+            token: selectedToken.address === zeroAddress ? undefined : selectedToken.address,
+        });
+
+        return balance;
+    };
+
+    const getSelectedTokenPrice = async () => {
+        if(selectedToken.symbol == 'USDC' || selectedToken.symbol == 'USDT') {
+            return 1;
+        }
+
+        const price = await getInputPriceQuote(
+            selectedToken.address,
+            BigInt(10**selectedToken.decimals)
+        );
+
+        return parseHumanReadable(price, 6, 2);
+    };
 
 
+    const getTeaBalance = async () => {
+        const optionInfo = await getOptionInfo(investmentInfo[investment].id);
+        const teaToken = optionInfo.presaleToken;
+
+        const balance = await getBalance(wagmiConfig, {
+            address: account.address ?? zeroAddress,
+            token: teaToken,
+        });
+
+        return balance;
+    };
+
+    const checkTokenAllowance = () => {
+        if(selectedToken.address == zeroAddress) {
+            setTokenIsApproved(true);
+            return;
+        }
+        
+        const inputValue = parseUnits(
+            tokenSellValue.toString(),
+            selectedToken.decimals
+        );
+        const allowance = result.data ?? 0n;
+
+        if(allowance == 0n || inputValue >= allowance) {
+            setTokenIsApproved(false);
+            return;
+        }
+
+        setTokenIsApproved(true);
+    };
 
     useEffect(() => {
-        const getSelectedTokenBalance = async () => {
-            const balance = await getBalance(wagmiConfig, {
-                address: account.address ?? zeroAddress,
-                token: selectedToken.address === zeroAddress ? undefined : selectedToken.address,
-            });
+        checkTokenAllowance();
+    }, [isSuccess, isError]);
 
-            return balance;
-        }
-
-        const getSelectedTokenPrice = async () => {
-            if(selectedToken.symbol == 'USDC' || selectedToken.symbol == 'USDT') {
-                return 1;
-            }
-
-            const price = await getInputPriceQuote(
-                selectedToken.address,
-                BigInt(10**selectedToken.decimals)
-            );
-
-            
-
-            return parseHumanReadable(price, 6, 2);
-        }
-
-
-        const getTeaBalance = async () => {
-            const optionInfo = await getOptionInfo(investmentInfo[investment].id);
-            const teaToken = optionInfo.presaleToken;
-
-            const balance = await getBalance(wagmiConfig, {
-                address: account.address ?? zeroAddress,
-                token: teaToken,
-            });
-
-            return balance;
-        }
-
-
-        const checkTokenAllowance = () => {
-            if(selectedToken.address == zeroAddress) {
-                setTokenIsApproved(true);
-                return;
-            }
-            
-            const inputValue = parseUnits(
-                tokenSellValue.toString(),
-                selectedToken.decimals
-            );
-            const allowance = result.data ?? 0n;
-
-            if(allowance == 0n || inputValue >= allowance) {
-                setTokenIsApproved(false);
-                return;
-            }
-
-            setTokenIsApproved(true);
-        }
+    useEffect(() => {
+        // reset states...
+        setIsTypingForTokenSell(false);
+        setIsTypingForTokenBuy(false);
+        setTokenBuyValue('');
+        setTokenSellValue('');
+        setSelectedTokenPrice('');
+        setTokenIsApproved(true);
 
         checkTokenAllowance();
 
@@ -164,6 +171,7 @@ export const SwapContainer = ({tokenList}:{tokenList: Token[]}) => {
 
             <div className={cn('relative flex gap-2', !isReversed ? 'flex-col-reverse' : 'flex-col')}>
                 <SwapInput
+                    disabled={selectedTokenPrice == ''}
                     title='Sell'
                     balance={balance}
                     value={
@@ -188,6 +196,7 @@ export const SwapContainer = ({tokenList}:{tokenList: Token[]}) => {
 
                         if(value.length == 0 || value == '0') {
                             setTokenBuyValue('');
+                            return;
                         }
 
                         const amountsIn = await getQuoteAmountsOutForTeaTokens(
@@ -212,6 +221,7 @@ export const SwapContainer = ({tokenList}:{tokenList: Token[]}) => {
                 </Button>
                 
                 <SwapInput 
+                    disabled={selectedTokenPrice == ''}
                     title='Buy'
                     balance={teaBalance}
                     value={
@@ -230,9 +240,9 @@ export const SwapContainer = ({tokenList}:{tokenList: Token[]}) => {
 
                         if(value.length == 0 || value == '0') {
                             setTokenSellValue('');
+                            return;
                         }
                         
-
                         const amountsIn = await getQuoteAmountsInForTeaTokens(
                             investmentInfo[investment].id,
                             selectedToken.address,
@@ -247,10 +257,10 @@ export const SwapContainer = ({tokenList}:{tokenList: Token[]}) => {
                 />
             </div>
 
-            <Button
+            <Button disabled={isPending || selectedTokenPrice == '' || tokenBuyValue.toString() == '' || tokenBuyValue.toString() == '0'}
                 onClick={async () => {
                     if(!tokenIsApproved) {
-                        approveToken(selectedToken.address);
+                        await approveToken(selectedToken.address);
                     } else {
                         await handleBuy(
                             selectedToken.address,
@@ -260,12 +270,11 @@ export const SwapContainer = ({tokenList}:{tokenList: Token[]}) => {
                 }}
                 className='bg-[#680043] hover:bg-[#aa006f] text-xl font-bold text-[#ff00a6] py-6'
             >
-                {tokenIsApproved ? 'Buy' : 'Allow token'}
+                {isPending ? <Spinner/> : (tokenIsApproved ? 'Buy' : `Allow $${selectedToken.symbol}`)}
             </Button>
 
-
             <div className='text-right text-zinc-500'>
-                <span>{selectedTokenPrice}$: {selectedToken.symbol}</span>
+                {selectedTokenPrice == '' ? <Spinner/> : <span>${selectedToken.symbol} price: ${selectedTokenPrice}</span>}
             </div>
         </div>
     );
@@ -273,6 +282,7 @@ export const SwapContainer = ({tokenList}:{tokenList: Token[]}) => {
 
 
 const SwapInput = ({
+    disabled,
     title,
     balance,
     isTea,
@@ -282,6 +292,7 @@ const SwapInput = ({
     onChange,
     onType,
 }:{
+    disabled?: boolean,
     title?: string,
     defaultValue?: string,
     tokenList?: Token[],
@@ -295,11 +306,12 @@ const SwapInput = ({
         <div className='w-full rounded-lg h-24 px-4 py-3 bg-[rgb(27,27,27)]'>
             <div className='inline-flex justify-between w-full items-start'>
                 <span className='text-zinc-400'>{title ?? 'Amount'}</span>
-                <span className='text-zinc-500 text-sm'>{balance ?? 0}</span>
+                <span className='text-zinc-500 text-sm'>Balance: {balance ?? 0}</span>
             </div>
             
             <div className='inline-flex gap-2 w-full h-10'>
                 <Input
+                    disabled={disabled}
                     value={value}
                     onKeyDown={(e: any) => {
                         const prevVals = e.target.value;

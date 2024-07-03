@@ -42,7 +42,7 @@ export const Buy = () => {
       <div className='w-full inline-flex justify-center'>
         <div className='w-[408px] text-center'>
           <span className='text-zinc-400 text-[2rem] font-bold'>
-            Buy TEA tokens, and gain money with us
+            {/* Buy TEA tokens, and gain money with us */}
           </span>
         </div>
       </div>

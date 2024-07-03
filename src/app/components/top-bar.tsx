@@ -76,6 +76,7 @@ export const TopBar = ({
 
       <span className={"inline-flex w-[228px] items-center"}>
         <span className="text-white">{chainId == ChainId.MAINNET ? 'Mainnet' : 'Sepolia'}</span>
+        &nbsp;
         <Wallet />
       </span>
     </div>

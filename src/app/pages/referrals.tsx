@@ -151,8 +151,7 @@ export const Referrals = () => {
   }, [referralTree, referralCode, getShortAccount]);
 
   const onNodeClick = (id: string) => {
-    console.log('clicked')
-    window.navigator.clipboard.writeText(id);
+    navigator?.clipboard?.writeText(id);
   };
 
   return (
