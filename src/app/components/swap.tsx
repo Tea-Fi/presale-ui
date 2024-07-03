@@ -315,7 +315,7 @@ const SwapInput = ({
                             e.preventDefault();
                         }
                     }}
-                    type="text"
+                    type="number"
                     inputMode='numeric'
                     onChange={onType}
                     placeholder='0'
