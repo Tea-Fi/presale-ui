@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import ReactFlow, { Background } from "reactflow";
+import { Copy } from "lucide-react";
 import "reactflow/dist/style.css";
 
 import { useAccount, useAccountEffect } from 'wagmi';
 import { getReferralCodeById, getReferralTreeByWallet, Referral } from '../utils/referrals';
-import copyIcon from "../../assets/icons/copy.png";
 
 export const Referrals = () => {
   const [referralCode, setReferralCode] = useState('');
@@ -17,6 +17,7 @@ export const Referrals = () => {
     display: "flex",
     justifyContent: "between",
   }
+
 
 
   const getShortAccount = useCallback(
@@ -75,7 +76,7 @@ export const Referrals = () => {
             id={referralCode}
             className="rounded-full w-full inline-flex h-full justify-around items-center text-[#ff23b2]"
           >
-            <img src={copyIcon} height="12px" />
+            <Copy />
             &nbsp;&nbsp;
             {getShortAccount(referralTree?.wallet)} | {referralCode.toUpperCase()} | {(referralTree?.fee || 0) / 100}%
           </div>
@@ -102,7 +103,7 @@ export const Referrals = () => {
               id={code}
               className="rounded-full w-full inline-flex h-full justify-around items-center text-[#ff20b1]"
             >
-              <img src={copyIcon} height="12px" />
+              <Copy />
               &nbsp;&nbsp;
               {getShortAccount(lead?.wallet)} | {code.toUpperCase()} | {(lead?.fee || 0) / 100}%
             </div>

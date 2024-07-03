@@ -42,7 +42,7 @@ export const loginMapping: { [key: string]: Referral } = {
   DIPSI: {
     id: 1,
     fee: 1500,
-    wallet: "0x007aB4E7581fda13CA9031f1DF42Df5DF9fc223E",
+    wallet: "0xe083846329683d68E73898347d5FD5F831C19b69",
     subleads: {
       JELLY: {
         id: 2,
