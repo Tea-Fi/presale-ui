@@ -302,12 +302,14 @@ const SwapInput = ({
                 <Input
                     value={value}
                     onKeyDown={(e: any) => {
-                        const value = e.target.value;
+                        const prevVals = e.target.value;
+                        const value = e.key;
                         const pattern = /^\d*\.?\d*$/;
-                        const isPatternTested = pattern.test(value);
+
+                        const isPatternTested = pattern.test(prevVals + value);
                         if(
                             !isPatternTested &&
-                            e.key !== 'Backspace'
+                            value !== 'Backspace'
                         ) {
                             e.preventDefault();
                         }
