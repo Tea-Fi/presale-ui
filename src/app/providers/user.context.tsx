@@ -1,6 +1,6 @@
 import type { FunctionComponent, ReactNode } from 'react';
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { getReferralTreeByCode } from '../utils/referrals';
+import { Referral, getReferralTreeByCode } from '../utils/referrals';
 
 export interface LoginResponse {
   status: LoginStatus | null;
@@ -26,7 +26,8 @@ export const UserContextProvider: FunctionComponent<{ children: ReactNode }> = (
 
   async function login(code: string): Promise<void> {
     try {
-      const referralTree = getReferralTreeByCode(code);
+      const referralTree = await getReferralTreeByCode(code);
+
       if (referralTree == undefined) {
         setStatus(LoginStatus.WRONG_CODE);
         setTimeout(() => setStatus(LoginStatus.LOGGED_OUT), 3000);
