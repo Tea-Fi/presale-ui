@@ -5,7 +5,6 @@ import "reactflow/dist/style.css";
 
 import { useAccount, useAccountEffect } from 'wagmi';
 import { getReferralTreeByWallet, Referral } from '../utils/referrals';
-import copyIcon from "../../assets/icons/copy.png";
 import { ReferralForm } from "../components/referral-form";
 
 export const Referrals = () => {

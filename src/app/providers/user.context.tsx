@@ -1,6 +1,6 @@
 import type { FunctionComponent, ReactNode } from 'react';
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { Referral, getReferralTreeByCode } from '../utils/referrals';
+import { getReferralTreeByCode } from '../utils/referrals';
 
 export interface LoginResponse {
   status: LoginStatus | null;

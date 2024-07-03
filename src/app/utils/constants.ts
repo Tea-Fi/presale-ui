@@ -39,25 +39,25 @@ export interface Referral {
   subleads?: { [key: string]: Referral };
 }
 
-export const loginMapping: { [key: string]: Referral } = {
-  DIPSI: {
-    id: 1,
-    fee: 1500,
-    wallet: "0xe083846329683d68E73898347d5FD5F831C19b69",
-    subleads: {
-      JELLY: {
-        id: 2,
-        fee: 300,
-        wallet: "0x4D7289A51494dC59694f15306386c8ec76210299",
-      },
-      RAFI: {
-        id: 3,
-        fee: 200,
-        wallet: "0x84076ad7edbaF2c12882C5C7F56cb39Ed2D505DF",
-      },
-    },
-  },
-};
+// export const loginMapping: { [key: string]: Referral } = {
+//   DIPSI: {
+//     id: 1,
+//     fee: 1500,
+//     wallet: "0xe083846329683d68E73898347d5FD5F831C19b69",
+//     subleads: {
+//       JELLY: {
+//         id: 2,
+//         fee: 300,
+//         wallet: "0x4D7289A51494dC59694f15306386c8ec76210299",
+//       },
+//       RAFI: {
+//         id: 3,
+//         fee: 200,
+//         wallet: "0x84076ad7edbaF2c12882C5C7F56cb39Ed2D505DF",
+//       },
+//     },
+//   },
+// };
 
 export const investmentInfo = {
   "0.16": {
