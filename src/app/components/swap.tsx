@@ -4,7 +4,8 @@ import { TeaTokenLogoAsset } from '../../assets/icons';
 import { ArrowDownUpIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { cn, parseHumanReadable } from '../utils';
-import { getBalance, getAccount } from '@wagmi/core'
+import { getBalance, getAccount } from '@wagmi/core';
+
 
 import { ChainId, Token, wagmiConfig } from '../config';
 import { Address, erc20Abi, maxUint256, parseUnits, zeroAddress } from 'viem';
@@ -184,6 +185,7 @@ export const SwapContainer = ({tokenList}:{tokenList: Token[]}) => {
 
                         const value = e.target.value;
 
+
                         if(value.length == 0 || value == '0') {
                             setTokenBuyValue('');
                         }
@@ -191,7 +193,7 @@ export const SwapContainer = ({tokenList}:{tokenList: Token[]}) => {
                         const amountsIn = await getQuoteAmountsOutForTeaTokens(
                             investmentInfo[investment].id,
                             selectedToken.address,
-                            e.target.value,
+                            value,
                         );
 
                         setTokenBuyValue(parseHumanReadable(
@@ -300,16 +302,19 @@ const SwapInput = ({
                 <Input
                     value={value}
                     onKeyDown={(e) => {
-                        const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
-                        const otherChars = '\'!@#$%^&*()_+=-,:/?<>{}'.split('');
-
-                        const charsDisabled = [...alphabet, ...otherChars]
-                        const isDisabled = charsDisabled.indexOf(e.key) != -1;
-
-                        if (isDisabled) {
+                        const value = e.target.value;
+                        const pattern = /^\d*\.?\d*$/;
+                        const isPatternTested = pattern.test(value);
+                        if(
+                            !isPatternTested &&
+                            e.key !== 'Backspace'
+                        ) {
                             e.preventDefault();
                         }
+                        console.log(pattern.test(value))
+                        console.log(value)
                     }}
+                    type="tel"
                     onChange={onType}
                     placeholder='0'
                     className='bg-transparent text-3xl px-0 text-zinc-300 placeholder:text-zinc-600 h-full'
