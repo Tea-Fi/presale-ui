@@ -1,6 +1,7 @@
 import { cn } from "../../utils/cn";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
+import { Progress } from "./progress";
 
 export const CardHoverEffect = ({
   items,
@@ -10,6 +11,8 @@ export const CardHoverEffect = ({
     title: string;
     description: string;
     link: string;
+    value?: number,
+    max?: number,
   }[];
   className?: string;
 }) => {
@@ -25,7 +28,7 @@ export const CardHoverEffect = ({
       {items.map((item, idx) => (
         <a
           href={item?.link}
-          key={item?.link}
+          key={idx}
           className="relative group block p-2 h-full w-full"
           onMouseEnter={() => setHoveredIndex(idx)}
           onMouseLeave={() => setHoveredIndex(null)}
@@ -50,6 +53,15 @@ export const CardHoverEffect = ({
           <Card>
             <CardTitle>{item.title}</CardTitle>
             <CardDescription>{item.description}</CardDescription>
+
+            <div className="flex flex-col gap-3 mt-4">
+              <div className="inline-flex justify-between text-zinc-400 text-sm">
+                <span>{item.value?.toLocaleString("en-US") ?? 0}</span>
+                <span>{item.max?.toLocaleString("en-US") ?? 100}</span>
+              </div>
+
+              <Progress value={item.value}  max={item.max}/>
+            </div>
           </Card>
         </a>
       ))}

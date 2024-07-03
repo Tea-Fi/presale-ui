@@ -6,6 +6,8 @@ import { useAccountEffect } from 'wagmi';
 import { getReferralCodeById, getReferralTreeByWallet, Referral } from '../utils/referrals';
 import { TeaSwapLogoAsset } from "../../assets/icons";
 import { cn } from "../utils/cn";
+import { getChainId } from '@wagmi/core';
+import { wagmiConfig, ChainId } from "../config";
 
 export const TopBar = ({
   isBuyPageActive,
@@ -18,6 +20,8 @@ export const TopBar = ({
 }) => {
   const [referralCode, setReferralCode] = useState('');
   const [referralTree, setReferralTree] = useState<Referral>();
+  const chainId = getChainId(wagmiConfig);
+
 
   useAccountEffect({
     onConnect({ address }) {
@@ -32,11 +36,12 @@ export const TopBar = ({
       setReferralCode('');
       setReferralTree(undefined);
     },
-  })
+  });
+
 
   return (
     <div className="w-full max-h-24 inline-flex justify-between items-center px-5 py-3">
-      <span className="w-[158px]">
+      <span className="w-[228px]">
         <TeaSwapLogoAsset className="size-10"/>
       </span>
 
@@ -69,7 +74,8 @@ export const TopBar = ({
         </NavLink>
       </div>
 
-      <span className="w-[158px]">
+      <span className={"inline-flex w-[228px] items-center"}>
+        <span className="text-white">{chainId == ChainId.MAINNET ? 'Mainnet' : 'Sepolia'}</span>
         <Wallet />
       </span>
     </div>
