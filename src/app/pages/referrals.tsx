@@ -4,7 +4,9 @@ import { Copy } from "lucide-react";
 import "reactflow/dist/style.css";
 
 import { useAccount, useAccountEffect } from 'wagmi';
-import { getReferralCodeById, getReferralTreeByWallet, Referral } from '../utils/referrals';
+import { getReferralTreeByWallet, Referral } from '../utils/referrals';
+import copyIcon from "../../assets/icons/copy.png";
+import { ReferralForm } from "../components/referral-form";
 
 export const Referrals = () => {
   const [referralCode, setReferralCode] = useState('');
@@ -25,30 +27,42 @@ export const Referrals = () => {
     []
   );
 
+  const getReferralTree = useCallback(() => {
+    if (address) {
+      getReferralTreeByWallet(address).then(referralTree => {
+        if (referralTree !== undefined) {
+          setReferralTree(referralTree);
+          setReferralCode(referralTree.referral as string);
+        }
+      });
+    }
+  }, [address])
+
   useEffect(() => {
     if (isConnected && address != undefined) {
-      const referralTree = getReferralTreeByWallet(address);
+      getReferralTreeByWallet(address).then(referralTree => {
+        if (referralTree !== undefined) {
+          setReferralTree(referralTree);
+          setReferralCode(referralTree.referral as string);
+        }
+      });
   
-      if (referralTree !== undefined) {
-        setReferralTree(referralTree);
-        setReferralCode(getReferralCodeById(referralTree.id) as string);
-      }
     }
   }, [address, isConnected]);
 
   useAccountEffect({
     onConnect({ address }) {
-      const refTree = getReferralTreeByWallet(address);
+      getReferralTreeByWallet(address).then(refTree => {
+        if (refTree !== undefined) {
+          const refCode = refTree.referral as string;
 
-      if (refTree !== undefined) {
-        const refCode = getReferralCodeById(refTree.id) as string;
-
-        if (referralTree == undefined || referralTree.id != refTree.id) {
-          setReferralTree(refTree);
-        } else if (referralCode == undefined || referralCode != refCode) {
-          setReferralCode(refCode);
+          if (referralTree == undefined || referralTree.id != refTree.id) {
+            setReferralTree(refTree);
+          } else if (referralCode == undefined || referralCode != refCode) {
+            setReferralCode(refCode);
+          }
         }
-      }
+      });
     },
     onDisconnect() {
       setReferralCode('');
@@ -156,7 +170,14 @@ export const Referrals = () => {
 
   return (
     <div className="referrals page">
-      <div className="title">YOUR SETUP: Code "<b>{referralCode.toUpperCase()}</b>" with {(referralTree?.fee || 0) / 100}% Fee </div>
+      <div className="referral-title-row">
+        <div className="title">YOUR SETUP: Code "<b>{referralCode.toUpperCase()}</b>" with {(referralTree?.fee || 0) / 100}% Fee </div>
+
+        {referralTree && referralCode && (
+          <ReferralForm referralTree={referralTree} onSubmit={getReferralTree} />
+        )}
+      </div>
+
       {referralTree != undefined ? (
         <div className="referral-container">
           <ReactFlow

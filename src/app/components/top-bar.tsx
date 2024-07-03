@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 
 import { Wallet } from "./wallet";
 import { useAccountEffect } from 'wagmi';
-import { getReferralCodeById, getReferralTreeByWallet, Referral } from '../utils/referrals';
+import { getReferralTreeByWallet, Referral } from '../utils/referrals';
 import { TeaSwapLogoAsset } from "../../assets/icons";
 import { cn } from "../utils/cn";
 import { getChainId } from '@wagmi/core';
@@ -25,12 +25,12 @@ export const TopBar = ({
 
   useAccountEffect({
     onConnect({ address }) {
-      const referralTree = getReferralTreeByWallet(address);
-
-      if (referralTree !== undefined) {
-        setReferralTree(referralTree);
-        setReferralCode(getReferralCodeById(referralTree.id) as string);
-      }
+      getReferralTreeByWallet(address).then(referralTree => {
+        if (referralTree !== undefined) {
+          setReferralTree(referralTree);
+          setReferralCode(referralTree.referral as string);
+        }
+      });
     },
     onDisconnect() {
       setReferralCode('');

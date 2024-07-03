@@ -4,6 +4,17 @@
     height: 650px;
     margin: 0px auto;
   }
+  .referral-title-row {
+    display: flex;
+    flex-flow: row nowrap;
+
+    justify-content: space-between;
+    align-items: center;
+
+    width: 90%;
+    margin: 0px auto;
+  }
+
   .title {
     font-size: 22px;
     margin: 16px;
