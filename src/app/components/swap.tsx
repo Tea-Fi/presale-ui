@@ -307,6 +307,7 @@ const SwapInput = ({
                         const pattern = /^[\d]\d*\.?\d*$/;
 
                         const isPatternTested = pattern.test(prevVals + value);
+
                         if(
                             !isPatternTested &&
                             value !== 'Backspace'
@@ -314,7 +315,8 @@ const SwapInput = ({
                             e.preventDefault();
                         }
                     }}
-                    type="tel"
+                    type="text"
+                    inputMode='numeric'
                     onChange={onType}
                     placeholder='0'
                     className='bg-transparent text-3xl px-0 text-zinc-300 placeholder:text-zinc-600 h-full'
