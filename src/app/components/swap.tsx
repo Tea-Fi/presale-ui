@@ -304,7 +304,7 @@ const SwapInput = ({
                     onKeyDown={(e: any) => {
                         const prevVals = e.target.value;
                         const value = e.key;
-                        const pattern = /^\d*\.?\d*$/;
+                        const pattern = /^[\d]\d*\.?\d*$/;
 
                         const isPatternTested = pattern.test(prevVals + value);
                         if(
