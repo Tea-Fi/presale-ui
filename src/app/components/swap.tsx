@@ -14,25 +14,27 @@ import { PRESALE_CONTRACT_ADDRESS, investmentInfo } from '../utils/constants';
 import { useReadContract, useWriteContract } from 'wagmi';
 import Spinner from './spinner';
 
-export const SwapContainer = ({tokenList}:{tokenList: Token[]}) => {
+export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
     const search = window.location.search;
     const urlParams = new URLSearchParams(search);
     const investment = urlParams.get('opt') || Object.keys(investmentInfo)[0];
-    
-    const [isReversed, setReversed] = useState<boolean>(false);
+    const referrerId = Number(window.localStorage.getItem('referral') || '0');
+
+    const [isReversed, setReversed] = useState<boolean>(true);
     const [balance, setBalance] = useState<string | number>(0);
     const [tokenSellValue, setTokenSellValue] = useState<string | number>('');
     const [tokenBuyValue, setTokenBuyValue] = useState<string | number>('');
 
     const [isTypingForTokenBuy, setIsTypingForTokenBuy] = useState<boolean>(false);
     const [isTypingForTokenSell, setIsTypingForTokenSell] = useState<boolean>(false);
-    
+
     const [teaBalance, setTeaBalance] = useState<string | number>(0);
 
     const [selectedToken, setSelectedToken] = useState<Token>(tokenList[0]);
     const [selectedTokenPrice, setSelectedTokenPrice] = useState<string | number>(0);
-    
+
     const [tokenIsApproved, setTokenIsApproved] = useState<boolean>(true);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const account = getAccount(wagmiConfig);
     const result = useReadContract({
@@ -43,7 +45,7 @@ export const SwapContainer = ({tokenList}:{tokenList: Token[]}) => {
         functionName: 'allowance',
     });
 
-    const {
+    let {
         // @ts-ignore
         isPending,
         // @ts-ignore
@@ -67,14 +69,27 @@ export const SwapContainer = ({tokenList}:{tokenList: Token[]}) => {
     }
 
     const handleBuy = async (token: Address, value: string) => {
-        console.log('token', token)
-        console.log('value', value)
-        return await buyExactPresaleTokens({
+        console.info('optionId', investmentInfo[investment].id)
+        console.info('referrerId', referrerId)
+        console.info('tokenSell', token)
+        console.info('buyAmountHuman', value)
+
+        setIsLoading(true);
+        const result = await buyExactPresaleTokens({
             optionId: investmentInfo[investment].id,
-            referrerId: Number(window.localStorage.getItem('referral') || '0'),
+            referrerId: referrerId,
             tokenSell: token,
             buyAmountHuman: value,
         });
+        setIsLoading(false);
+
+        if (result.status == 'SUCCESS') {
+            getTeaBalance().then((res) => setTeaBalance(
+                parseHumanReadable(res.value, res.decimals, 3)
+            ));
+        }
+
+        return result;
     };
 
     const getSelectedTokenBalance = async () => {
@@ -87,13 +102,13 @@ export const SwapContainer = ({tokenList}:{tokenList: Token[]}) => {
     };
 
     const getSelectedTokenPrice = async () => {
-        if(selectedToken.symbol == 'USDC' || selectedToken.symbol == 'USDT') {
+        if (selectedToken.symbol == 'USDC' || selectedToken.symbol == 'USDT') {
             return 1;
         }
 
         const price = await getInputPriceQuote(
             selectedToken.address,
-            BigInt(10**selectedToken.decimals)
+            BigInt(10 ** selectedToken.decimals)
         );
 
         return parseHumanReadable(price, 6, 2);
@@ -113,18 +128,18 @@ export const SwapContainer = ({tokenList}:{tokenList: Token[]}) => {
     };
 
     const checkTokenAllowance = () => {
-        if(selectedToken.address == zeroAddress) {
+        if (selectedToken.address == zeroAddress) {
             setTokenIsApproved(true);
             return;
         }
-        
+
         const inputValue = parseUnits(
             tokenSellValue.toString(),
             selectedToken.decimals
         );
         const allowance = result.data ?? 0n;
 
-        if(allowance == 0n || inputValue >= allowance) {
+        if (allowance == 0n || inputValue >= allowance) {
             setTokenIsApproved(false);
             return;
         }
@@ -134,7 +149,7 @@ export const SwapContainer = ({tokenList}:{tokenList: Token[]}) => {
 
     useEffect(() => {
         checkTokenAllowance();
-    }, [isSuccess, isError]);
+    }, [isSuccess, isError, selectedTokenPrice]);
 
     useEffect(() => {
         // reset states...
@@ -158,8 +173,7 @@ export const SwapContainer = ({tokenList}:{tokenList: Token[]}) => {
         getSelectedTokenBalance().then((res) => setBalance(
             parseHumanReadable(res.value, res.decimals, 3)
         ));
-    }, [selectedToken]);
-
+    }, [selectedToken, isReversed]);
 
     return (
         <div className='flex flex-col gap-2 p-2 rounded-xl max-w-[480px] w-[480px] h-auto bg-[rgb(19,19,19)]'>
@@ -171,13 +185,13 @@ export const SwapContainer = ({tokenList}:{tokenList: Token[]}) => {
 
             <div className={cn('relative flex gap-2', !isReversed ? 'flex-col-reverse' : 'flex-col')}>
                 <SwapInput
-                    disabled={selectedTokenPrice == ''}
+                    disabled={isLoading || isPending || selectedTokenPrice == '' || !isReversed}
                     title='Sell'
                     balance={balance}
                     value={
                         isTypingForTokenSell ?
-                        undefined :
-                        tokenSellValue ?? ''
+                            undefined :
+                            tokenSellValue ?? ''
                     }
                     tokenList={tokenList}
                     defaultValue={'ETH'}
@@ -187,14 +201,14 @@ export const SwapContainer = ({tokenList}:{tokenList: Token[]}) => {
                     }}
                     onType={async (e) => {
                         setIsTypingForTokenSell(true);
-                        if(isTypingForTokenBuy == true) {
+                        if (isTypingForTokenBuy == true) {
                             setIsTypingForTokenBuy(false);
                         }
 
                         const value = e.target.value;
 
 
-                        if(value.length == 0 || value == '0') {
+                        if (value.length == 0 || value == '0') {
                             setTokenBuyValue('');
                             return;
                         }
@@ -212,37 +226,39 @@ export const SwapContainer = ({tokenList}:{tokenList: Token[]}) => {
                         ));
                     }}
                 />
-                
+
                 <Button
                     onClick={() => setReversed(!isReversed)}
                     className='absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 outline outline-[6px] outline-[rgb(19,19,19)] bg-[rgb(27,27,27)] hover:bg-[rgb(25,25,25)]'
-                    >
-                    <ArrowDownUpIcon className='text-zinc-400'/>
+                >
+                    <ArrowDownUpIcon className='text-zinc-400' />
                 </Button>
-                
-                <SwapInput 
-                    disabled={selectedTokenPrice == ''}
+
+                <SwapInput
+                    disabled={isLoading || isPending || selectedTokenPrice == '' || isReversed}
                     title='Buy'
                     balance={teaBalance}
                     value={
-                        isTypingForTokenBuy ? 
-                        undefined : 
-                        tokenBuyValue ?? ''
+                        isTypingForTokenBuy ?
+                            undefined :
+                            tokenBuyValue ?? ''
                     }
                     isTea
                     onType={async (e) => {
                         setIsTypingForTokenBuy(true);
-                        if(isTypingForTokenSell == true) {
+                        if (isTypingForTokenSell == true) {
                             setIsTypingForTokenSell(false);
                         }
-                        
+
                         const value = e.target.value;
 
-                        if(value.length == 0 || value == '0') {
+                        if (value.length == 0 || value == '0') {
                             setTokenSellValue('');
                             return;
                         }
-                        
+
+                        setTokenBuyValue(value);
+
                         const amountsIn = await getQuoteAmountsInForTeaTokens(
                             investmentInfo[investment].id,
                             selectedToken.address,
@@ -257,9 +273,9 @@ export const SwapContainer = ({tokenList}:{tokenList: Token[]}) => {
                 />
             </div>
 
-            <Button disabled={isPending || selectedTokenPrice == '' || tokenBuyValue.toString() == '' || tokenBuyValue.toString() == '0'}
+            <Button disabled={isLoading || isPending || selectedTokenPrice == '' || tokenBuyValue.toString() == '' || tokenBuyValue.toString() == '0'}
                 onClick={async () => {
-                    if(!tokenIsApproved) {
+                    if (!tokenIsApproved) {
                         await approveToken(selectedToken.address);
                     } else {
                         await handleBuy(
@@ -270,11 +286,11 @@ export const SwapContainer = ({tokenList}:{tokenList: Token[]}) => {
                 }}
                 className='bg-[#680043] hover:bg-[#aa006f] text-xl font-bold text-[#ff00a6] py-6'
             >
-                {isPending ? <Spinner/> : (tokenIsApproved ? 'Buy' : `Allow $${selectedToken.symbol}`)}
+                {(isPending || isLoading) ? <Spinner /> : (tokenIsApproved ? 'Buy' : `Allow ${selectedToken.symbol}`)}
             </Button>
 
             <div className='text-right text-zinc-500'>
-                {selectedTokenPrice == '' ? <Spinner/> : <span>${selectedToken.symbol} price: ${selectedTokenPrice}</span>}
+                {selectedTokenPrice == '' ? <Spinner /> : <span>{selectedToken.symbol} price: ${selectedTokenPrice}</span>}
             </div>
         </div>
     );
@@ -291,7 +307,7 @@ const SwapInput = ({
     value,
     onChange,
     onType,
-}:{
+}: {
     disabled?: boolean,
     title?: string,
     defaultValue?: string,
@@ -308,7 +324,7 @@ const SwapInput = ({
                 <span className='text-zinc-400'>{title ?? 'Amount'}</span>
                 <span className='text-zinc-500 text-sm'>Balance: {balance ?? 0}</span>
             </div>
-            
+
             <div className='inline-flex gap-2 w-full h-10'>
                 <Input
                     disabled={disabled}
@@ -320,7 +336,7 @@ const SwapInput = ({
 
                         const isPatternTested = pattern.test(prevVals + value);
 
-                        if(
+                        if (
                             !isPatternTested &&
                             value !== 'Backspace'
                         ) {
@@ -336,10 +352,11 @@ const SwapInput = ({
 
                 {isTea ?
                     <div className='inline-flex gap-3 items-center rounded-full bg-[rgb(19,19,19)] h-full px-2 w-44 text-zinc-400'>
-                        <Item isTea/>
+                        <Item isTea />
                     </div>
-                :
+                    :
                     <SelectContainer
+                        disabled={disabled}
                         defaultValue={defaultValue}
                         onChange={onChange}
                         items={tokenList}
@@ -350,10 +367,10 @@ const SwapInput = ({
     );
 }
 
-const SelectContainer = ({items, defaultValue, onChange}:{items?: Token[], defaultValue?: string,  onChange?: (value: string) => void}) => {
+const SelectContainer = ({ items, defaultValue, onChange, disabled }: { items?: Token[], defaultValue?: string, onChange?: (value: string) => void, disabled?: boolean }) => {
     return (
-        <Select onValueChange={onChange} defaultValue={defaultValue}>
-            <SelectTrigger 
+        <Select disabled={disabled} onValueChange={onChange} defaultValue={defaultValue}>
+            <SelectTrigger
                 className='inline-flex gap-3 items-center rounded-full bg-[rgb(19,19,19)] h-full px-2 w-44 text-zinc-400'
             >
                 <SelectValue placeholder='Select token' />
@@ -361,13 +378,13 @@ const SelectContainer = ({items, defaultValue, onChange}:{items?: Token[], defau
 
             <SelectContent className='bg-[rgb(19,19,19)]'>
                 <SelectGroup>
-                    {items ? items.map(((item, index) => 
+                    {items ? items.map(((item, index) =>
                         <SelectItem key={index} value={item.symbol} className='hover:bg-[rgb(27,27,27)] focus:bg-[rgb(27,27,27)]'>
-                            <Item url={item.imageUrl} value={item.symbol}/>
+                            <Item url={item.imageUrl} value={item.symbol} />
                         </SelectItem>
                     ))
-                    : <></>
-                }
+                        : <></>
+                    }
                 </SelectGroup>
             </SelectContent>
 
@@ -375,21 +392,21 @@ const SelectContainer = ({items, defaultValue, onChange}:{items?: Token[], defau
     );
 }
 
-const Item = ({value, url, isTea}:{value?: string, url?: string, isTea?: boolean}) => {
+const Item = ({ value, url, isTea }: { value?: string, url?: string, isTea?: boolean }) => {
     return (
         <div className='inline-flex gap-3 items-center rounded-full bg-[rgb(19,19,19)] h-full px-2'>
-            {isTea ? 
+            {isTea ?
                 <span>
                     <TeaTokenLogoAsset className='rounded-full size-6' />
                 </span>
-            : 
-            <Avatar className='items-center justify-center w-auto'>
-                <AvatarImage
-                    className={'size-6'}
-                    src={url ?? ''}
-                    alt={value ?? ''}
-                />
-            </Avatar>}
+                :
+                <Avatar className='items-center justify-center w-auto'>
+                    <AvatarImage
+                        className={'size-6'}
+                        src={url ?? ''}
+                        alt={value ?? ''}
+                    />
+                </Avatar>}
             <span className='text-zinc-400 font-semibold'>
                 {isTea ? 'TEA' : value ?? ''}
             </span>
