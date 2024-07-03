@@ -2,8 +2,6 @@ import { zeroAddress } from 'viem';
 import { SwapContainer } from '../components/swap';
 import { Token } from '../config';
 
-
-
 const tokenList: Token[] = [
   {
     address: zeroAddress,

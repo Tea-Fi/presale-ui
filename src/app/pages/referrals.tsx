@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import ReactFlow, { Background, Controls } from "reactflow";
+import ReactFlow, { Background } from "reactflow";
 import "reactflow/dist/style.css";
 
 import { useAccount, useAccountEffect } from 'wagmi';
@@ -10,6 +10,14 @@ export const Referrals = () => {
   const [referralCode, setReferralCode] = useState('');
   const [referralTree, setReferralTree] = useState<Referral>();
   const { address, isConnected } = useAccount();
+  const edgeStyles = { 
+    background: "#3a0c2a",
+    fontWeight: "bold",
+    borderRadius: 9999,
+    display: "flex",
+    justifyContent: "between",
+  }
+
 
   const getShortAccount = useCallback(
     (account = "") => `${account.slice(0, 6)}...${account.slice(-4)}`,
@@ -65,12 +73,7 @@ export const Referrals = () => {
         label: (
           <div
             id={referralCode}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              whiteSpace: "nowrap",
-              cursor: "pointer",
-            }}
+            className="rounded-full w-full inline-flex h-full justify-around items-center text-[#ff23b2]"
           >
             <img src={copyIcon} height="12px" />
             &nbsp;&nbsp;
@@ -79,7 +82,11 @@ export const Referrals = () => {
         ),
       },
       connectable: false,
-      style: { width: NW, height: NH },
+      style: { 
+        width: NW,
+        height: NH,
+        ...edgeStyles,
+      },
       position: { x: NOFF, y: NOFF },
     });
 
@@ -88,16 +95,12 @@ export const Referrals = () => {
       
       data.push({
         id: code,
+
         data: {
           label: (
             <div
               id={code}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                whiteSpace: "nowrap",
-                cursor: "pointer",
-              }}
+              className="rounded-full w-full inline-flex h-full justify-around items-center text-[#ff20b1]"
             >
               <img src={copyIcon} height="12px" />
               &nbsp;&nbsp;
@@ -106,8 +109,15 @@ export const Referrals = () => {
           ),
         },
         connectable: false,
-        style: { width: NW, height: NH },
-        position: { x: NOFF + (NW * leftIndex) + (NW * leftBranchingIndexes[level]), y: 2 * level * NH + NOFF },
+        style: { 
+          width: NW,
+          height: NH,
+          ...edgeStyles,
+        },
+        position: { 
+          x: NOFF + (NW * leftIndex) + (NW * leftBranchingIndexes[level]),
+          y: 2 * level * NH + NOFF
+        },
       });
 
       edges.push({
@@ -115,6 +125,7 @@ export const Referrals = () => {
         source: parentCode,
         target: code,
         type: "straight",
+        animated: true,
         label: ((lead?.fee || 0) / (parentFee / 100)).toFixed(2) + "%",
       });
 
@@ -139,6 +150,7 @@ export const Referrals = () => {
   }, [referralTree, referralCode, getShortAccount]);
 
   const onNodeClick = (id: string) => {
+    console.log('clicked')
     window.navigator.clipboard.writeText(id);
   };
 
@@ -156,7 +168,6 @@ export const Referrals = () => {
             preventScrolling={false}
           >
             <Background />
-            <Controls />
           </ReactFlow>
         </div>
       ) : (
