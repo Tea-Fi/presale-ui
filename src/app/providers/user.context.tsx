@@ -1,6 +1,7 @@
 import type { FunctionComponent, ReactNode } from 'react';
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { getReferralTreeByCode } from '../utils/referrals';
+import { AUTH_ACCESS_TOKEN_KEY } from '../utils/auth';
 
 export interface LoginResponse {
   status: LoginStatus | null;
@@ -33,6 +34,15 @@ export const UserContextProvider: FunctionComponent<{ children: ReactNode }> = (
         setTimeout(() => setStatus(LoginStatus.LOGGED_OUT), 3000);
       } else {
         window.localStorage.setItem('referral', String(referralTree.id));
+
+        const referralCode = window.localStorage.getItem('referral-code');
+
+        if (referralCode !== referralTree.referral) {
+          window.localStorage.removeItem(AUTH_ACCESS_TOKEN_KEY);
+        }
+
+        window.localStorage.setItem('referral-code', String(referralTree.referral));
+        
         if (window.localStorage.getItem('agreedToTerms') === 'true') {
           setStatus(LoginStatus.LOGGED_IN);
         } else {

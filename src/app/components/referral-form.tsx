@@ -106,7 +106,7 @@ export const ReferralForm: React.FC<Props> = (props) => {
 
   const onSubmit = React.useCallback(async (values: ReferralPayload) => {
     try {
-      await createReferral(props.referralTree.referral!, values);
+      await createReferral(values);
 
       setShowform(false)
       props.onSubmit();

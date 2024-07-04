@@ -1,6 +1,8 @@
 import { API_URL } from "../config/env";
+
 import { api } from "./api";
 import { Referral } from "./constants";
+import { AUTH_ACCESS_TOKEN_KEY } from "./auth";
 
 export type { Referral } from "./constants";
 
@@ -31,14 +33,24 @@ export const referralCodeExists = async (code: string): Promise<boolean> => {
   }
 }
 
-export const createReferral = async (code: string, payload: CreateReferralPayload) => {
-  const result = await api.post(`${API_URL}/leads/${code}`, JSON.stringify(payload), {
+export const createReferral = async (payload: CreateReferralPayload) => {
+  const accessToken = window.localStorage.getItem(AUTH_ACCESS_TOKEN_KEY);
+
+  const response = await api.post(`${API_URL}/leads`, JSON.stringify(payload), {
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+
+      ...(accessToken && { 'Authorization': `Bearer ${accessToken}` }) 
     }
   })
-    .then(res => res.data)
-    .then(res => typeof res === 'string' ? JSON.parse(res) : res);
+
+  if (response.status === 401) {
+    throw new Error('You are unauthorized to create new referral');
+  }
+
+  const result = typeof response.data === 'string'
+    ? JSON.parse(response.data)
+    : response.data
 
   if (result.error) {
     throw new Error(result.error);

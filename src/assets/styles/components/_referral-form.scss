@@ -105,8 +105,9 @@
 
         gap: 1rem;
 
-        & > input {
+        & > input[type=range] {
             flex-grow: 1;
+            accent-color: $color-brand;
         }
 
         & > div {

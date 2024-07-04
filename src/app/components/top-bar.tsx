@@ -2,7 +2,7 @@ import { useState } from "react";
 import { NavLink } from "react-router-dom";
 
 import { Wallet } from "./wallet";
-import { useAccountEffect } from 'wagmi';
+import { useAccountEffect, useSignMessage } from 'wagmi';
 import { getReferralTreeByWallet, Referral } from '../utils/referrals';
 import { TeaSwapLogoAsset } from "../../assets/icons";
 import { cn } from "../utils/cn";
@@ -12,6 +12,7 @@ import { RiMenu3Fill } from "react-icons/ri";
 import { Button } from "./ui";
 import { useModal } from "connectkit";
 
+import { authenticate } from "../utils/auth";
 
 export const TopBar = ({
   isBuyPageActive,
@@ -26,16 +27,22 @@ export const TopBar = ({
   const [referralTree, setReferralTree] = useState<Referral>();
   const chainId = getChainId(wagmiConfig);
   const {setOpen} = useModal();
+  
+  const { signMessage } = useSignMessage<string>()
 
 
   useAccountEffect({
     onConnect({ address }) {
-      getReferralTreeByWallet(address).then(referralTree => {
-        if (referralTree !== undefined) {
-          setReferralTree(referralTree);
-          setReferralCode(referralTree.referral as string);
-        }
-      });
+      const code = window.localStorage.getItem('referral-code')!;
+
+      authenticate(code, signMessage)
+        .then(() => getReferralTreeByWallet(address))
+        .then(referralTree => {
+          if (referralTree !== undefined) {
+            setReferralTree(referralTree);
+            setReferralCode(referralTree.referral as string);
+          }
+        })
     },
     onDisconnect() {
       setReferralCode('');

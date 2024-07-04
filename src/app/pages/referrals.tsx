@@ -3,9 +3,10 @@ import ReactFlow, { Background } from "reactflow";
 import { Copy } from "lucide-react";
 import "reactflow/dist/style.css";
 
-import { useAccount, useAccountEffect } from 'wagmi';
+import { useAccount, useAccountEffect, useSignMessage } from 'wagmi';
 import { getReferralTreeByWallet, Referral } from '../utils/referrals';
 import { ReferralForm } from "../components/referral-form";
+import { authenticate } from "../utils/auth";
 
 export const Referrals = () => {
   const [referralCode, setReferralCode] = useState('');
@@ -18,6 +19,8 @@ export const Referrals = () => {
     display: "flex",
     justifyContent: "between",
   }
+
+  const { signMessage } = useSignMessage<string>()
 
   const getShortAccount = useCallback(
     (account = "") => `${account.slice(0, 6)}...${account.slice(-4)}`,
@@ -49,17 +52,22 @@ export const Referrals = () => {
 
   useAccountEffect({
     onConnect({ address }) {
-      getReferralTreeByWallet(address).then(refTree => {
-        if (refTree !== undefined) {
-          const refCode = refTree.referral as string;
+      const code = window.localStorage.getItem('referral-code');
 
-          if (referralTree == undefined || referralTree.id != refTree.id) {
-            setReferralTree(refTree);
-          } else if (referralCode == undefined || referralCode != refCode) {
-            setReferralCode(refCode);
+      authenticate(code!, signMessage)
+
+      getReferralTreeByWallet(address)
+        .then(refTree => {
+          if (refTree !== undefined) {
+            const refCode = refTree?.referral as string;
+
+            if (referralTree == undefined || referralTree.id != refTree.id) {
+              setReferralTree(refTree);
+            } else if (referralCode == undefined || referralCode != refCode) {
+              setReferralCode(refCode);
+            }
           }
-        }
-      });
+        });
     },
     onDisconnect() {
       setReferralCode('');
