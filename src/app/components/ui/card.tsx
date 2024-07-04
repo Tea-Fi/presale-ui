@@ -57,8 +57,8 @@ export const CardHoverEffect = ({
 
             <div className="flex flex-col gap-3 mt-4">
               <div className="inline-flex justify-between text-zinc-400 text-sm">
-                <span>{item.value == null ? <Spinner/> : item.value?.toLocaleString("en-US")}</span>
-                <span>{item.max == null ? <Spinner/> : item.max?.toLocaleString("en-US")}</span>
+                <span>{item.value == null ? <Spinner/> : `${parseFloat((item.value / (item.max ?? 100) * 100).toFixed(2))}%`}</span>
+                <span>{item.max == null ? <Spinner/> : `100%`}</span>
               </div>
 
               <Progress value={item.value}  max={item.max}/>

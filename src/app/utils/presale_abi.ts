@@ -59,6 +59,19 @@ export const PRESALE_ABI = [
     },
     {
         "type": "function",
+        "name": "DELTA_PRESALE_TOKEN_PRICE_SCALE_DIVISOR",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint8",
+                "internalType": "uint8"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
         "name": "MULTISIG_WALLET",
         "inputs": [],
         "outputs": [
@@ -66,19 +79,6 @@ export const PRESALE_ABI = [
                 "name": "",
                 "type": "address",
                 "internalType": "address"
-            }
-        ],
-        "stateMutability": "view"
-    },
-    {
-        "type": "function",
-        "name": "PERCENTAGE_RATE",
-        "inputs": [],
-        "outputs": [
-            {
-                "name": "",
-                "type": "uint256",
-                "internalType": "uint256"
             }
         ],
         "stateMutability": "view"
@@ -359,49 +359,6 @@ export const PRESALE_ABI = [
     },
     {
         "type": "function",
-        "name": "inputPriceQuoteReversed",
-        "inputs": [
-            {
-                "name": "token",
-                "type": "address",
-                "internalType": "address"
-            },
-            {
-                "name": "amountsIn",
-                "type": "uint256",
-                "internalType": "uint256"
-            }
-        ],
-        "outputs": [
-            {
-                "name": "",
-                "type": "uint256",
-                "internalType": "uint256"
-            }
-        ],
-        "stateMutability": "view"
-    },
-    {
-        "type": "function",
-        "name": "isReferral",
-        "inputs": [
-            {
-                "name": "referral",
-                "type": "address",
-                "internalType": "address"
-            }
-        ],
-        "outputs": [
-            {
-                "name": "",
-                "type": "bool",
-                "internalType": "bool"
-            }
-        ],
-        "stateMutability": "view"
-    },
-    {
-        "type": "function",
         "name": "owner",
         "inputs": [],
         "outputs": [
@@ -438,17 +395,12 @@ export const PRESALE_ABI = [
         "name": "referrals",
         "inputs": [
             {
-                "name": "referrerId",
+                "name": "",
                 "type": "uint32",
                 "internalType": "uint32"
             }
         ],
         "outputs": [
-            {
-                "name": "isCreated",
-                "type": "bool",
-                "internalType": "bool"
-            },
             {
                 "name": "referrals",
                 "type": "uint16",
@@ -492,7 +444,7 @@ export const PRESALE_ABI = [
         "name": "saleOptions",
         "inputs": [
             {
-                "name": "optionId",
+                "name": "",
                 "type": "uint8",
                 "internalType": "uint8"
             }
@@ -549,7 +501,7 @@ export const PRESALE_ABI = [
         "name": "salePaymentTokens",
         "inputs": [
             {
-                "name": "token",
+                "name": "",
                 "type": "address",
                 "internalType": "address"
             }
@@ -693,7 +645,7 @@ export const PRESALE_ABI = [
                 "internalType": "uint256"
             },
             {
-                "name": "tokenReceicedPrice",
+                "name": "tokenReceivedPrice",
                 "type": "uint256",
                 "indexed": false,
                 "internalType": "uint256"
@@ -735,19 +687,6 @@ export const PRESALE_ABI = [
     {
         "type": "event",
         "name": "OptionDeleted",
-        "inputs": [
-            {
-                "name": "optionId",
-                "type": "uint8",
-                "indexed": true,
-                "internalType": "uint8"
-            }
-        ],
-        "anonymous": false
-    },
-    {
-        "type": "event",
-        "name": "OptionUpdated",
         "inputs": [
             {
                 "name": "optionId",
@@ -903,7 +842,7 @@ export const PRESALE_ABI = [
     },
     {
         "type": "error",
-        "name": "NotEnoughTokensLeft",
+        "name": "NotEnoughTokensLeftPerOption",
         "inputs": [
             {
                 "name": "amount",
@@ -981,6 +920,11 @@ export const PRESALE_ABI = [
                 "internalType": "address"
             }
         ]
+    },
+    {
+        "type": "error",
+        "name": "ReentrancyGuardReentrantCall",
+        "inputs": []
     },
     {
         "type": "error",

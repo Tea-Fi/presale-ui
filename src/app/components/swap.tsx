@@ -102,7 +102,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
     };
 
     const getSelectedTokenPrice = async () => {
-        if (selectedToken.symbol == 'USDC' || selectedToken.symbol == 'USDT') {
+        if (selectedToken.symbol == 'USDC' || selectedToken.symbol == 'USDT'  || selectedToken.symbol == 'DAI') {
             return 1;
         }
 
@@ -149,7 +149,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
 
     useEffect(() => {
         checkTokenAllowance();
-    }, [isSuccess, isError, selectedTokenPrice]);
+    }, [isReversed, isSuccess, isError, selectedTokenPrice, tokenIsApproved]);
 
     useEffect(() => {
         // reset states...
@@ -222,7 +222,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
                         setTokenBuyValue(parseHumanReadable(
                             amountsIn,
                             18,
-                            4
+                            6
                         ));
                     }}
                 />
@@ -267,7 +267,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
                         setTokenSellValue(parseHumanReadable(
                             amountsIn,
                             selectedToken.decimals,
-                            4
+                            6
                         ));
                     }}
                 />
@@ -338,7 +338,11 @@ const SwapInput = ({
 
                         if (
                             !isPatternTested &&
-                            value !== 'Backspace'
+                            value !== 'Backspace' &&
+                            value !== 'ArrowLeft' &&
+                            value !== 'ArrowRight' &&
+                            value !== 'ArrowDown' &&
+                            value !== 'ArrowUp'
                         ) {
                             e.preventDefault();
                         }
@@ -356,7 +360,7 @@ const SwapInput = ({
                     </div>
                     :
                     <SelectContainer
-                        disabled={disabled}
+                        // disabled={disabled}
                         defaultValue={defaultValue}
                         onChange={onChange}
                         items={tokenList}

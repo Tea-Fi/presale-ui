@@ -28,7 +28,7 @@ export const Progress: FC<Props> = ({ max, value, className }) => {
 	const Childdiv = {
 		transition: "0.2s",
 		width: `${currentInPerc >= MAX ? MAX : currentInPerc}%`,
-		backgroundImage: 'linear-gradient(90deg, #FFC700 0%, #00CD90 100%)'
+		backgroundImage: 'linear-gradient(90deg, #FF3187 0%, #B22383 100%)'
 	};
 
 	return (

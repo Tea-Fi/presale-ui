@@ -1,7 +1,7 @@
 import { getChainId } from '@wagmi/core';
 import { SwapContainer } from '../components/swap';
 import { Token, wagmiConfig } from '../config';
-import { USDT, USDC, ETH, WETH, WBTC } from '../utils/constants';
+import { USDT, USDC, ETH, WETH, WBTC, DAI } from '../utils/constants';
 
 export const Buy = () => {
   const chainId = getChainId(wagmiConfig);
@@ -29,6 +29,12 @@ export const Buy = () => {
       decimals: 6,
       symbol: "USDT",
       imageUrl: "https://seeklogo.com/images/T/tether-usdt-logo-FA55C7F397-seeklogo.com.png"
+    },
+    {
+      address: DAI[chainId],
+      decimals: 18,
+      symbol: "DAI",
+      imageUrl: "https://cryptologos.cc/logos/multi-collateral-dai-dai-logo.png"
     },
     {
       address: WBTC[chainId],

@@ -192,20 +192,18 @@ export async function buyExactPresaleTokens({
     PRESALE_ABI,
     signer
   );
+  
 
   try {
     let tx;
     if(!tokenSell || tokenSell === ZeroAddress) {
-      const {
-        price,
-      } = await getOptionInfo(optionId);
-
-      const usdEquivalentedAmountInPresaleToken = buyAmount * price / BigInt(1e14);
-      const amountInETH = await getInputPriceQuoteReversed(
+      const amountInETH = await getQuoteAmountsInForTeaTokens(
+        optionId,
         tokenSell,
-        usdEquivalentedAmountInPresaleToken
+        buyAmountHuman
       );
 
+      console.log(amountInETH);
       tx = await presaleContract.buyExactPresaleTokensETH(
         optionId,
         referrerId,
