@@ -67,6 +67,16 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
                 maxUint256,
             ],
         });
+
+        if (hash == undefined) {
+            setIsLoading(false);
+            return {
+                status: 'ERROR',
+                message: 'Operation cancelled by user',
+                txid: null,
+            };
+        }
+
         const transactionReceipt = await waitForTransactionReceipt(wagmiConfig, { hash });
         setIsLoading(false);
 
