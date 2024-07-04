@@ -50,8 +50,8 @@ export const investmentInfo = {
   },
   "0.2": {
     id: 1,
-    tge: "20% - released at TGE",
-    vested: "80% - vested linearly over 6 months",
+    tge: "30% - released at TGE",
+    vested: "70% - vested linearly over 6 months",
   },
   "0.24": {
     id: 2,

@@ -4,7 +4,7 @@ import { TeaTokenLogoAsset } from '../../assets/icons';
 import { ArrowDownUpIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { cn, parseHumanReadable } from '../utils';
-import { getBalance, getAccount, getChainId } from '@wagmi/core';
+import { getBalance, getAccount, getChainId, waitForTransactionReceipt } from '@wagmi/core';
 
 import { Token, wagmiConfig } from '../config';
 import { Address, erc20Abi, maxUint256, parseUnits, zeroAddress } from 'viem';
@@ -37,7 +37,8 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
 
     const account = getAccount(wagmiConfig);
     const chainId = getChainId(wagmiConfig);
-    const result = useReadContract({
+
+    const allowances = useReadContract({
         abi: erc20Abi,
         config: wagmiConfig,
         address: selectedToken.address,
@@ -55,9 +56,9 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
         writeContract
     } = useWriteContract();
 
-
     const approveToken = async (token: Address) => {
-        return await writeContract({
+        setIsLoading(true);
+        const hash = await writeContract({
             address: token,
             abi: erc20Abi,
             functionName: 'approve',
@@ -66,6 +67,22 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
                 maxUint256,
             ],
         });
+        const transactionReceipt = await waitForTransactionReceipt(wagmiConfig, { hash });
+        setIsLoading(false);
+
+        if (transactionReceipt.status == 'success') {
+            return {
+                status: 'SUCCESS',
+                message: 'Allowance successfully set',
+                txid: hash,
+            }; 
+        }
+
+        return {
+            status: 'ERROR',
+            message: 'Error setting allowance',
+            txid: null,
+        };
     }
 
     const handleBuy = async (token: Address, value: string) => {
@@ -127,7 +144,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
         return balance;
     };
 
-    const checkTokenAllowance = () => {
+    const checkTokenAllowance =  async () => {
         if (selectedToken.address == zeroAddress) {
             setTokenIsApproved(true);
             return;
@@ -137,9 +154,9 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
             tokenSellValue.toString(),
             selectedToken.decimals
         );
-        const allowance = result.data ?? 0n;
+        const allowance = allowances.data ?? 0n;
 
-        if (allowance == 0n || inputValue >= allowance) {
+        if (allowance == 0n || inputValue > allowance) {
             setTokenIsApproved(false);
             return;
         }
@@ -149,18 +166,21 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
 
     useEffect(() => {
         checkTokenAllowance();
-    }, [isReversed, isSuccess, isError, selectedTokenPrice, tokenIsApproved]);
+    }, [allowances]);
 
     useEffect(() => {
+        allowances.refetch();
+    }, [isSuccess, isError]);
+
+    useEffect(() => {
+        allowances.refetch();
+
         // reset states...
         setIsTypingForTokenSell(false);
         setIsTypingForTokenBuy(false);
         setTokenBuyValue('');
         setTokenSellValue('');
         setSelectedTokenPrice('');
-        setTokenIsApproved(true);
-
-        checkTokenAllowance();
 
         getSelectedTokenPrice().then((res) => {
             setSelectedTokenPrice(res)
