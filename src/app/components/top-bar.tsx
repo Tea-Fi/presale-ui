@@ -8,6 +8,10 @@ import { TeaSwapLogoAsset } from "../../assets/icons";
 import { cn } from "../utils/cn";
 import { getChainId } from '@wagmi/core';
 import { wagmiConfig, ChainId } from "../config";
+import { RiMenu3Fill } from "react-icons/ri";
+import { Button } from "./ui";
+import { useModal } from "connectkit";
+
 
 export const TopBar = ({
   isBuyPageActive,
@@ -21,6 +25,7 @@ export const TopBar = ({
   const [referralCode, setReferralCode] = useState('');
   const [referralTree, setReferralTree] = useState<Referral>();
   const chainId = getChainId(wagmiConfig);
+  const {setOpen} = useModal();
 
 
   useAccountEffect({
@@ -41,7 +46,7 @@ export const TopBar = ({
 
   return (
     <div className="w-full max-h-24 inline-flex justify-between items-center px-5 py-3">
-      <span className="w-[228px]">
+      <span className="md:w-[228px]">
         <TeaSwapLogoAsset className="size-10"/>
       </span>
 
@@ -74,11 +79,19 @@ export const TopBar = ({
         </NavLink>
       </div>
 
-      <span className={"inline-flex w-[228px] items-center"}>
+      <span className={"w-[228px] items-center hidden md:inline-flex"}>
         <span className="text-white">{chainId == ChainId.MAINNET ? 'Mainnet' : 'Sepolia'}</span>
         &nbsp;
         <Wallet />
       </span>
+
+
+      {/* Burger menu for small sizes */}
+      <Button
+        className="text-white text-[2.7rem] bg-transparent p-0 hover:bg-transparent hover:text-zinc-400 md:hidden"
+        onClick={() => setOpen(true)}>
+        <RiMenu3Fill />
+      </Button>
     </div>
   );
 };

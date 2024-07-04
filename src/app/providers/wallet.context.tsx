@@ -1,12 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { FunctionComponent, ReactNode } from 'react';
-import { useConnectModal } from '@rainbow-me/rainbowkit';
 
 import { JsonRpcProvider, ethers } from 'ethers';
 import { ERC20_ABI } from '../utils/erc20_abi';
 import { USDT, USDC, WETH, WBTC } from '../utils/constants';
 // import { CoinType } from '../pages/buy';
 import { useConnections, useConnectorClient } from 'wagmi';
+import { useModal } from 'connectkit';
 
 export enum WalletEvents {
   REQUEST_ACCOUNTS = 'eth_requestAccounts',
@@ -57,7 +57,7 @@ const defaultCurrencies = {
 };
 
 export const WalletProvider: FunctionComponent<{ children: ReactNode }> = ({ children }) => {
-  const { openConnectModal } = useConnectModal();
+  const { open, setOpen } = useModal();
 
   const { data } = useConnectorClient();
   const connections = useConnections();
@@ -121,10 +121,10 @@ export const WalletProvider: FunctionComponent<{ children: ReactNode }> = ({ chi
   }, [account, chainId]);
 
   const connect = useCallback(() => {
-    if (openConnectModal) {
-      openConnectModal();
+    if (open) {
+      setOpen(true);
     }
-  }, [openConnectModal]);
+  }, [open]);
 
   const disconnect = useCallback(() => {
     setCurrenciesInfo(defaultCurrencies);

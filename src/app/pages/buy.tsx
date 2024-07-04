@@ -55,7 +55,7 @@ export const Buy = () => {
         </div>
       </div>
 
-      <div className='w-full inline-flex justify-center mb-20'>
+      <div className='w-full inline-flex justify-center mb-20 p-5'>
         <SwapContainer
           tokenList={tokenList}
         />

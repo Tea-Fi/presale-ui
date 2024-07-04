@@ -22,7 +22,7 @@ export const Layout = () => {
     <main className='flex flex-col min-h-screen min-v-screen dark'>
       {status === LoginStatus.LOGGED_IN && <TopBar />}
       <Outlet />
-      <BackgroundBeams className='pointer-events-none' />
+      <BackgroundBeams className='hidden pointer-events-none md:block' />
     </main>
   );
 };
