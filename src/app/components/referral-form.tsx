@@ -1,13 +1,15 @@
 import React from "react";
 
-import { SlIcon } from '@shoelace-style/shoelace/dist/react';
-import { Form, Formik, Field, ErrorMessage } from 'formik';
-import { Button } from "./ui";
 import { z } from "zod";
-import { cn } from "../utils/cn";
-import { Referral, createReferral, referralCodeExists } from "../utils/referrals";
-
 import { isAddress } from 'ethers'
+import { useAccount, useSignMessage } from "wagmi";
+import { Form, Formik, Field, ErrorMessage } from 'formik';
+import { SlIcon } from '@shoelace-style/shoelace/dist/react';
+
+import { Button } from "./ui";
+import { cn } from "../utils/cn";
+import * as referrals from '../utils/referrals';
+import type { Referral } from "../utils/referrals";
 
 const ReferralValidationSchema = z.object({
   walletAddress: z.string().refine(x => isAddress(x), {
@@ -63,6 +65,9 @@ interface Props {
 }
 
 export const ReferralForm: React.FC<Props> = (props) => {
+  const account = useAccount();
+  const { signMessageAsync } = useSignMessage()
+
   const [showForm, setShowform] = React.useState(false);
   const [error, setError] = React.useState<string | undefined>();
 
@@ -94,7 +99,7 @@ export const ReferralForm: React.FC<Props> = (props) => {
     }
 
     if (values.referralCode) {
-      const codeExists = await referralCodeExists(values.referralCode);
+      const codeExists = await referrals.referralCodeExists(values.referralCode);
 
       if (codeExists) {
         result['referralCode'] = 'Referral code already exists'; 
@@ -105,15 +110,34 @@ export const ReferralForm: React.FC<Props> = (props) => {
   }, [])
 
   const onSubmit = React.useCallback(async (values: ReferralPayload) => {
+    setError(undefined)
+
+    if (!account.address) {
+      setError('Wallet not connected');
+      return;
+    }
+
     try {
-      await createReferral(values);
+      const signPayload = await referrals.generateSignature(account.address!, values);
+
+      const signedMessage = await signMessageAsync({ 
+        message: `0x${signPayload}`,
+      });
+     
+      const payload = {
+        ...values,
+        signature: signedMessage,
+        senderAddress: account.address!,
+      };
+
+      await referrals.createReferral(props.referralTree.referral!, payload);
 
       setShowform(false)
       props.onSubmit();
     } catch (err) {
       setError(`${err}`)
     }
-  }, [props.onSubmit]);
+  }, [props.onSubmit, account]);
 
   return (
     <>

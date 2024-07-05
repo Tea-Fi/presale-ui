@@ -2,7 +2,6 @@ import { API_URL } from "../config/env";
 
 import { api } from "./api";
 import { Referral } from "./constants";
-import { AUTH_ACCESS_TOKEN_KEY } from "./auth";
 
 export type { Referral } from "./constants";
 
@@ -10,6 +9,11 @@ export interface CreateReferralPayload {
   walletAddress: string;
   referralCode: string;
   fee: number;
+}
+
+export type CreateReferralFullPayload = CreateReferralPayload & {
+  signature: string,
+  senderAddress: string,
 }
 
 export const validCode = async (code: string): Promise<boolean> => {
@@ -33,14 +37,12 @@ export const referralCodeExists = async (code: string): Promise<boolean> => {
   }
 }
 
-export const createReferral = async (payload: CreateReferralPayload) => {
-  const accessToken = window.localStorage.getItem(AUTH_ACCESS_TOKEN_KEY);
+export const createReferral = async (code: string, payload: CreateReferralFullPayload) => {
+  const body = JSON.stringify(payload);
 
-  const response = await api.post(`${API_URL}/leads`, JSON.stringify(payload), {
+  const response = await api.post(`${API_URL}/leads/${code}`, body, {
     headers: {
       'Content-Type': 'application/json',
-
-      ...(accessToken && { 'Authorization': `Bearer ${accessToken}` }) 
     }
   })
 
@@ -53,10 +55,20 @@ export const createReferral = async (payload: CreateReferralPayload) => {
     : response.data
 
   if (result.error) {
-    throw new Error(result.error);
+    throw new Error(result.message);
   }
 
   return result as Referral;
+}
+
+export const generateSignature = async (address: string, payload: CreateReferralPayload) => {
+  const utf8 = new TextEncoder()
+    .encode(`${payload.walletAddress}${payload.referralCode}${payload.fee}`)
+
+  const buffer = await crypto.subtle.digest('SHA-256', utf8)
+  const hash = Buffer.from(buffer).toString('base64');
+
+  return `${address}${hash}`;
 }
 
 const getReferralTree = async (query: string): Promise<Referral | undefined> => {
