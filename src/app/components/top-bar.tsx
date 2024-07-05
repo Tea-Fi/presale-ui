@@ -26,16 +26,16 @@ export const TopBar = ({
   const [referralTree, setReferralTree] = useState<Referral>();
   const chainId = getChainId(wagmiConfig);
   const {setOpen} = useModal();
-
-
+  
   useAccountEffect({
     onConnect({ address }) {
-      getReferralTreeByWallet(address).then(referralTree => {
-        if (referralTree !== undefined) {
-          setReferralTree(referralTree);
-          setReferralCode(referralTree.referral as string);
-        }
-      });
+      getReferralTreeByWallet(address)
+        .then(referralTree => {
+          if (referralTree !== undefined) {
+            setReferralTree(referralTree);
+            setReferralCode(referralTree.referral as string);
+          }
+        })
     },
     onDisconnect() {
       setReferralCode('');

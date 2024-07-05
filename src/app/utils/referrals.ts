@@ -1,4 +1,5 @@
 import { API_URL } from "../config/env";
+
 import { api } from "./api";
 import { Referral } from "./constants";
 
@@ -8,6 +9,11 @@ export interface CreateReferralPayload {
   walletAddress: string;
   referralCode: string;
   fee: number;
+}
+
+export type CreateReferralFullPayload = CreateReferralPayload & {
+  signature: string,
+  senderAddress: string,
 }
 
 export const validCode = async (code: string): Promise<boolean> => {
@@ -31,20 +37,38 @@ export const referralCodeExists = async (code: string): Promise<boolean> => {
   }
 }
 
-export const createReferral = async (code: string, payload: CreateReferralPayload) => {
-  const result = await api.post(`${API_URL}/leads/${code}`, JSON.stringify(payload), {
+export const createReferral = async (code: string, payload: CreateReferralFullPayload) => {
+  const body = JSON.stringify(payload);
+
+  const response = await api.post(`${API_URL}/leads/${code}`, body, {
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     }
   })
-    .then(res => res.data)
-    .then(res => typeof res === 'string' ? JSON.parse(res) : res);
+
+  if (response.status === 401) {
+    throw new Error('You are unauthorized to create new referral');
+  }
+
+  const result = typeof response.data === 'string'
+    ? JSON.parse(response.data)
+    : response.data
 
   if (result.error) {
-    throw new Error(result.error);
+    throw new Error(result.message);
   }
 
   return result as Referral;
+}
+
+export const generateSignature = async (address: string, payload: CreateReferralPayload) => {
+  const utf8 = new TextEncoder()
+    .encode(`${payload.walletAddress}${payload.referralCode}${payload.fee}`)
+
+  const buffer = await crypto.subtle.digest('SHA-256', utf8)
+  const hash = Buffer.from(buffer).toString('base64');
+
+  return `${address}${hash}`;
 }
 
 const getReferralTree = async (query: string): Promise<Referral | undefined> => {

@@ -49,17 +49,18 @@ export const Referrals = () => {
 
   useAccountEffect({
     onConnect({ address }) {
-      getReferralTreeByWallet(address).then(refTree => {
-        if (refTree !== undefined) {
-          const refCode = refTree.referral as string;
+      getReferralTreeByWallet(address)
+        .then(refTree => {
+          if (refTree !== undefined) {
+            const refCode = refTree?.referral as string;
 
-          if (referralTree == undefined || referralTree.id != refTree.id) {
-            setReferralTree(refTree);
-          } else if (referralCode == undefined || referralCode != refCode) {
-            setReferralCode(refCode);
+            if (referralTree == undefined || referralTree.id != refTree.id) {
+              setReferralTree(refTree);
+            } else if (referralCode == undefined || referralCode != refCode) {
+              setReferralCode(refCode);
+            }
           }
-        }
-      });
+        });
     },
     onDisconnect() {
       setReferralCode('');
