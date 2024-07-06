@@ -90,7 +90,7 @@ export const Referrals = () => {
           >
             <Copy />
             &nbsp;&nbsp;
-            {getShortAccount(referralTree?.wallet)} | {referralCode.toUpperCase()} | {(referralTree?.fee || 0) / 100}%
+            {getShortAccount(referralTree?.wallet)} | {referralCode.toUpperCase()} | {(referralTree?.fee || 0) / 100}% | {(`${Number(referralTree?.amountInUsd?.toFixed(2) || 0).toLocaleString('en-US')}$` || '')}
           </div>
         ),
       },
@@ -117,7 +117,7 @@ export const Referrals = () => {
             >
               <Copy />
               &nbsp;&nbsp;
-              {getShortAccount(lead?.wallet)} | {code.toUpperCase()} | {(lead?.fee || 0) / 100}%
+              {getShortAccount(lead?.wallet)} | {code.toUpperCase()} | {(lead?.fee || 0) / 100}% | {(`${Number(lead?.amountInUsd?.toFixed(2) || 0).toLocaleString("en-US")}$` || '')}
             </div>
           ),
         },
