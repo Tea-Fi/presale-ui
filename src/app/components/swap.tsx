@@ -8,10 +8,12 @@ import { getBalance, getAccount, getChainId, waitForTransactionReceipt } from '@
 
 import { Token, wagmiConfig } from '../config';
 import { Address, erc20Abi, maxUint256, parseUnits, zeroAddress } from 'viem';
-import { buyExactPresaleTokens, getInputPriceQuote, getOptionInfo, getQuoteAmountsInForTeaTokens, getQuoteAmountsOutForTeaTokens } from '../utils/presale';
+import { buyExactPresaleTokens, getInputPriceQuote, getOptionInfo } from '../utils/presale';
 import { PRESALE_CONTRACT_ADDRESS, investmentInfo } from '../utils/constants';
 import { useReadContract, useWriteContract } from 'wagmi';
+import { readContract } from '@wagmi/core';
 import Spinner from './spinner';
+import { PRESALE_ABI } from '../utils/presale_abi';
 
 export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
     const search = window.location.search;
@@ -47,14 +49,14 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
     });
 
     let {
-        // @ts-ignore
         isPending,
-        // @ts-ignore
         isSuccess,
-        // @ts-ignore
         isError,
         writeContract
     } = useWriteContract();
+
+
+
 
     const approveToken = async (token: Address) => {
         setIsLoading(true);
@@ -119,6 +121,8 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
         return result;
     };
 
+
+
     const getSelectedTokenBalance = async () => {
         const balance = await getBalance(wagmiConfig, {
             address: account.address ?? zeroAddress,
@@ -173,6 +177,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
 
         setTokenIsApproved(true);
     };
+
 
     useEffect(() => {
         checkTokenAllowance();
@@ -243,14 +248,19 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
                             return;
                         }
 
-                        const amountsIn = await getQuoteAmountsOutForTeaTokens(
-                            investmentInfo[investment].id,
-                            selectedToken.address,
-                            value,
-                        );
+                        const amountsOut = await readContract(wagmiConfig, {
+                            abi: PRESALE_ABI,
+                            address: PRESALE_CONTRACT_ADDRESS[chainId]as Address,
+                            args: [
+                                investmentInfo[investment].id,
+                                selectedToken.address,
+                                parseUnits(value, selectedToken.decimals),
+                            ],
+                            functionName: 'getExactReceiveAmount',
+                        });
 
                         setTokenBuyValue(parseHumanReadable(
-                            amountsIn,
+                            amountsOut as bigint,
                             18,
                             6
                         ));
@@ -286,16 +296,22 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
                             setTokenSellValue('');
                             return;
                         }
+                        
+                        const amountsIn = await readContract(wagmiConfig, {
+                            abi: PRESALE_ABI,
+                            address: PRESALE_CONTRACT_ADDRESS[chainId]as Address,
+                            args: [
+                                investmentInfo[investment].id,
+                                selectedToken.address,
+                                parseUnits(value, selectedToken.decimals),
+                            ],
+                            functionName: 'getExactPayAmount',
+                        });
 
                         setTokenBuyValue(value);
 
-                        const amountsIn = await getQuoteAmountsInForTeaTokens(
-                            investmentInfo[investment].id,
-                            selectedToken.address,
-                            value,
-                        );
                         setTokenSellValue(parseHumanReadable(
-                            amountsIn,
+                            amountsIn as bigint,
                             selectedToken.decimals,
                             6
                         ));
