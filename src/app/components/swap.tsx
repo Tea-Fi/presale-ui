@@ -82,6 +82,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
 
   let { isPending, isSuccess, isError, writeContract } = useWriteContract();
 
+
   useEffect(() => {
     const fetchBalance = async () => {
       try {
@@ -130,6 +131,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
     setIsLoading(false);
 
     if (transactionReceipt.status == "success") {
+      await checkTokenAllowance();
       return {
         status: "SUCCESS",
         message: "Allowance successfully set",
@@ -164,6 +166,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
         setTeaBalance(parseHumanReadable(res.value, res.decimals, 3))
       );
     }
+
 
     return result;
   };
@@ -255,6 +258,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
     allowances.refetch();
   }, [isSuccess, isError]);
 
+
   useEffect(() => {
     allowances.refetch();
 
@@ -293,7 +297,6 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
         setTokenBuyValue("");
         return;
       }
-
 
 
       const amountsOut = await readContract(wagmiConfig, {

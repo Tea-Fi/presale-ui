@@ -3,6 +3,8 @@ import { ERC20_ABI } from './erc20_abi';
 import { PRESALE_ABI } from './presale_abi';
 import { PRESALE_CONTRACT_ADDRESS } from './constants';
 import { Address, erc20Abi } from 'viem';
+import { writeContract, readContract, getChainId } from '@wagmi/core';
+import { wagmiConfig } from '../config';
 
 export async function getTokenAllowance(tokenAddress: string, ownerAddress: string, spenderAddress: string) {
   // updated provider with custom url for better testnet experience
@@ -181,47 +183,50 @@ export async function buyExactPresaleTokens({
     tokenSell: Address,
     buyAmountHuman: string,
   }) {
-  // updated provider with custom url for better testnet experience
-  const provider = new ethers.BrowserProvider((window as any).ethereum);
-  const signer = await provider.getSigner()
-  const chainId = Number((await provider.getNetwork()).chainId);
-  const buyAmount = parseEther(buyAmountHuman);
-
-  const presaleContract = new ethers.Contract(
-    PRESALE_CONTRACT_ADDRESS[chainId],
-    PRESALE_ABI,
-    signer
-  );
-  
+  const chainId = getChainId(wagmiConfig);
+  const buyAmount = parseUnits(buyAmountHuman, 18);
 
   try {
     let tx;
     if(!tokenSell || tokenSell === ZeroAddress) {
-      const amountInETH = await getQuoteAmountsInForTeaTokens(
-        optionId,
-        tokenSell,
-        buyAmountHuman
-      );
+      const amountInETH = await readContract(wagmiConfig, {
+        abi: PRESALE_ABI,
+        address: PRESALE_CONTRACT_ADDRESS[chainId] as Address,
+        args: [
+          optionId,
+          tokenSell,
+          buyAmount,
+        ],
+        functionName: "getExactPayAmount",
+      });
 
-      console.log(amountInETH);
-      tx = await presaleContract.buyExactPresaleTokensETH(
-        optionId,
-        referrerId,
-        buyAmount,
-        {
-          value: amountInETH,
-        }
-      );
+      tx = await writeContract(wagmiConfig, {
+        abi: PRESALE_ABI,
+        address: PRESALE_CONTRACT_ADDRESS[chainId] as Address,
+        args: [
+          optionId,
+          referrerId,
+          buyAmount,
+        ],
+        value: amountInETH as bigint,
+        functionName: "buyExactPresaleTokensETH",
+      });
     } else {
-      tx = await presaleContract.buyExactPresaleTokens(
-        optionId,
-        referrerId,
-        tokenSell,
-        buyAmount,
-      );
+      tx = await writeContract(wagmiConfig, {
+        abi: PRESALE_ABI,
+        address: PRESALE_CONTRACT_ADDRESS[chainId] as Address,
+        args: [
+          optionId,
+          referrerId,
+          tokenSell,
+          buyAmount,
+        ],
+        functionName: "buyExactPresaleTokens",
+      });
     }
 
-    await tx.wait();
+    console.log(tx);
+
     return {
       status: 'SUCCESS',
       message: 'Successfull $TEA purchase',
