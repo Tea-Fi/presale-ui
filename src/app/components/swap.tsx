@@ -37,6 +37,8 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
     const [tokenIsApproved, setTokenIsApproved] = useState<boolean>(true);
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
+    const [balanceIsSufficient, setBalanceIsSufficient] = useState<boolean>(false)
+
     const account = getAccount(wagmiConfig);
     const chainId = getChainId(wagmiConfig);
 
@@ -178,6 +180,12 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
         setTokenIsApproved(true);
     };
 
+    useEffect(() => {
+        const value = parseUnits(tokenSellValue.toString(), selectedToken.decimals);
+        const balanceValue = parseUnits(balance.toString(), selectedToken.decimals);
+
+        setBalanceIsSufficient(value <= balanceValue);
+    }, [tokenSellValue, balance])
 
     useEffect(() => {
         checkTokenAllowance();
@@ -205,9 +213,10 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
             parseHumanReadable(res.value, res.decimals, 3)
         ));
 
-        getSelectedTokenBalance().then((res) => setBalance(
-            parseHumanReadable(res.value, res.decimals, 3)
-        ));
+        getSelectedTokenBalance().then((res) => {
+            setBalance(parseHumanReadable(res.value, res.decimals, 3))
+            setBalanceIsSufficient(res.value < parseUnits(tokenSellValue.toString(), selectedToken.decimals))
+        });
     }, [selectedToken, isReversed]);
 
     return (
@@ -310,7 +319,6 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
                         });
 
                         setTokenBuyValue(value);
-
                         setTokenSellValue(parseHumanReadable(
                             amountsIn as bigint,
                             selectedToken.decimals,
@@ -320,7 +328,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
                 />
             </div>
 
-            <Button disabled={isLoading || isPending || selectedTokenPrice == '' || tokenBuyValue.toString() == '' || tokenBuyValue.toString() == '0'}
+            <Button disabled={isLoading || isPending || selectedTokenPrice == '' || tokenBuyValue.toString() == '' || tokenBuyValue.toString() == '0' || !balanceIsSufficient}
                 onClick={async () => {
                     if (!tokenIsApproved) {
                         await approveToken(selectedToken.address);
@@ -333,7 +341,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
                 }}
                 className='bg-[#680043] hover:bg-[#aa006f] text-xl font-bold text-[#ff00a6] py-6'
             >
-                {(isPending || isLoading) ? <Spinner /> : (tokenIsApproved ? 'Buy' : `Allow ${selectedToken.symbol}`)}
+                {(isPending || isLoading) ? <Spinner /> : (!balanceIsSufficient ? 'Insufficient funds' : tokenIsApproved ? 'Buy' : `Allow ${selectedToken.symbol}`)}
             </Button>
 
             <div className='text-right text-zinc-500'>
