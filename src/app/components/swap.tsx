@@ -56,6 +56,8 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
 
   const [tokenIsApproved, setTokenIsApproved] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [balanceIsSufficient, setBalanceIsSufficient] =
+    useState<boolean>(false);
 
   const searchTimeout = useRef<NodeJS.Timeout>();
 
@@ -201,6 +203,13 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
   };
 
   useEffect(() => {
+    const value = parseUnits(tokenSellValue.toString(), selectedToken.decimals);
+    const balanceValue = parseUnits(balance.toString(), selectedToken.decimals);
+
+    setBalanceIsSufficient(value <= balanceValue);
+  }, [tokenSellValue, balance]);
+
+  useEffect(() => {
     checkTokenAllowance();
   }, [allowances]);
 
@@ -226,9 +235,13 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
       setTeaBalance(parseHumanReadable(res.value, res.decimals, 3))
     );
 
-    getSelectedTokenBalance().then((res) =>
-      setBalance(parseHumanReadable(res.value, res.decimals, 3))
-    );
+    getSelectedTokenBalance().then((res) => {
+      setBalance(parseHumanReadable(res.value, res.decimals, 3));
+      setBalanceIsSufficient(
+        res.value <
+          parseUnits(tokenSellValue.toString(), selectedToken.decimals)
+      );
+    });
   }, [selectedToken, isReversed, account?.address]);
 
   const onCurrencyAmountChange = async () => {
@@ -364,7 +377,8 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
           isPending ||
           selectedTokenPrice == "" ||
           tokenBuyValue.toString() == "" ||
-          tokenBuyValue.toString() == "0"
+          tokenBuyValue.toString() == "0" ||
+          !balanceIsSufficient
         }
         onClick={async () => {
           if (!tokenIsApproved) {
@@ -377,6 +391,8 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
       >
         {isPending || isLoading ? (
           <Spinner />
+        ) : !balanceIsSufficient ? (
+          "Insufficient funds"
         ) : tokenIsApproved ? (
           "Buy"
         ) : (
