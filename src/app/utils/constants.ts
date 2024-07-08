@@ -1,4 +1,3 @@
-import { ZeroAddress } from "ethers";
 import { zeroAddress, Address } from 'viem';
 
 type Currency = Record<number, Address>;
