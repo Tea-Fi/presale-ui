@@ -192,7 +192,7 @@ export const Referrals = () => {
             nodes={nodes}
             edges={edges}
             fitView
-            onNodeClick={(event) => { /* Pass noop to trigger real event */}}
+            onNodeClick={(_) => { /* Pass noop to trigger real event */}}
             zoomOnScroll={false}
             preventScrolling={false}
           >
