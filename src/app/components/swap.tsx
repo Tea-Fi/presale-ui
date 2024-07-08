@@ -24,6 +24,8 @@ import {
   buyExactPresaleTokens,
   getInputPriceQuote,
   getOptionInfo,
+  getSaleOptionsCout,
+  getTokensAvailable,
 } from "../utils/presale";
 import { PRESALE_CONTRACT_ADDRESS, investmentInfo } from "../utils/constants";
 import { useReadContract, useWriteContract } from "wagmi";
@@ -39,6 +41,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
 
   const [isReversed, setReversed] = useState<boolean>(true);
   const [balance, setBalance] = useState<string | number>(0);
+  const [restTeaBalance, setRestTeaBalance] = useState<string | number>(0);
   const [tokenSellValue, setTokenSellValue] = useState<string | number>("");
   const [tokenBuyValue, setTokenBuyValue] = useState<string | number>("");
 
@@ -59,6 +62,8 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
   const [balanceIsSufficient, setBalanceIsSufficient] =
     useState<boolean>(false);
 
+  const [teaIsSufficient, setTeaIsSufficient] = useState<boolean>(false);
+
   const searchTimeout = useRef<NodeJS.Timeout>();
 
   const account = getAccount(wagmiConfig);
@@ -76,6 +81,30 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
   });
 
   let { isPending, isSuccess, isError, writeContract } = useWriteContract();
+
+  useEffect(() => {
+    const fetchBalance = async () => {
+      try {
+        const investmentIndex = Object.keys(investmentInfo).findIndex(
+          (key) => key === investment
+        );
+
+        const [total, option, optionsCount] = await Promise.all([
+          getTokensAvailable(),
+          getOptionInfo(investmentIndex),
+          getSaleOptionsCout(),
+        ]);
+        const sold = option.sold;
+        const rest = total / optionsCount - sold;
+        setRestTeaBalance(parseHumanReadable(rest, 18, 3));
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    if (investment && investment) {
+      fetchBalance();
+    }
+  }, [investmentInfo, investment]);
 
   const approveToken = async (token: Address) => {
     setIsLoading(true);
@@ -208,6 +237,15 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
 
     setBalanceIsSufficient(value <= balanceValue);
   }, [tokenSellValue, balance]);
+
+  useEffect(() => {
+    const teaValue = parseUnits(tokenBuyValue.toString(), 18);
+    const teaBalance = parseUnits(restTeaBalance.toString(), 18);
+
+    setTeaIsSufficient(teaValue <= teaBalance);
+  }, [restTeaBalance, tokenBuyValue]);
+
+  setTeaIsSufficient;
 
   useEffect(() => {
     checkTokenAllowance();
@@ -380,7 +418,8 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
           selectedTokenPrice == "" ||
           tokenBuyValue.toString() == "" ||
           tokenBuyValue.toString() == "0" ||
-          !balanceIsSufficient
+          !balanceIsSufficient ||
+          !teaIsSufficient
         }
         onClick={async () => {
           if (!tokenIsApproved) {
@@ -395,6 +434,8 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
           <Spinner />
         ) : !balanceIsSufficient ? (
           "Insufficient funds"
+        ) : !teaIsSufficient ? (
+          "Insufficient TEA tokens"
         ) : tokenIsApproved ? (
           "Buy"
         ) : (
