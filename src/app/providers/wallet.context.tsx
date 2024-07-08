@@ -1,25 +1,33 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import type { FunctionComponent, ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import type { FunctionComponent, ReactNode } from "react";
 
-import { JsonRpcProvider, ethers } from 'ethers';
-import { ERC20_ABI } from '../utils/erc20_abi';
-import { USDT, USDC, WETH, WBTC } from '../utils/constants';
+import { JsonRpcProvider, ethers } from "ethers";
+import { ERC20_ABI } from "../utils/erc20_abi";
+import { USDT, USDC, WETH, WBTC } from "../utils/constants";
 // import { CoinType } from '../pages/buy';
-import { useConnections, useConnectorClient } from 'wagmi';
-import { useModal } from 'connectkit';
+import { useConnections, useConnectorClient } from "wagmi";
+import { useModal, useChains } from "connectkit";
+import { SUPPORTED_NETWORK } from "../config";
 
 export enum WalletEvents {
-  REQUEST_ACCOUNTS = 'eth_requestAccounts',
-  ACCOUNTS = 'eth_accounts',
-  ACCOUNTS_CHANGED = 'accountsChanged',
-  GET_BALANCE = 'eth_getBalance',
+  REQUEST_ACCOUNTS = "eth_requestAccounts",
+  ACCOUNTS = "eth_accounts",
+  ACCOUNTS_CHANGED = "accountsChanged",
+  GET_BALANCE = "eth_getBalance",
 }
 
 enum WalletStatus {
-  CONNECTED = 'connected',
-  CONNECTING = 'connecting',
-  DISCONNECTED = 'disconnected',
-  DISCONNECTING = 'disconnecting',
+  CONNECTED = "connected",
+  CONNECTING = "connecting",
+  DISCONNECTED = "disconnected",
+  DISCONNECTING = "disconnecting",
 }
 
 export interface WalletContext {
@@ -38,7 +46,7 @@ interface Currency {
   decimal: number;
 }
 
-const METAMASK_ACCOUNT_LOCALSTORAGE_KEY = 'metamask_account';
+const METAMASK_ACCOUNT_LOCALSTORAGE_KEY = "metamask_account";
 export const WalletContext = createContext<WalletContext | null>(null);
 
 const initialValues = {
@@ -56,21 +64,30 @@ const defaultCurrencies = {
   wbtc: { balance: null, decimal: 8 },
 };
 
-export const WalletProvider: FunctionComponent<{ children: ReactNode }> = ({ children }) => {
+export const WalletProvider: FunctionComponent<{ children: ReactNode }> = ({
+  children,
+}) => {
   const { open, setOpen } = useModal();
 
   const { data } = useConnectorClient();
   const connections = useConnections();
 
-  const [values, setValues] = useState<Pick<WalletContext, keyof ContextValues>>(initValues());
+  const chains = useChains();
 
-  const [currenciesInfo, setCurrenciesInfo] = useState<Record<string, Currency>>(defaultCurrencies);
+  const [values, setValues] = useState<
+    Pick<WalletContext, keyof ContextValues>
+  >(initValues());
+
+  const [currenciesInfo, setCurrenciesInfo] =
+    useState<Record<string, Currency>>(defaultCurrencies);
 
   const account = useMemo(() => data?.account?.address || null, [data]);
   const chainId = useMemo(() => data?.chain?.id || null, [data]);
 
   function initValues() {
-    const storedValues = window.localStorage.getItem(METAMASK_ACCOUNT_LOCALSTORAGE_KEY);
+    const storedValues = window.localStorage.getItem(
+      METAMASK_ACCOUNT_LOCALSTORAGE_KEY
+    );
     if (storedValues) {
       return JSON.parse(storedValues);
     }
@@ -81,25 +98,67 @@ export const WalletProvider: FunctionComponent<{ children: ReactNode }> = ({ chi
     async (address: string) => {
       try {
         if (!chainId) return;
-        const provider = new JsonRpcProvider(import.meta.env.VITE_PUBLIC_INFURA_URL);
+        const provider = new JsonRpcProvider(
+          import.meta.env.VITE_PUBLIC_INFURA_URL
+        );
 
-        const [ethBalance, usdtBalance, usdcBalance, wethBalance, wbtcBalance] = await Promise.all([
-          provider?.getBalance(address),
-          getFormattedBalanceOfErc20TokenHolder(USDT[chainId], address, currenciesInfo.usdt.decimal),
-          getFormattedBalanceOfErc20TokenHolder(USDC[chainId], address, currenciesInfo.usdc.decimal),
-          getFormattedBalanceOfErc20TokenHolder(WETH[chainId], address, currenciesInfo.weth.decimal),
-          getFormattedBalanceOfErc20TokenHolder(WBTC[chainId], address, currenciesInfo.wbtc.decimal),
-        ]);
+        const [ethBalance, usdtBalance, usdcBalance, wethBalance, wbtcBalance] =
+          await Promise.all([
+            provider?.getBalance(address),
+            getFormattedBalanceOfErc20TokenHolder(
+              USDT[chainId],
+              address,
+              currenciesInfo.usdt.decimal
+            ),
+            getFormattedBalanceOfErc20TokenHolder(
+              USDC[chainId],
+              address,
+              currenciesInfo.usdc.decimal
+            ),
+            getFormattedBalanceOfErc20TokenHolder(
+              WETH[chainId],
+              address,
+              currenciesInfo.weth.decimal
+            ),
+            getFormattedBalanceOfErc20TokenHolder(
+              WBTC[chainId],
+              address,
+              currenciesInfo.wbtc.decimal
+            ),
+          ]);
 
         setCurrenciesInfo({
-          eth: { balance: ethBalance ? ethers.formatUnits(ethBalance) : '0', decimal: 18 },
-          usdt: { balance: usdtBalance.toLocaleString('en-US', { maximumFractionDigits: 4 }), decimal: 6 },
-          usdc: { balance: usdcBalance.toLocaleString('en-US', { maximumFractionDigits: 4 }), decimal: 6 },
-          weth: { balance: wethBalance.toLocaleString('en-US', { maximumFractionDigits: 4 }), decimal: 18 },
-          wbtc: { balance: wbtcBalance.toLocaleString('en-US', { maximumFractionDigits: 4 }), decimal: 8 },
+          eth: {
+            balance: ethBalance ? ethers.formatUnits(ethBalance) : "0",
+            decimal: 18,
+          },
+          usdt: {
+            balance: usdtBalance.toLocaleString("en-US", {
+              maximumFractionDigits: 4,
+            }),
+            decimal: 6,
+          },
+          usdc: {
+            balance: usdcBalance.toLocaleString("en-US", {
+              maximumFractionDigits: 4,
+            }),
+            decimal: 6,
+          },
+          weth: {
+            balance: wethBalance.toLocaleString("en-US", {
+              maximumFractionDigits: 4,
+            }),
+            decimal: 18,
+          },
+          wbtc: {
+            balance: wbtcBalance.toLocaleString("en-US", {
+              maximumFractionDigits: 4,
+            }),
+            decimal: 8,
+          },
         });
       } catch (err) {
-        console.error('==>', err);
+        console.error("==>", err);
       }
     },
     [chainId]
@@ -114,9 +173,17 @@ export const WalletProvider: FunctionComponent<{ children: ReactNode }> = ({ chi
   useEffect(() => {
     if (account && chainId) {
       _getBalance(account);
-      setValues((values) => ({ ...values, account: account, status: WalletStatus.CONNECTED }));
+      setValues((values) => ({
+        ...values,
+        account: account,
+        status: WalletStatus.CONNECTED,
+      }));
     } else {
-      setValues((values) => ({ ...values, account: null, status: WalletStatus.DISCONNECTED }));
+      setValues((values) => ({
+        ...values,
+        account: null,
+        status: WalletStatus.DISCONNECTED,
+      }));
     }
   }, [account, chainId]);
 
@@ -128,7 +195,11 @@ export const WalletProvider: FunctionComponent<{ children: ReactNode }> = ({ chi
 
   const disconnect = useCallback(() => {
     setCurrenciesInfo(defaultCurrencies);
-    setValues((values) => ({ ...values, account: null, status: WalletStatus.DISCONNECTED }));
+    setValues((values) => ({
+      ...values,
+      account: null,
+      status: WalletStatus.DISCONNECTED,
+    }));
   }, []);
 
   // async function getFormattedDecimalOfErc20TokenHolder(contractAddress: string) {
@@ -141,10 +212,20 @@ export const WalletProvider: FunctionComponent<{ children: ReactNode }> = ({ chi
   //   return numDecimals;
   // }
 
-  async function getFormattedBalanceOfErc20TokenHolder(contractAddress: string, address: string, numDecimals: number) {
+  async function getFormattedBalanceOfErc20TokenHolder(
+    contractAddress: string,
+    address: string,
+    numDecimals: number
+  ) {
     // updated provider with custom url for better testnet experience
-    const provider = new JsonRpcProvider(import.meta.env.VITE_PUBLIC_INFURA_URL);
-    const usdtErc20Contract = new ethers.Contract(contractAddress, ERC20_ABI, provider);
+    const provider = new JsonRpcProvider(
+      import.meta.env.VITE_PUBLIC_INFURA_URL
+    );
+    const usdtErc20Contract = new ethers.Contract(
+      contractAddress,
+      ERC20_ABI,
+      provider
+    );
 
     try {
       const balance = await usdtErc20Contract.balanceOf(address);
@@ -178,7 +259,10 @@ export const WalletProvider: FunctionComponent<{ children: ReactNode }> = ({ chi
   // }, [initAccountsListener, onAccountsChanged, onAccountsError]);
 
   useEffect(() => {
-    window.localStorage.setItem(METAMASK_ACCOUNT_LOCALSTORAGE_KEY, JSON.stringify(values));
+    window.localStorage.setItem(
+      METAMASK_ACCOUNT_LOCALSTORAGE_KEY,
+      JSON.stringify(values)
+    );
   }, [values]);
 
   useEffect(() => {
@@ -190,7 +274,11 @@ export const WalletProvider: FunctionComponent<{ children: ReactNode }> = ({ chi
   }, [account]);
 
   const unsupportedChain = useMemo(
-    () => (connections[0] && chainId ? connections[0]?.chainId !== chainId : false),
+    () =>
+      connections[0] && chainId
+        ? connections[0]?.chainId !== chainId ||
+          `${connections[0].chainId}` !== SUPPORTED_NETWORK
+        : false,
     [connections, chainId]
   );
 
@@ -214,7 +302,7 @@ export const WalletProvider: FunctionComponent<{ children: ReactNode }> = ({ chi
 export const useWalletContext = (): WalletContext => {
   const contextValue = useContext(WalletContext);
   if (!contextValue) {
-    throw new Error('Tried to use template context from outside the provider');
+    throw new Error("Tried to use template context from outside the provider");
   }
   return contextValue;
 };
