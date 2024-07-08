@@ -67,9 +67,15 @@ export const Referrals = () => {
       setReferralTree(undefined);
     },
   })
+  
+  const onNodeClick = (id: string) => {
+    navigator?.clipboard?.writeText(id);
+  };
+
 
   let edges: any = [];
   let leftBranchingIndexes: { [key: number]: number } = {};
+
   const nodes = useMemo(() => {
     if (referralTree == undefined) return [];
 
@@ -87,8 +93,12 @@ export const Referrals = () => {
           <div
             id={referralCode}
             className="rounded-full w-full inline-flex h-full justify-around items-center text-[#ff23b2]"
+            onClick={() => onNodeClick(referralTree.wallet)}
           >
-            <Copy />
+            <div className="cursor-pointer ">
+              <Copy />
+            </div>
+            
             &nbsp;&nbsp;
             {getShortAccount(referralTree?.wallet)} | {referralCode.toUpperCase()} | {(referralTree?.fee || 0) / 100}% | {(`${Number(referralTree?.amountInUsd?.toFixed(2) || 0).toLocaleString('en-US')}$` || '')}
           </div>
@@ -114,8 +124,12 @@ export const Referrals = () => {
             <div
               id={code}
               className="rounded-full w-full inline-flex h-full justify-around items-center text-[#ff20b1]"
+              onClick={() => onNodeClick(lead.wallet)}
             >
-              <Copy />
+              <div className="cursor-pointer ">
+                <Copy />
+              </div>
+
               &nbsp;&nbsp;
               {getShortAccount(lead?.wallet)} | {code.toUpperCase()} | {(lead?.fee || 0) / 100}% | {(`${Number(lead?.amountInUsd?.toFixed(2) || 0).toLocaleString("en-US")}$` || '')}
             </div>
@@ -162,10 +176,6 @@ export const Referrals = () => {
     return data;
   }, [referralTree, referralCode, getShortAccount]);
 
-  const onNodeClick = (id: string) => {
-    navigator?.clipboard?.writeText(id);
-  };
-
   return (
     <div className="referrals page">
       <div className="referral-title-row">
@@ -181,8 +191,8 @@ export const Referrals = () => {
           <ReactFlow
             nodes={nodes}
             edges={edges}
-            onNodeClick={(e: any) => onNodeClick(e.target.id)}
             fitView
+            onNodeClick={(event) => { /* Pass noop to trigger real event */}}
             zoomOnScroll={false}
             preventScrolling={false}
           >
