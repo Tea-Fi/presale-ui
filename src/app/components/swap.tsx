@@ -294,6 +294,8 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
         return;
       }
 
+
+
       const amountsOut = await readContract(wagmiConfig, {
         abi: PRESALE_ABI,
         address: PRESALE_CONTRACT_ADDRESS[chainId] as Address,
@@ -329,10 +331,11 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
         args: [
           investmentInfo[investment].id,
           selectedToken.address,
-          parseUnits(value, selectedToken.decimals),
+          parseUnits(value, 18),
         ],
         functionName: "getExactPayAmount",
       });
+
 
       setTokenSellValue(
         parseHumanReadable(amountsIn as bigint, selectedToken.decimals, 6)

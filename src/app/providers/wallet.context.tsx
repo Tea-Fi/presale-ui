@@ -11,9 +11,8 @@ import type { FunctionComponent, ReactNode } from "react";
 import { JsonRpcProvider, ethers } from "ethers";
 import { ERC20_ABI } from "../utils/erc20_abi";
 import { USDT, USDC, WETH, WBTC } from "../utils/constants";
-// import { CoinType } from '../pages/buy';
 import { useConnections, useConnectorClient } from "wagmi";
-import { useModal, useChains } from "connectkit";
+import { useModal } from "connectkit";
 import { SUPPORTED_NETWORK } from "../config";
 
 export enum WalletEvents {
@@ -71,8 +70,6 @@ export const WalletProvider: FunctionComponent<{ children: ReactNode }> = ({
 
   const { data } = useConnectorClient();
   const connections = useConnections();
-
-  const chains = useChains();
 
   const [values, setValues] = useState<
     Pick<WalletContext, keyof ContextValues>
