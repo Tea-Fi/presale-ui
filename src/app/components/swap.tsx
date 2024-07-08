@@ -244,14 +244,12 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
     });
   }, [selectedToken, isReversed, account?.address]);
 
-  const onCurrencyAmountChange = async () => {
+  const onCurrencyAmountChange = async (value: string) => {
     try {
       setIsTypingForTokenSell(true);
       if (isTypingForTokenBuy == true) {
         setIsTypingForTokenBuy(false);
       }
-
-      const value = `${tokenSellValue}`;
 
       if (value.length == 0 || value == "0") {
         setTokenBuyValue("");
@@ -275,14 +273,12 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
     }
   };
 
-  const onTeaAmountChange = async () => {
+  const onTeaAmountChange = async (value: string) => {
     try {
       setIsTypingForTokenBuy(true);
       if (isTypingForTokenSell == true) {
         setIsTypingForTokenSell(false);
       }
-
-      const value = `${tokenBuyValue}`;
 
       if (value.length == 0 || value == "0") {
         setTokenSellValue("");
@@ -341,10 +337,13 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
             const token = tokenList.find((token) => token.symbol === value);
             setSelectedToken(token ?? tokenList[0]);
           }}
-          onType={async (e) => {
-            setTokenSellValue(e.target.value);
+          onType={(e) => {
             clearTimeout(searchTimeout.current);
-            searchTimeout.current = setTimeout(onCurrencyAmountChange, 500);
+            searchTimeout.current = setTimeout(
+              () => onCurrencyAmountChange(e.target.value),
+              500
+            );
+            setTokenSellValue(e.target.value);
           }}
         />
 
@@ -363,10 +362,13 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
           balance={teaBalance}
           value={isTypingForTokenBuy ? undefined : tokenBuyValue ?? ""}
           isTea
-          onType={async (e) => {
-            setTokenBuyValue(e.target.value);
+          onType={(e) => {
             clearTimeout(searchTimeout.current);
-            searchTimeout.current = setTimeout(onTeaAmountChange, 500);
+            searchTimeout.current = setTimeout(
+              () => onTeaAmountChange(e.target.value),
+              500
+            );
+            setTokenBuyValue(e.target.value);
           }}
         />
       </div>
