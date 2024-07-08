@@ -221,7 +221,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
             <div className={cn('relative flex gap-2', !isReversed ? 'flex-col-reverse' : 'flex-col')}>
                 <SwapInput
                     disabled={isLoading || isPending || selectedTokenPrice == '' || !isReversed}
-                    title='Sell'
+                    title=''
                     balance={balance}
                     value={
                         isTypingForTokenSell ?
@@ -277,7 +277,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
 
                 <SwapInput
                     disabled={isLoading || isPending || selectedTokenPrice == '' || isReversed}
-                    title='Buy'
+                    title=''
                     balance={teaBalance}
                     value={
                         isTypingForTokenBuy ?
@@ -368,7 +368,7 @@ const SwapInput = ({
     return (
         <div className='w-full rounded-lg h-24 px-4 py-3 bg-[rgb(27,27,27)]'>
             <div className='inline-flex justify-between w-full items-start'>
-                <span className='text-zinc-400'>{title ?? 'Amount'}</span>
+                <span className='text-zinc-400'>{title}</span>
                 <span className='text-zinc-500 text-sm'>Balance: {balance ?? 0}</span>
             </div>
 
