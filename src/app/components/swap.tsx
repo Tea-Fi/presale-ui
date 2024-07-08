@@ -169,7 +169,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
             selectedToken.decimals
         );
         const allowance = allowances.data ?? 0n;
-
+        
         if (allowance == 0n || inputValue > allowance) {
             setTokenIsApproved(false);
             return;
@@ -259,6 +259,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
                             functionName: 'getExactReceiveAmount',
                         });
 
+                        setTokenSellValue(value);
                         setTokenBuyValue(parseHumanReadable(
                             amountsOut as bigint,
                             18,
