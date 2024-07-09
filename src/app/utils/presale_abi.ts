@@ -3,17 +3,17 @@ export const PRESALE_ABI = [
         "type": "constructor",
         "inputs": [
             {
-                "name": "_multisigWallet",
+                "name": "multisigWallet_",
                 "type": "address",
                 "internalType": "address"
             },
             {
-                "name": "_uniswapRouterV2",
+                "name": "uniswapRouterV2",
                 "type": "address",
                 "internalType": "contract IUniswapV2Router02"
             },
             {
-                "name": "tokensAvailableForPresale",
+                "name": "tokensAvailableForPresale_",
                 "type": "uint256",
                 "internalType": "uint256"
             },
@@ -24,18 +24,18 @@ export const PRESALE_ABI = [
                 "components": [
                     {
                         "name": "tgeAmount",
-                        "type": "uint8",
-                        "internalType": "uint8"
+                        "type": "uint256",
+                        "internalType": "uint256"
                     },
                     {
                         "name": "leftoverVesting",
-                        "type": "uint8",
-                        "internalType": "uint8"
+                        "type": "uint256",
+                        "internalType": "uint256"
                     },
                     {
                         "name": "price",
-                        "type": "uint8",
-                        "internalType": "uint8"
+                        "type": "uint256",
+                        "internalType": "uint256"
                     },
                     {
                         "name": "presaleToken",
@@ -66,32 +66,6 @@ export const PRESALE_ABI = [
                 "name": "",
                 "type": "uint8",
                 "internalType": "uint8"
-            }
-        ],
-        "stateMutability": "view"
-    },
-    {
-        "type": "function",
-        "name": "MULTISIG_WALLET",
-        "inputs": [],
-        "outputs": [
-            {
-                "name": "",
-                "type": "address",
-                "internalType": "address"
-            }
-        ],
-        "stateMutability": "view"
-    },
-    {
-        "type": "function",
-        "name": "TOKENS_AVAILABLE_FOR_PRESALE",
-        "inputs": [],
-        "outputs": [
-            {
-                "name": "",
-                "type": "uint256",
-                "internalType": "uint256"
             }
         ],
         "stateMutability": "view"
@@ -287,18 +261,18 @@ export const PRESALE_ABI = [
                 "components": [
                     {
                         "name": "tgeAmount",
-                        "type": "uint8",
-                        "internalType": "uint8"
+                        "type": "uint256",
+                        "internalType": "uint256"
                     },
                     {
                         "name": "leftoverVesting",
-                        "type": "uint8",
-                        "internalType": "uint8"
+                        "type": "uint256",
+                        "internalType": "uint256"
                     },
                     {
                         "name": "price",
-                        "type": "uint8",
-                        "internalType": "uint8"
+                        "type": "uint256",
+                        "internalType": "uint256"
                     },
                     {
                         "name": "presaleToken",
@@ -353,6 +327,19 @@ export const PRESALE_ABI = [
                 "name": "",
                 "type": "uint256",
                 "internalType": "uint256"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "multisigWallet",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "address",
+                "internalType": "address"
             }
         ],
         "stateMutability": "view"
@@ -452,18 +439,18 @@ export const PRESALE_ABI = [
         "outputs": [
             {
                 "name": "tgeAmount",
-                "type": "uint8",
-                "internalType": "uint8"
+                "type": "uint256",
+                "internalType": "uint256"
             },
             {
                 "name": "leftoverVesting",
-                "type": "uint8",
-                "internalType": "uint8"
+                "type": "uint256",
+                "internalType": "uint256"
             },
             {
                 "name": "price",
-                "type": "uint8",
-                "internalType": "uint8"
+                "type": "uint256",
+                "internalType": "uint256"
             },
             {
                 "name": "presaleToken",
@@ -522,6 +509,19 @@ export const PRESALE_ABI = [
     },
     {
         "type": "function",
+        "name": "tokensAvailableForPresale",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
         "name": "totalSold",
         "inputs": [],
         "outputs": [
@@ -558,6 +558,19 @@ export const PRESALE_ABI = [
         ],
         "outputs": [],
         "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "uniswapV2Router",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "address",
+                "internalType": "contract IUniswapV2Router02"
+            }
+        ],
+        "stateMutability": "view"
     },
     {
         "type": "function",
@@ -781,7 +794,7 @@ export const PRESALE_ABI = [
             {
                 "name": "token",
                 "type": "address",
-                "indexed": false,
+                "indexed": true,
                 "internalType": "address"
             },
             {
@@ -842,6 +855,17 @@ export const PRESALE_ABI = [
     },
     {
         "type": "error",
+        "name": "InvalidMultisigWalletAddress",
+        "inputs": [
+            {
+                "name": "wallet",
+                "type": "address",
+                "internalType": "address"
+            }
+        ]
+    },
+    {
+        "type": "error",
         "name": "NotEnoughTokensLeftPerOption",
         "inputs": [
             {
@@ -868,7 +892,7 @@ export const PRESALE_ABI = [
     },
     {
         "type": "error",
-        "name": "OptionNotCreated",
+        "name": "OptionNotInitialized",
         "inputs": [
             {
                 "name": "optionId",
