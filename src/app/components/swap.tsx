@@ -148,8 +148,6 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
     }
   };
 
-  console.log("log => isLoading", isLoading);
-
   const handleBuy = async (token: Address, value: string) => {
     try {
       console.info("optionId", investmentInfo[investment].id);
