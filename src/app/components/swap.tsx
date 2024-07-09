@@ -21,7 +21,6 @@ import {
 import { Token, wagmiConfig } from "../config";
 import { Address, erc20Abi, maxUint256, parseUnits, zeroAddress } from "viem";
 import {
-  buyExactPresaleTokens,
   getInputPriceQuote,
   getOptionInfo,
   getSaleOptionsCout,
