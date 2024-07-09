@@ -29,7 +29,7 @@ import {
 } from "../utils/presale";
 import { PRESALE_CONTRACT_ADDRESS, investmentInfo } from "../utils/constants";
 import { useReadContract, useWriteContract } from "wagmi";
-import { readContract } from "@wagmi/core";
+import { readContract, writeContract } from "@wagmi/core";
 import Spinner from "./spinner";
 import { PRESALE_ABI } from "../utils/presale_abi";
 
@@ -42,8 +42,8 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
   const [isReversed, setReversed] = useState<boolean>(true);
   const [balance, setBalance] = useState<string | number>(0);
   const [restTeaBalance, setRestTeaBalance] = useState<string | number>(0);
-  const [tokenSellValue, setTokenSellValue] = useState<string | number>("");
-  const [tokenBuyValue, setTokenBuyValue] = useState<string | number>("");
+  const [tokenSellValue,  setTokenSellValue] = useState<string | number>("");
+  const [tokenBuyValue,   setTokenBuyValue] = useState<string | number>("");
 
   const [isTypingForTokenBuy, setIsTypingForTokenBuy] =
     useState<boolean>(false);
@@ -80,7 +80,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
     functionName: "allowance",
   });
 
-  let { isPending, isSuccess, isError, writeContract } = useWriteContract();
+  // let { isPending, isSuccess, isError, writeContract } = useWriteContract();
 
 
   useEffect(() => {
@@ -109,12 +109,13 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
 
   const approveToken = async (token: Address) => {
     setIsLoading(true);
-    const hash = await writeContract({
+    const hash = await writeContract(wagmiConfig, {
       address: token,
       abi: erc20Abi,
       functionName: "approve",
       args: [PRESALE_CONTRACT_ADDRESS[chainId] as Address, maxUint256],
     });
+
 
     if (hash == undefined) {
       setIsLoading(false);
@@ -130,8 +131,9 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
     });
     setIsLoading(false);
 
+
+
     if (transactionReceipt.status == "success") {
-      await checkTokenAllowance();
       return {
         status: "SUCCESS",
         message: "Allowance successfully set",
@@ -256,7 +258,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
 
   useEffect(() => {
     allowances.refetch();
-  }, [isSuccess, isError]);
+  }, [tokenIsApproved]);
 
 
   useEffect(() => {
@@ -370,7 +372,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
       >
         <SwapInput
           disabled={
-            isLoading || isPending || selectedTokenPrice == "" || !isReversed
+            isLoading || selectedTokenPrice == "" || !isReversed
           }
           title=""
           balance={balance}
@@ -400,7 +402,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
 
         <SwapInput
           disabled={
-            isLoading || isPending || selectedTokenPrice == "" || isReversed
+            isLoading || selectedTokenPrice == "" || isReversed
           }
           title=""
           balance={teaBalance}
@@ -420,7 +422,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
       <Button
         disabled={
           isLoading ||
-          isPending ||
+          
           selectedTokenPrice == "" ||
           tokenBuyValue.toString() == "" ||
           tokenBuyValue.toString() == "0" ||
@@ -429,14 +431,18 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
         }
         onClick={async () => {
           if (!tokenIsApproved) {
-            await approveToken(selectedToken.address);
+            const {status} = await approveToken(selectedToken.address);
+            
+            if(status == "SUCCESS") {
+              setTokenIsApproved(true)
+            }
           } else {
             await handleBuy(selectedToken.address, tokenBuyValue.toString());
           }
         }}
         className="bg-[#680043] hover:bg-[#aa006f] text-xl font-bold text-[#ff00a6] py-6"
       >
-        {isPending || isLoading ? (
+        { isLoading ? (
           <Spinner />
         ) : !balanceIsSufficient ? (
           "Insufficient funds"
