@@ -1,4 +1,4 @@
-import { zeroAddress, Address } from 'viem';
+import { zeroAddress, Address } from "viem";
 
 type Currency = Record<number, Address>;
 type ChainAddress = Record<number, string>;
@@ -29,7 +29,7 @@ export const DAI = {
 } as Currency;
 
 export const PRESALE_CONTRACT_ADDRESS = {
-  1: "0x2a788384623e6cf95a5eF5586f3f414fA75fBa55",
+  1: "0x75A3605F0Fc6aa02ef6c63E0cC8d9c31278DbF43",
   11155111: "0x388C8acA8F2C0a206edF9855D1C993E13Dd492ce",
 } as ChainAddress;
 
@@ -58,4 +58,4 @@ export const investmentInfo = {
     tge: "50% - released at TGE",
     vested: "50% - vested linearly over 2 months",
   },
-} as Record<string, { id: number, tge: string; vested: string }>;
+} as Record<string, { id: number; tge: string; vested: string }>;

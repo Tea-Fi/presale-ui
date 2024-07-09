@@ -105,42 +105,50 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
   }, [investmentInfo, investment]);
 
   const approveToken = async (token: Address) => {
-    setIsLoading(true);
-    const hash = await writeContract(wagmiConfig, {
-      address: token,
-      abi: erc20Abi,
-      functionName: "approve",
-      args: [PRESALE_CONTRACT_ADDRESS[chainId] as Address, maxUint256],
-    });
+    try {
+      setIsLoading(true);
+      const hash = await writeContract(wagmiConfig, {
+        address: token,
+        abi: erc20Abi,
+        functionName: "approve",
+        args: [PRESALE_CONTRACT_ADDRESS[chainId] as Address, maxUint256],
+      });
 
-    if (hash == undefined) {
-      setIsLoading(false);
+      if (hash == undefined) {
+        setIsLoading(false);
+        return {
+          status: "ERROR",
+          message: "Operation cancelled by user",
+          txid: null,
+        };
+      }
+
+      const transactionReceipt = await waitForTransactionReceipt(wagmiConfig, {
+        hash,
+      });
+
+      if (transactionReceipt.status == "success") {
+        setTokenIsApproved(true);
+        return {
+          status: "SUCCESS",
+          message: "Allowance successfully set",
+          txid: hash,
+        };
+      }
+
       return {
         status: "ERROR",
-        message: "Operation cancelled by user",
+        message: "Error setting allowance",
         txid: null,
       };
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
     }
-
-    const transactionReceipt = await waitForTransactionReceipt(wagmiConfig, {
-      hash,
-    });
-    setIsLoading(false);
-
-    if (transactionReceipt.status == "success") {
-      return {
-        status: "SUCCESS",
-        message: "Allowance successfully set",
-        txid: hash,
-      };
-    }
-
-    return {
-      status: "ERROR",
-      message: "Error setting allowance",
-      txid: null,
-    };
   };
+
+  console.log("log => isLoading", isLoading);
 
   const handleBuy = async (token: Address, value: string) => {
     try {
@@ -150,7 +158,10 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
       console.info("buyAmountHuman", value);
 
       if (referrerId <= 0) {
-        return toast.error("Unable to use Referral ID, please clear browser cache and reload the page to re-enter the referral code again.", {});
+        return toast.error(
+          "Unable to use Referral ID, please clear browser cache and reload the page to re-enter the referral code again.",
+          {}
+        );
       }
 
       setIsLoading(true);
@@ -456,11 +467,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
         }
         onClick={async () => {
           if (!tokenIsApproved) {
-            const { status } = await approveToken(selectedToken.address);
-
-            if (status == "SUCCESS") {
-              setTokenIsApproved(true);
-            }
+            await approveToken(selectedToken.address);
           } else {
             await handleBuy(selectedToken.address, tokenBuyValue.toString());
             setTokenIsApproved(false);
