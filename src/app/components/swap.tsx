@@ -149,6 +149,10 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
       console.info("tokenSell", token);
       console.info("buyAmountHuman", value);
 
+      if (referrerId <= 0) {
+        return toast.error("Unable to use Referral ID, please clear browser cache and reload the page to re-enter the referral code again.", {});
+      }
+
       setIsLoading(true);
       const chainId = getChainId(wagmiConfig);
       const buyAmount = parseUnits(value, 18);
