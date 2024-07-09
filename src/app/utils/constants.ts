@@ -30,7 +30,7 @@ export const DAI = {
 
 export const PRESALE_CONTRACT_ADDRESS = {
   1: "0x2a788384623e6cf95a5eF5586f3f414fA75fBa55",
-  11155111: "0xaF32d8a5a53244ea15CC76d29F351fB73F33d84D",
+  11155111: "0x388C8acA8F2C0a206edF9855D1C993E13Dd492ce",
 } as ChainAddress;
 
 export interface Referral {

@@ -286,7 +286,6 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
   }, [allowances]);
 
   useEffect(() => {
-    console.log("here on refetch");
     allowances.refetch();
   }, [tokenIsApproved]);
 
