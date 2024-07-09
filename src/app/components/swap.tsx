@@ -28,7 +28,7 @@ import {
   getTokensAvailable,
 } from "../utils/presale";
 import { PRESALE_CONTRACT_ADDRESS, investmentInfo } from "../utils/constants";
-import { useReadContract, useWriteContract } from "wagmi";
+import { useReadContract } from "wagmi";
 import { readContract, writeContract } from "@wagmi/core";
 import Spinner from "./spinner";
 import { PRESALE_ABI } from "../utils/presale_abi";
@@ -80,7 +80,6 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
     functionName: "allowance",
   });
 
-  // let { isPending, isSuccess, isError, writeContract } = useWriteContract();
 
 
   useEffect(() => {
@@ -155,22 +154,69 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
     console.info("buyAmountHuman", value);
 
     setIsLoading(true);
-    const result = await buyExactPresaleTokens({
-      optionId: investmentInfo[investment].id,
-      referrerId: referrerId,
-      tokenSell: token,
-      buyAmountHuman: value,
-    });
-    setIsLoading(false);
+    const chainId = getChainId(wagmiConfig);
+    const buyAmount = parseUnits(value, 18);
+    let status;
+    let hash;
+    let txReceipt;
 
-    if (result.status == "SUCCESS") {
-      getTeaBalance().then((res) =>
-        setTeaBalance(parseHumanReadable(res.value, res.decimals, 3))
-      );
+    try {
+      if(!token || token === zeroAddress) {
+        const amountInETH = await readContract(wagmiConfig, {
+          abi: PRESALE_ABI,
+          address: PRESALE_CONTRACT_ADDRESS[chainId] as Address,
+          args: [
+            investmentInfo[investment].id,
+            token,
+            buyAmount,
+          ],
+          functionName: "getExactPayAmount",
+        });
+
+        hash = await writeContract(wagmiConfig, {
+          abi: PRESALE_ABI,
+          address: PRESALE_CONTRACT_ADDRESS[chainId] as Address,
+          args: [
+            investmentInfo[investment].id,
+            referrerId,
+            buyAmount,
+          ],
+          value: amountInETH as bigint,
+          functionName: "buyExactPresaleTokensETH",
+        });
+      } else {
+        hash = await writeContract(wagmiConfig, {
+          abi: PRESALE_ABI,
+          address: PRESALE_CONTRACT_ADDRESS[chainId] as Address,
+          args: [
+            investmentInfo[investment].id,
+            referrerId,
+            token,
+            buyAmount,
+          ],
+          functionName: "buyExactPresaleTokens",
+        });
+      }
+
+
+      txReceipt = await waitForTransactionReceipt(wagmiConfig, {
+        hash,
+      });
+
+      status = "SUCCESS";
+    } catch (e) {
+      status = "ERROR";
+    } finally {
+      setIsLoading(false);
+
+      if (txReceipt && txReceipt.status == "success") {
+        getTeaBalance().then((res) =>
+          setTeaBalance(parseHumanReadable(res.value, res.decimals, 3))
+        );
+      }
     }
 
-
-    return result;
+    return status
   };
 
   const getSelectedTokenBalance = async () => {
@@ -257,6 +303,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
   }, [allowances]);
 
   useEffect(() => {
+    console.log('here on refetch')
     allowances.refetch();
   }, [tokenIsApproved]);
 
@@ -438,6 +485,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
             }
           } else {
             await handleBuy(selectedToken.address, tokenBuyValue.toString());
+            setTokenIsApproved(false);
           }
         }}
         className="bg-[#680043] hover:bg-[#aa006f] text-xl font-bold text-[#ff00a6] py-6"
