@@ -1,28 +1,124 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import ReactFlow, { Background } from "reactflow";
+import { useCallback, useEffect, useState } from "react";
+import ReactFlow, { Background, BaseEdge, Edge, EdgeLabelRenderer, EdgeProps, getBezierPath, Node, useEdgesState, useNodesState } from "reactflow";
 import { Copy } from "lucide-react";
+
+import { toast } from 'react-toastify';
+
 import "reactflow/dist/style.css";
 
 import { useAccount, useAccountEffect } from 'wagmi';
 import { getReferralTreeByWallet, Referral } from '../utils/referrals';
 import { ReferralForm } from "../components/referral-form";
+import { cn } from "../utils";
 
-export const Referrals = () => {
-  const [referralCode, setReferralCode] = useState('');
-  const [referralTree, setReferralTree] = useState<Referral>();
-  const { address, isConnected } = useAccount();
-  const edgeStyles = { 
-    background: "#3a0c2a",
-    fontWeight: "bold",
-    borderRadius: 9999,
-    display: "flex",
-    justifyContent: "between",
-  }
+interface ReferralNodeProps {
+  code: string;
+  walletAddress: string;
 
+  fee?: number;
+  amountInUsd?: number;
+}
+
+const ReferralNode = (props: ReferralNodeProps) => {
+  const onNodeClick = useCallback((id: string) => {
+    navigator?.clipboard?.writeText(id);
+    toast.success("Copied code to clipboard");
+  }, []);
+  
   const getShortAccount = useCallback(
     (account = "") => `${account.slice(0, 6)}...${account.slice(-4)}`,
     []
   );
+
+  return (
+    <div
+      className={cn(
+        "relative rounded-lg w-full h-full  ",
+        "flex flex-col justify-start items-start",
+        "text-[#ff23b2] text-sm"
+      )}
+      onClick={() => onNodeClick(props.code)}
+    >
+      <div className={cn("text-[0.75rem] font-bold text-center w-full")}>
+        {props.code.toUpperCase()}
+      </div>
+
+      <div className="flex justify-between w-full">
+        <div className={cn("text-[0.75rem]")}>
+          {getShortAccount(props.walletAddress)}
+        </div>
+
+        <div className={cn(
+          "rounded-md absolute -top-1 -right-1 p-1",
+          "cursor-pointer scale-75 transition-all duration-300",
+          "hover:shadow-lg hover:scale-90 hover:bg-slate-900"
+        )}>
+          <Copy />
+        </div>
+      </div>
+
+      <div className="flex justify-between w-full">
+        <div className={cn("text-[0.75rem]")}>
+          {(`${Number(props?.amountInUsd?.toFixed(2) || 0).toLocaleString('en-US')}$` || '')}
+        </div>
+
+        <div className={cn("text-[0.75rem]")}>
+          {(props?.fee || 0) / 100}%
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const ReferralEdge = (props: EdgeProps) => {
+  const [edgePath] = getBezierPath({
+    sourceX: props.sourceX,
+    sourceY: props.sourceY,
+    targetX: props.targetX,
+    targetY: props.targetY
+  });
+
+  return (
+    <>
+      <BaseEdge id={props.id} path={edgePath} />
+      <EdgeLabelRenderer>
+        <div 
+          style={{
+            position: 'absolute',
+            transform: `translate(-50%, -100%) translate(${props.targetX}px,${props.targetY - 3}px)`
+          }}
+          className="bg-gray-50 rounded-md p-1 text-gray-900 text-xs"
+        >
+          {props.label}
+        </div>
+      </EdgeLabelRenderer>
+    </>
+  )
+}
+
+const edgeStyles = { 
+  background: "#3a0c2a",
+  borderRadius: 'var(--radius)',
+  display: "flex",
+  justifyContent: "between",
+};
+
+const edgeTypes = {
+  'referral': ReferralEdge
+}
+
+export const Referrals = () => {
+  const { address, isConnected } = useAccount();
+
+  const [referralCode, setReferralCode] = useState('');
+  const [referralTree, setReferralTree] = useState<Referral>();
+
+
+  const [treeNode, setTreeNodes] = useState<Node<any, string>[]>([]);
+  const [treeEdges, setTreeEdges] = useState<Edge<any>[]>([]);
+ 
+  const [nodes, setNodes] = useNodesState(treeNode);
+  const [edges, setEdges] = useEdgesState(treeEdges);
 
   const getReferralTree = useCallback(() => {
     if (address) {
@@ -68,113 +164,129 @@ export const Referrals = () => {
     },
   })
   
-  const onNodeClick = (id: string) => {
-    navigator?.clipboard?.writeText(id);
-  };
+  useEffect(() => {
+    setNodes([])
+    setEdges([])
 
+    setTimeout(() => {
+      setNodes(treeNode)
+      setEdges(treeEdges)
+    }, 0)
+  }, [treeNode, treeEdges]) 
 
-  let edges: any = [];
-  let leftBranchingIndexes: { [key: number]: number } = {};
+  useEffect(() => {
+    if (!referralTree || !referralCode) return;
 
-  const nodes = useMemo(() => {
-    if (referralTree == undefined) return [];
-
-    const NW = 270;
-    const NH = 35;
+    const NODE_WIDTH = 160;
+    const NODE_HEIGHT = 80;
+    const NODE_PADDING = 15;
     const NOFF = 10;
-    const data = [];
-    edges = [];
-    leftBranchingIndexes = {};
 
-    data.push({
-      id: referralCode,
-      data: {
-        label: (
-          <div
-            id={referralCode}
-            className="rounded-full w-full inline-flex h-full justify-around items-center text-[#ff23b2]"
-            onClick={() => onNodeClick(referralTree.wallet)}
-          >
-            <div className="cursor-pointer ">
-              <Copy />
-            </div>
-            
-            &nbsp;&nbsp;
-            {getShortAccount(referralTree?.wallet)} | {referralCode.toUpperCase()} | {(referralTree?.fee || 0) / 100}% | {(`${Number(referralTree?.amountInUsd?.toFixed(2) || 0).toLocaleString('en-US')}$` || '')}
-          </div>
-        ),
-      },
-      connectable: false,
-      style: { 
-        width: NW,
-        height: NH,
-        ...edgeStyles,
-      },
-      position: { x: NOFF, y: NOFF },
-    });
+    const data = [] as Node<any, string>[];
+    const edges = [] as Edge<any>[];
 
-    const pushSublead = (lead: Referral, code: string, parentCode: string, parentFee: number, level: number, leftIndex: number) => {   
-      leftBranchingIndexes[level] = leftBranchingIndexes[level] || 0;
-      
-      data.push({
-        id: code,
-
-        data: {
-          label: (
-            <div
-              id={code}
-              className="rounded-full w-full inline-flex h-full justify-around items-center text-[#ff20b1]"
-              onClick={() => onNodeClick(lead.wallet)}
-            >
-              <div className="cursor-pointer ">
-                <Copy />
-              </div>
-
-              &nbsp;&nbsp;
-              {getShortAccount(lead?.wallet)} | {code.toUpperCase()} | {(lead?.fee || 0) / 100}% | {(`${Number(lead?.amountInUsd?.toFixed(2) || 0).toLocaleString("en-US")}$` || '')}
-            </div>
-          ),
-        },
-        connectable: false,
-        style: { 
-          width: NW,
-          height: NH,
-          ...edgeStyles,
-        },
-        position: { 
-          x: NOFF + (NW * leftIndex) + (NW * leftBranchingIndexes[level]),
-          y: 2 * level * NH + NOFF
-        },
-      });
-
-      edges.push({
-        id: `edge-${code}`,
-        source: parentCode,
-        target: code,
-        type: "straight",
-        animated: true,
-        label: ((lead?.fee || 0) / (parentFee / 100)).toFixed(2) + "%",
-      });
-
-      if (lead.subleads != undefined) {
-        let leftIndex = 0;
-        for (let subleadCode of Object.keys(lead.subleads)) {
-          pushSublead(lead.subleads[subleadCode], subleadCode, code, lead?.fee || 0, level + 1, leftIndex++);
-          leftBranchingIndexes[level + 1] += Object.keys(lead.subleads[subleadCode]?.subleads || {}).length;
-        }
-      }
+    const root = {
+      code: referralTree.referral!,
+      walletAddress: referralTree.wallet,
+      fee: referralTree.fee,
+      amountInUsd: referralTree.amountInUsd,
+      subleads: Object.keys(referralTree.subleads ?? {}).length,
+      parent: '',
+      level: 0
     };
+    
+    const queue = Object
+      .keys(referralTree.subleads ?? {})
+      .map(x => ({
+        ...referralTree.subleads?.[x],
+        parent: referralTree.referral!,
+        level: 1 
+      }));
 
-    if (referralTree.subleads != undefined) {
-      let leftIndex = 0;
-      for (let subleadCode of Object.keys(referralTree.subleads)) {
-        pushSublead(referralTree.subleads[subleadCode], subleadCode, referralCode, referralTree?.fee || 0, 1, leftIndex++);
-        leftBranchingIndexes[2] += Object.keys(referralTree.subleads[subleadCode]?.subleads || {}).length;
+    let levels = [[root], []]
+
+    while (queue.length > 0) {
+      const current = queue.pop()!;
+
+      if (!levels[current.level]) {
+        levels.push([]);
       }
+
+      const level = levels[current.level];
+
+      const node = {
+        code: current.referral!,
+        walletAddress: current.wallet!,
+        fee: current.fee,
+        amountInUsd: current.amountInUsd,
+        subleads: Object.keys(current.subleads ?? {}).length,
+        parent: current.parent,
+        level: current.level,
+      }
+
+      level.push(node);
+      queue.push(...Object.keys(current.subleads ?? {})
+        .map(x => ({
+          ...current.subleads?.[x],
+          parent: current.referral!,
+          level: current.level + 1 
+        }))
+      );
     }
 
-    return data;
-  }, [referralTree, referralCode, getShortAccount]);
+    const maxLengthLevel = levels.reduce((acc, e) => acc.length > e.length ? acc : e)
+    const maxLevelIdx = levels.lastIndexOf(maxLengthLevel);
+
+    for (let levelIdx = 0; levelIdx < levels.length; levelIdx++) {
+      const offset = maxLevelIdx >= levelIdx && maxLengthLevel.length > levels[levelIdx].length
+        ? Math.floor((maxLengthLevel.length - levels[levelIdx].length) / 2) * (NODE_WIDTH + NODE_PADDING)
+        : 0;
+      
+      data.push(...levels[levelIdx].map((x, idx) => ({
+        id: x.code,
+        data: {
+          label: (
+            <ReferralNode 
+              code={x.code}
+              walletAddress={x.walletAddress}
+              fee={x.fee}
+              amountInUsd={x.amountInUsd}
+            />
+          )
+        },
+
+        style: { 
+          width: NODE_WIDTH,
+          height: NODE_HEIGHT,
+
+          ...edgeStyles,
+        },
+        position: {
+          x: NOFF + offset + ((NODE_WIDTH + NODE_PADDING) * idx),
+          y: 2 * levelIdx * NODE_HEIGHT + NOFF
+        }
+
+      })));
+
+      edges.push(...levels[levelIdx]
+        .filter(x => x.parent)
+        .map(x => {
+          const parent = levels[levelIdx -1].find(node => node.code === x.parent);
+
+          return {
+            id: `edge-${x.code}`,
+            source: x.parent,
+            target: x.code,
+            type: "referral",
+            animated: true,
+            label: ((x?.fee || 0) / ((parent?.fee ?? 0) / 100)).toFixed(2) + "%",
+          }
+        }))
+    }
+
+    setTreeNodes(data)
+    setTreeEdges(edges)
+  }, [referralTree])
 
   return (
     <div className="referrals page">
@@ -191,6 +303,7 @@ export const Referrals = () => {
           <ReactFlow
             nodes={nodes}
             edges={edges}
+            edgeTypes={edgeTypes}
             fitView
             onNodeClick={(_) => { /* Pass noop to trigger real event */}}
             zoomOnScroll={false}
