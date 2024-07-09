@@ -32,6 +32,7 @@ import { useReadContract, useWriteContract } from "wagmi";
 import { readContract } from "@wagmi/core";
 import Spinner from "./spinner";
 import { PRESALE_ABI } from "../utils/presale_abi";
+import { toast } from "react-toastify";
 
 export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
   const search = window.location.search;
@@ -145,27 +146,45 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
   };
 
   const handleBuy = async (token: Address, value: string) => {
-    console.info("optionId", investmentInfo[investment].id);
-    console.info("referrerId", referrerId);
-    console.info("tokenSell", token);
-    console.info("buyAmountHuman", value);
+    try {
+      console.info("optionId", investmentInfo[investment].id);
+      console.info("referrerId", referrerId);
+      console.info("tokenSell", token);
+      console.info("buyAmountHuman", value);
 
-    setIsLoading(true);
-    const result = await buyExactPresaleTokens({
-      optionId: investmentInfo[investment].id,
-      referrerId: referrerId,
-      tokenSell: token,
-      buyAmountHuman: value,
-    });
-    setIsLoading(false);
+      setIsLoading(true);
+      const result = await buyExactPresaleTokens({
+        optionId: investmentInfo[investment].id,
+        referrerId: referrerId,
+        tokenSell: token,
+        buyAmountHuman: value,
+      });
 
-    if (result.status == "SUCCESS") {
-      getTeaBalance().then((res) =>
-        setTeaBalance(parseHumanReadable(res.value, res.decimals, 3))
-      );
+      if (result.status == "SUCCESS") {
+        getTeaBalance().then((res) =>
+          setTeaBalance(parseHumanReadable(res.value, res.decimals, 3))
+        );
+        toast.success(
+          "Congratulations! Your tokens have been successfully purchased."
+        );
+        setTokenBuyValue("");
+        setTokenSellValue("");
+      }
+      if (
+        result.status === "ERROR" &&
+        !result.message.includes("User denied")
+      ) {
+        toast.error("Failed to buy. Please try again.");
+        console.error(result.message);
+      }
+
+      return result;
+    } catch (error) {
+      toast.error("Failed to buy. Please try again.");
+      console.error(error);
+    } finally {
+      setIsLoading(false);
     }
-
-    return result;
   };
 
   const getSelectedTokenBalance = async () => {
@@ -280,7 +299,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
           parseUnits(tokenSellValue.toString(), selectedToken.decimals)
       );
     });
-  }, [selectedToken, isReversed, account?.address]);
+  }, [selectedToken, account?.address]);
 
   const onCurrencyAmountChange = async (value: string) => {
     try {
@@ -293,8 +312,6 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
         setTokenBuyValue("");
         return;
       }
-
-
 
       const amountsOut = await readContract(wagmiConfig, {
         abi: PRESALE_ABI,
@@ -336,7 +353,6 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
         functionName: "getExactPayAmount",
       });
 
-
       setTokenSellValue(
         parseHumanReadable(amountsIn as bigint, selectedToken.decimals, 6)
       );
@@ -371,7 +387,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
           }
           title=""
           balance={balance}
-          value={isTypingForTokenSell ? undefined : tokenSellValue ?? ""}
+          value={tokenSellValue}
           tokenList={tokenList}
           defaultValue={"ETH"}
           onChange={(value: string) => {
@@ -401,7 +417,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
           }
           title=""
           balance={teaBalance}
-          value={isTypingForTokenBuy ? undefined : tokenBuyValue ?? ""}
+          value={tokenBuyValue}
           isTea
           onType={(e) => {
             clearTimeout(searchTimeout.current);

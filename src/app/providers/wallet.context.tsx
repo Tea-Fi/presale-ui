@@ -7,12 +7,17 @@ import {
   useState,
 } from "react";
 import type { FunctionComponent, ReactNode } from "react";
-
+import {
+  useAccount,
+  useConnections,
+  useConnectorClient,
+  useDisconnect,
+} from "wagmi";
+import { useModal } from "connectkit";
 import { JsonRpcProvider, ethers } from "ethers";
+
 import { ERC20_ABI } from "../utils/erc20_abi";
 import { USDT, USDC, WETH, WBTC } from "../utils/constants";
-import { useConnections, useConnectorClient } from "wagmi";
-import { useModal } from "connectkit";
 import { SUPPORTED_NETWORK } from "../config";
 
 export enum WalletEvents {
@@ -67,9 +72,10 @@ export const WalletProvider: FunctionComponent<{ children: ReactNode }> = ({
   children,
 }) => {
   const { open, setOpen } = useModal();
-
   const { data } = useConnectorClient();
   const connections = useConnections();
+  const { isDisconnected } = useAccount();
+  const { disconnect: fullDisconnect } = useDisconnect();
 
   const [values, setValues] = useState<
     Pick<WalletContext, keyof ContextValues>
@@ -80,6 +86,15 @@ export const WalletProvider: FunctionComponent<{ children: ReactNode }> = ({
 
   const account = useMemo(() => data?.account?.address || null, [data]);
   const chainId = useMemo(() => data?.chain?.id || null, [data]);
+
+  //need to full disconnect because sometimes we get 2 connections instead of 1
+  useEffect(() => {
+    if (isDisconnected && connections?.length) {
+      connections.forEach(({ connector }) => {
+        fullDisconnect({ connector });
+      });
+    }
+  }, [connections]);
 
   function initValues() {
     const storedValues = window.localStorage.getItem(
@@ -273,10 +288,9 @@ export const WalletProvider: FunctionComponent<{ children: ReactNode }> = ({
   const unsupportedChain = useMemo(
     () =>
       connections[0] && chainId
-        ? connections[0]?.chainId !== chainId ||
-          `${connections[0].chainId}` !== SUPPORTED_NETWORK
+        ? `${connections[0].chainId}` !== SUPPORTED_NETWORK
         : false,
-    [connections, chainId]
+    [connections, chainId, SUPPORTED_NETWORK]
   );
 
   return (
