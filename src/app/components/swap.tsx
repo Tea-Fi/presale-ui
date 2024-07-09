@@ -312,7 +312,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
     );
 
     getSelectedTokenBalance().then((res) => {
-      setBalance(parseHumanReadable(res.value, res.decimals, 3));
+      setBalance(parseHumanReadable(res.value, res.decimals, 8));
       setBalanceIsSufficient(
         res.value <
           parseUnits(tokenSellValue.toString(), selectedToken.decimals)
