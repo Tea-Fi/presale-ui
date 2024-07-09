@@ -21,15 +21,14 @@ import {
 import { Token, wagmiConfig } from "../config";
 import { Address, erc20Abi, maxUint256, parseUnits, zeroAddress } from "viem";
 import {
-  buyExactPresaleTokens,
   getInputPriceQuote,
   getOptionInfo,
   getSaleOptionsCout,
   getTokensAvailable,
 } from "../utils/presale";
 import { PRESALE_CONTRACT_ADDRESS, investmentInfo } from "../utils/constants";
-import { useReadContract, useWriteContract } from "wagmi";
-import { readContract } from "@wagmi/core";
+import { useReadContract } from "wagmi";
+import { readContract, writeContract } from "@wagmi/core";
 import Spinner from "./spinner";
 import { PRESALE_ABI } from "../utils/presale_abi";
 import { toast } from "react-toastify";
@@ -81,8 +80,6 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
     functionName: "allowance",
   });
 
-  let { isPending, isSuccess, isError, writeContract } = useWriteContract();
-
   useEffect(() => {
     const fetchBalance = async () => {
       try {
@@ -109,7 +106,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
 
   const approveToken = async (token: Address) => {
     setIsLoading(true);
-    const hash = await writeContract({
+    const hash = await writeContract(wagmiConfig, {
       address: token,
       abi: erc20Abi,
       functionName: "approve",
@@ -153,35 +150,53 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
       console.info("buyAmountHuman", value);
 
       setIsLoading(true);
-      const result = await buyExactPresaleTokens({
-        optionId: investmentInfo[investment].id,
-        referrerId: referrerId,
-        tokenSell: token,
-        buyAmountHuman: value,
+      const chainId = getChainId(wagmiConfig);
+      const buyAmount = parseUnits(value, 18);
+      let hash;
+      let txReceipt;
+
+      if (!token || token === zeroAddress) {
+        const amountInETH = await readContract(wagmiConfig, {
+          abi: PRESALE_ABI,
+          address: PRESALE_CONTRACT_ADDRESS[chainId] as Address,
+          args: [investmentInfo[investment].id, token, buyAmount],
+          functionName: "getExactPayAmount",
+        });
+
+        hash = await writeContract(wagmiConfig, {
+          abi: PRESALE_ABI,
+          address: PRESALE_CONTRACT_ADDRESS[chainId] as Address,
+          args: [investmentInfo[investment].id, referrerId, buyAmount],
+          value: amountInETH as bigint,
+          functionName: "buyExactPresaleTokensETH",
+        });
+      } else {
+        hash = await writeContract(wagmiConfig, {
+          abi: PRESALE_ABI,
+          address: PRESALE_CONTRACT_ADDRESS[chainId] as Address,
+          args: [investmentInfo[investment].id, referrerId, token, buyAmount],
+          functionName: "buyExactPresaleTokens",
+        });
+      }
+
+      txReceipt = await waitForTransactionReceipt(wagmiConfig, {
+        hash,
       });
 
-      if (result.status == "SUCCESS") {
+      if (txReceipt.status == "success") {
         getTeaBalance().then((res) =>
           setTeaBalance(parseHumanReadable(res.value, res.decimals, 3))
         );
+        setTokenBuyValue("");
+        setTokenSellValue("");
         toast.success(
           "Congratulations! Your tokens have been successfully purchased."
         );
-        setTokenBuyValue("");
-        setTokenSellValue("");
+      } else if (txReceipt?.status == "reverted") {
+        toast.error("Failed to buy. Please try again");
       }
-      if (
-        result.status === "ERROR" &&
-        !result.message.includes("User denied")
-      ) {
-        toast.error("Failed to buy. Please try again.");
-        console.error(result.message);
-      }
-
-      return result;
-    } catch (error) {
-      toast.error("Failed to buy. Please try again.");
-      console.error(error);
+    } catch (e) {
+      console.error(e);
     } finally {
       setIsLoading(false);
     }
@@ -271,8 +286,9 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
   }, [allowances]);
 
   useEffect(() => {
+    console.log("here on refetch");
     allowances.refetch();
-  }, [isSuccess, isError]);
+  }, [tokenIsApproved]);
 
   useEffect(() => {
     allowances.refetch();
@@ -382,9 +398,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
         )}
       >
         <SwapInput
-          disabled={
-            isLoading || isPending || selectedTokenPrice == "" || !isReversed
-          }
+          disabled={isLoading || selectedTokenPrice == "" || !isReversed}
           title=""
           balance={balance}
           value={tokenSellValue}
@@ -412,9 +426,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
         </Button>
 
         <SwapInput
-          disabled={
-            isLoading || isPending || selectedTokenPrice == "" || isReversed
-          }
+          disabled={isLoading || selectedTokenPrice == "" || isReversed}
           title=""
           balance={teaBalance}
           value={tokenBuyValue}
@@ -433,7 +445,6 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
       <Button
         disabled={
           isLoading ||
-          isPending ||
           selectedTokenPrice == "" ||
           tokenBuyValue.toString() == "" ||
           tokenBuyValue.toString() == "0" ||
@@ -442,14 +453,19 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
         }
         onClick={async () => {
           if (!tokenIsApproved) {
-            await approveToken(selectedToken.address);
+            const { status } = await approveToken(selectedToken.address);
+
+            if (status == "SUCCESS") {
+              setTokenIsApproved(true);
+            }
           } else {
             await handleBuy(selectedToken.address, tokenBuyValue.toString());
+            setTokenIsApproved(false);
           }
         }}
         className="bg-[#680043] hover:bg-[#aa006f] text-xl font-bold text-[#ff00a6] py-6"
       >
-        {isPending || isLoading ? (
+        {isLoading ? (
           <Spinner />
         ) : !balanceIsSufficient ? (
           "Insufficient funds"

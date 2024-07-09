@@ -5,7 +5,7 @@ import { wagmiConfig } from '../config';
 export const ConnectProvider = ({ children }: { children: React.ReactNode }) => {
 	return (
 		<WagmiProvider config={wagmiConfig}>
-			<ConnectKitProvider>{children}</ConnectKitProvider>
+			<ConnectKitProvider mode="dark" theme="auto">{children}</ConnectKitProvider>
 		</WagmiProvider>
 	);
 };
