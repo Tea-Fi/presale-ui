@@ -31,6 +31,7 @@ import { useReadContract } from "wagmi";
 import { readContract, writeContract } from "@wagmi/core";
 import Spinner from "./spinner";
 import { PRESALE_ABI } from "../utils/presale_abi";
+import { SAFE_ERC20_ABI } from "../utils/safe-erc20-abi";
 import { toast } from "react-toastify";
 
 export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
@@ -109,7 +110,11 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
       setIsLoading(true);
       const hash = await writeContract(wagmiConfig, {
         address: token,
-        abi: erc20Abi,
+        // mainnet USDT need specific safe-erc20 abi
+        abi:
+          token === "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+            ? SAFE_ERC20_ABI
+            : erc20Abi,
         functionName: "approve",
         args: [PRESALE_CONTRACT_ADDRESS[chainId] as Address, maxUint256],
       });
