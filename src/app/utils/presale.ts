@@ -97,7 +97,7 @@ export async function getTokensAvailable(): Promise<bigint> {
     provider
   );
 
-  return await presaleContract.TOKENS_AVAILABLE_FOR_PRESALE();
+  return await presaleContract.tokensAvailableForPresale();
 }
 
 export async function getTotalSold(): Promise<bigint> {
