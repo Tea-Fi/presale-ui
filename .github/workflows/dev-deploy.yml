@@ -23,6 +23,7 @@ jobs:
       - run: |
           echo $ENV
           echo $ENV > .env
+      - run: ls -al
       - run: npm install
       - run: CI=false npm run build
       - uses: actions/upload-artifact@v3
