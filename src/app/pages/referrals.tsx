@@ -125,9 +125,11 @@ export const Referrals = () => {
   const [edges, setEdges] = useEdgesState(treeEdges);
   const chainId = getChainId(wagmiConfig);
 
+  console.log(chainId)
+
   const getReferralTree = useCallback(() => {
     if (address) {
-      getReferralTreeByWallet(address).then(referralTree => {
+      getReferralTreeByWallet(address, chainId).then(referralTree => {
         if (referralTree !== undefined) {
           setReferralTree(referralTree);
           setReferralCode(referralTree.referral as string);
