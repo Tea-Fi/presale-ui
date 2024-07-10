@@ -8,6 +8,9 @@ import {
 } from "./env";
 import { HttpTransport } from "viem";
 
+console.log("log => SUPPORTED_NETWORK", SUPPORTED_NETWORK);
+console.log("log => env", import.meta.env.VITE_PUBLIC_SUPPORTED_NETWORK);
+
 const chains = {
   1: [mainnet],
   11155111: [sepolia],
