@@ -3,6 +3,9 @@ import ReactFlow, { Background, BaseEdge, Edge, EdgeLabelRenderer, EdgeProps, ge
 import { Copy } from "lucide-react";
 
 import { toast } from 'react-toastify';
+import {
+  getChainId,
+} from "@wagmi/core";
 
 import "reactflow/dist/style.css";
 
@@ -10,6 +13,7 @@ import { useAccount, useAccountEffect } from 'wagmi';
 import { getReferralTreeByWallet, Referral } from '../utils/referrals';
 import { ReferralForm } from "../components/referral-form";
 import { cn } from "../utils";
+import { wagmiConfig } from "../config";
 
 interface ReferralNodeProps {
   code: string;
@@ -33,7 +37,7 @@ const ReferralNode = (props: ReferralNodeProps) => {
   return (
     <div
       className={cn(
-        "relative rounded-lg w-full h-full  ",
+        "relative rounded-lg w-full h-full",
         "flex flex-col justify-start items-start",
         "text-[#ff23b2] text-sm"
       )}
@@ -116,9 +120,10 @@ export const Referrals = () => {
 
   const [treeNode, setTreeNodes] = useState<Node<any, string>[]>([]);
   const [treeEdges, setTreeEdges] = useState<Edge<any>[]>([]);
- 
+
   const [nodes, setNodes] = useNodesState(treeNode);
   const [edges, setEdges] = useEdgesState(treeEdges);
+  const chainId = getChainId(wagmiConfig);
 
   const getReferralTree = useCallback(() => {
     if (address) {
@@ -133,7 +138,7 @@ export const Referrals = () => {
 
   useEffect(() => {
     if (isConnected && address != undefined) {
-      getReferralTreeByWallet(address).then(referralTree => {
+      getReferralTreeByWallet(address, chainId).then(referralTree => {
         if (referralTree !== undefined) {
           setReferralTree(referralTree);
           setReferralCode(referralTree.referral as string);
@@ -145,7 +150,7 @@ export const Referrals = () => {
 
   useAccountEffect({
     onConnect({ address }) {
-      getReferralTreeByWallet(address)
+      getReferralTreeByWallet(address, chainId)
         .then(refTree => {
           if (refTree !== undefined) {
             const refCode = refTree?.referral as string;

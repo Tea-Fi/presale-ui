@@ -89,14 +89,14 @@ const getReferralTree = async (query: string): Promise<Referral | undefined> => 
   }
 }
 
-export const getReferralTreeByCode = async (code: string) => {
-  return getReferralTree(`code=${code}`);
+export const getReferralTreeByCode = async (code: string, chainId: number = 1) => {
+  return getReferralTree(`code=${code}&chainId=${chainId}`);
 }
 
-export const getReferralTreeByWallet = async (wallet: string) => {
-  return getReferralTree(`walletAddress=${wallet}`);
+export const getReferralTreeByWallet = async (wallet: string, chainId: number = 1) => {
+  return getReferralTree(`walletAddress=${wallet}&chainId=${chainId}`);
 }
 
-export const getReferralTreeById = async (id: number | string) => {
-  return getReferralTree(`id=${id}`);
+export const getReferralTreeById = async (id: number | string, chainId: number = 1) => {
+  return getReferralTree(`id=${id}&chainId=${chainId}`);
 }
