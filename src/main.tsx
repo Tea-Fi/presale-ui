@@ -10,6 +10,8 @@ import { Provider } from "./app/providers";
 
 import "./assets/styles/main.scss";
 import "./index.css";
+import { Toaster } from "./app/components/ui";
+
 
 setBasePath(
   "https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.14.0/cdn/"
@@ -19,6 +21,7 @@ const root = createRoot(document.getElementById("root") as HTMLElement);
 root.render(
   <Provider>
     <App />
+    <Toaster duration={10000} position="top-center"/>
     <ToastContainer />
   </Provider>
 );

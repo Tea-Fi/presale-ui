@@ -33,6 +33,9 @@ import Spinner from "./spinner";
 import { PRESALE_ABI } from "../utils/presale_abi";
 import { SAFE_ERC20_ABI } from "../utils/safe-erc20-abi";
 import { toast } from "react-toastify";
+import { toast as soonerToast } from "sonner";
+import * as rdd from 'react-device-detect';
+
 
 export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
   const search = window.location.search;
@@ -469,6 +472,18 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
           !teaIsSufficient
         }
         onClick={async () => {
+          console.log('is mobile', rdd.isMobile)
+          if(rdd.isMobile) {
+            soonerToast(
+              "You need to approve transaction in your wallet", {
+              duration: 20000,
+              action: {
+                label: "Open Wallet",
+                onClick: () => window.open("https://metamask.app.link")
+              }
+            });
+          }
+          
           if (!tokenIsApproved) {
             await approveToken(selectedToken.address);
           } else {
