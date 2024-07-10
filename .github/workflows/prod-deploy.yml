@@ -1,0 +1,56 @@
+name: Build and Deploy to PROD AWS CloudFront
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  CI: "true"
+  CLOUDFRONT_DISTRIBUTION_ID: "E1GF8CXU3DSBWT"
+  BUCKET_NAME: "presale.tea-fi.com"
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    container: dawnbreather/cicd_toolset:node16-buster-slim-build202206021208
+    env:
+      CI: 'true'
+      ENV: '${{ secrets.PROD_ENV }}'
+    steps:
+      - uses: actions/checkout@v3
+      - run: |
+          echo $ENV
+          echo $ENV > .env
+      - run: npm install
+      - run: CI=false npm run build
+      - uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: build
+          retention-days: 1
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: build
+    container: dawnbreather/cicd_toolset:node16-buster-slim-build202206021208
+    env:
+      CI: 'true'
+      AWS_ACCESS_KEY_ID: '${{ secrets.AWS_ACCESS_KEY_ID }}'
+      AWS_SECRET_ACCESS_KEY: '${{ secrets.AWS_SECRET_ACCESS_KEY }}'
+      AWS_DEFAULT_REGION: 'us-east-1'
+      AWS_REGION: 'us-east-1'
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: build
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: 'us-east-1'
+      - run: aws s3 sync --no-progress ./ s3://${BUCKET_NAME}/ --delete
+      - run: aws cloudfront create-invalidation --distribution-id ${CLOUDFRONT_DISTRIBUTION_ID} --paths '/*'
