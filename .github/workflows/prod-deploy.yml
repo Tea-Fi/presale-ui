@@ -17,12 +17,11 @@ jobs:
     container: dawnbreather/cicd_toolset:node18-buster-slim-build202301171630
     env:
       CI: 'true'
-      ENV: '${{ secrets.PROD_ENV }}'
+      ENV: '${{ vars.PROD_ENV }}'
     steps:
       - uses: actions/checkout@v3
       - run: |
-          echo $ENV
-          echo $ENV > .env
+          echo "${{ vars.PROD_ENV }}" > .env
       - run: npm install
       - run: CI=false npm run build
       - uses: actions/upload-artifact@v3
