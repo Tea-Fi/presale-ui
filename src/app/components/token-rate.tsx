@@ -1,7 +1,5 @@
-import { SlCard, SlFormatNumber } from '@shoelace-style/shoelace/dist/react';
-import { useCoin } from '../hooks/useCoin';
+import { SlCard } from '@shoelace-style/shoelace/dist/react';
 import teaToken from '../../assets/icons/tea-logo.svg';
-import Spinner from './spinner';
 
 export const TokenRate = () => {
   return (

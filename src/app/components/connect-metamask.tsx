@@ -1,7 +1,6 @@
-import React from 'react';
 import { SlButton, SlSpinner } from '@shoelace-style/shoelace/dist/react';
 import metaMaskFoxLogo from '../../assets/icons/metamask-fox.svg';
-import { useWalletContext } from '../context/wallet.context';
+import { useWalletContext } from '../providers/wallet.context';
 
 export const ConnectMetamask = () => {
   const { status, connect } = useWalletContext();

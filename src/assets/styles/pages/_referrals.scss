@@ -1,0 +1,35 @@
+.referrals {
+  .referral-container {
+    width: 90%;
+    height: 650px;
+    margin: 0px auto;
+  }
+  .referral-title-row {
+    display: flex;
+    flex-flow: row nowrap;
+
+    justify-content: space-between;
+    align-items: center;
+
+    width: 90%;
+    margin: 0px auto;
+  }
+
+  .title {
+    font-size: 22px;
+    margin: 16px;
+    font-weight: 700;
+  }
+  > :last-child {
+    border: 1px solid $color-border;
+    border-radius: 4px;
+  }
+  .no-referrals {
+    color: $color-danger;
+    padding: 32px;
+    width: 100%;
+    height: fit-content;
+    margin: 0px auto;
+    max-width: 650px;
+  }
+}

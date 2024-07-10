@@ -1,6 +1,6 @@
 import type { FunctionComponent, ReactNode } from 'react';
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { loginMapping } from '../utils/constants';
+import { getReferralTreeByCode } from '../utils/referrals';
 
 export interface LoginResponse {
   status: LoginStatus | null;
@@ -26,14 +26,14 @@ export const UserContextProvider: FunctionComponent<{ children: ReactNode }> = (
 
   async function login(code: string): Promise<void> {
     try {
-      const validKeys = Object.keys(loginMapping);
-      const result = validKeys.filter((item) => item === code);
-      const isCorrect = result.length > 0;
-      if (!isCorrect) {
+      const referralTree = await getReferralTreeByCode(code);
+
+      if (referralTree == undefined) {
         setStatus(LoginStatus.WRONG_CODE);
         setTimeout(() => setStatus(LoginStatus.LOGGED_OUT), 3000);
       } else {
-        window.localStorage.setItem('referral', String(loginMapping[code].id));
+        window.localStorage.setItem('referral', String(referralTree.id));
+        
         if (window.localStorage.getItem('agreedToTerms') === 'true') {
           setStatus(LoginStatus.LOGGED_IN);
         } else {

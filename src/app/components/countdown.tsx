@@ -1,8 +1,7 @@
-import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
+import { Dispatch, SetStateAction, useMemo, useState } from 'react';
 import { SlCard } from '@shoelace-style/shoelace/dist/react';
-import { useEventContext } from '../context/event.context';
-import { getPresaleRoundInfo } from '../utils/presale';
-import { getTimeDiffrenece } from '../utils/calculation';
+
+
 interface ICountdown {
   isActive: boolean | null;
   roundInfo: {
@@ -11,10 +10,10 @@ interface ICountdown {
   };
   setIsActive: Dispatch<SetStateAction<boolean | null>>;
 }
-export const Countdown = ({ isActive, roundInfo, setIsActive }: ICountdown) => {
-  const [secondsToEnd, setSecondsToEnd] = useState<number | null>(null);
-  const [countdownName, setCountdownName] = useState<string | null>(null);
-  const { showModal, setEventInfo } = useEventContext();
+export const Countdown = ({ isActive }: ICountdown) => {
+  const [secondsToEnd] = useState<number | null>(null);
+  const [countdownName] = useState<string | null>(null);
+  // const { showModal, setEventInfo } = useEventContext();
 
   // useEffect(() => {
   //   let interval: NodeJS.Timer;
