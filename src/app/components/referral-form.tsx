@@ -1,19 +1,19 @@
 import React from "react";
 
 import { z } from "zod";
-import { isAddress } from 'ethers'
+import { isAddress } from "ethers";
 import { useAccount, useSignMessage } from "wagmi";
-import { Form, Formik, Field, ErrorMessage } from 'formik';
-import { SlIcon } from '@shoelace-style/shoelace/dist/react';
+import { Form, Formik, Field, ErrorMessage } from "formik";
+import { SlIcon } from "@shoelace-style/shoelace/dist/react";
 
 import { Button } from "./ui";
 import { cn } from "../utils/cn";
-import * as referrals from '../utils/referrals';
+import * as referrals from "../utils/referrals";
 import type { Referral } from "../utils/referrals";
 
 const ReferralValidationSchema = z.object({
-  walletAddress: z.string().refine(x => isAddress(x), {
-    message: 'Is not a valid address'
+  walletAddress: z.string().refine((x) => isAddress(x), {
+    message: "Is not a valid address",
   }),
 
   referralCode: z.string(),
@@ -24,20 +24,22 @@ type ReferralPayload = z.infer<typeof ReferralValidationSchema> & {
 };
 
 const initialValues: ReferralPayload = {
-  walletAddress: '',
-  referralCode: '',
-  fee: 10
+  walletAddress: "",
+  referralCode: "",
+  fee: 10,
 };
 
 interface FormFieldProps {
   label: string;
   name: string;
   error?: string;
-  validate?: (value: any) => Promise<Record<string, string>>
-  validateOnBlur?: boolean
+  validate?: (value: any) => Promise<Record<string, string>>;
+  validateOnBlur?: boolean;
 }
 
-const FormField: React.FC<FormFieldProps & React.PropsWithChildren> = (props) => {
+const FormField: React.FC<FormFieldProps & React.PropsWithChildren> = (
+  props
+) => {
   return (
     <div className="referral-form-field">
       <div className="referral-form-field__label">{props.label}</div>
@@ -56,34 +58,46 @@ const FormField: React.FC<FormFieldProps & React.PropsWithChildren> = (props) =>
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
 interface Props {
-  referralTree: Referral
-  onSubmit: () => void
+  referralTree: Referral;
+  onSubmit: () => void;
 }
 
 export const ReferralForm: React.FC<Props> = (props) => {
   const account = useAccount();
-  const { signMessageAsync } = useSignMessage()
+  const { signMessageAsync } = useSignMessage();
 
   const [showForm, setShowform] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<string | undefined>();
 
-  const validationSchema = React.useMemo(() => ReferralValidationSchema.extend({
-    fee: z.number().int().min(10).max(props.referralTree.fee! - 10)
-  }), [props.referralTree])
+  const validationSchema = React.useMemo(
+    () =>
+      ReferralValidationSchema.extend({
+        fee: z
+          .number()
+          .int()
+          .min(10)
+          .max(props.referralTree.fee! - 10),
+      }),
+    [props.referralTree]
+  );
 
   const toggleForm = React.useCallback(() => {
-    setShowform(state => !state);
-  }, [])
+    setShowform((state) => !state);
+  }, []);
 
-  const hideFormOnClick = React.useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    if (e.currentTarget != e.target) return; 
+  const hideFormOnClick = React.useCallback(
+    (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+      if (e.currentTarget != e.target) return;
 
-    setShowform(false);
-  }, [])
+      setShowform(false);
+    },
+    []
+  );
 
   const validate = React.useCallback(async (values: ReferralPayload) => {
     const validation = validationSchema.safeParse(values);
@@ -92,77 +106,81 @@ export const ReferralForm: React.FC<Props> = (props) => {
 
     if (!validation.success) {
       const errors = validation.error.issues
-        .map(x => ({ [x.path[0]]: x.message}))
+        .map((x) => ({ [x.path[0]]: x.message }))
         .reduce((acc, e) => ({ ...acc, ...e }));
 
-      result = Object.assign(result, errors)
+      result = Object.assign(result, errors);
     }
 
     if (values.referralCode) {
-      const codeExists = await referrals.referralCodeExists(values.referralCode);
+      const codeExists = await referrals.referralCodeExists(
+        values.referralCode
+      );
 
       if (codeExists) {
-        result['referralCode'] = 'Referral code already exists'; 
+        result["referralCode"] = "Referral code already exists";
       }
     }
 
     return result;
-  }, [])
+  }, []);
 
-  const onSubmit = React.useCallback(async (values: ReferralPayload) => {
-    setError(undefined)
+  const onSubmit = React.useCallback(
+    async (values: ReferralPayload) => {
+      setError(undefined);
 
-    if (!account.address) {
-      setError('Wallet not connected');
-      return;
-    }
+      if (!account.address) {
+        setError("Wallet not connected");
+        return;
+      }
+      console.log("log => values", values);
 
-    try {
-      const signPayload = await referrals.generateSignature(account.address!, values);
+      try {
+        setIsLoading(true);
+        const signPayload = await referrals.generateSignature(
+          account.address!,
+          values
+        );
 
-      const signedMessage = await signMessageAsync({ 
-        message: `0x${signPayload}`,
-      });
-     
-      const payload = {
-        ...values,
-        signature: signedMessage,
-        senderAddress: account.address!,
-      };
+        const signedMessage = await signMessageAsync({
+          message: `0x${signPayload}`,
+        });
 
-      await referrals.createReferral(props.referralTree.referral!, payload);
+        const payload = {
+          ...values,
+          signature: signedMessage,
+          senderAddress: account.address!,
+        };
 
-      setShowform(false)
-      props.onSubmit();
-    } catch (err) {
-      setError(`${err}`)
-    }
-  }, [props.onSubmit, account]);
+        await referrals.createReferral(props.referralTree.referral!, payload);
+
+        setShowform(false);
+        props.onSubmit();
+      } catch (err) {
+        setError(`${err}`);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [props.onSubmit, account]
+  );
 
   return (
     <>
-      <Button onClick={toggleForm}>
-        Create Referral
-      </Button>
+      <Button onClick={toggleForm}>Create Referral</Button>
 
-      
       {showForm && (
-        <Formik 
+        <Formik
           initialValues={initialValues}
           validate={validate}
           onSubmit={onSubmit}
           validateOnBlur={true}
           validateOnChange={false}
         >
-          {({ values, errors, isSubmitting }) => (
-            <div 
-              className="referral-form-backdrop"
-              onClick={hideFormOnClick}
-            >
+          {({ values, errors }) => (
+            <div className="referral-form-backdrop" onClick={hideFormOnClick}>
               <Form className="referral-form">
-                <div className={cn("text-xl")}>
-                  Create new referral
-                </div> 
+                <div className={cn("text-xl")}>Create new referral</div>
 
                 <div className="referral-form__close" onClick={toggleForm}>
                   <SlIcon slot="icon" name="x-lg" />
@@ -173,20 +191,22 @@ export const ReferralForm: React.FC<Props> = (props) => {
                   label="Wallet Address"
                   error={errors.walletAddress}
                 />
-                
+
                 <FormField
                   name="referralCode"
                   label="Referral Code"
                   error={errors.referralCode}
                 />
 
-                <FormField
-                  name="fee"
-                  label="Percentage"
-                  error={errors.fee}
-                >
+                <FormField name="fee" label="Percentage" error={errors.fee}>
                   <div className="referral-form__slider">
-                    <Field type="range" name="fee" min="10" max={props.referralTree.fee! - 10} step="10" />
+                    <Field
+                      type="range"
+                      name="fee"
+                      min="10"
+                      max={props.referralTree.fee! - 10}
+                      step="10"
+                    />
 
                     <div>{(values.fee / 100).toFixed(2)}%</div>
                   </div>
@@ -194,7 +214,7 @@ export const ReferralForm: React.FC<Props> = (props) => {
 
                 {error && <div className="referral-form__error">{error}</div>}
 
-                <Button type="submit" disabled={isSubmitting}>
+                <Button type="submit" disabled={isLoading}>
                   Create Sublead
                 </Button>
               </Form>
@@ -203,5 +223,5 @@ export const ReferralForm: React.FC<Props> = (props) => {
         </Formik>
       )}
     </>
-  )
+  );
 };
