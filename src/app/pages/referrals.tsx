@@ -243,7 +243,7 @@ export const Referrals = () => {
     const maxLengthLevel = levels.reduce((acc, e) => acc.length > e.length ? acc : e)
     const maxLevelIdx = levels.lastIndexOf(maxLengthLevel);
 
-    for (let levelIdx = 0; levelIdx < levels.length; levelIdx++) {
+    for (let levelIdx = 0; levelIdx <= maxLevelIdx; levelIdx++) {
       const offset = maxLevelIdx >= levelIdx && maxLengthLevel.length > levels[levelIdx].length
         ? Math.floor((maxLengthLevel.length - levels[levelIdx].length) / 2) * (NODE_WIDTH + NODE_PADDING)
         : 0;
@@ -278,6 +278,97 @@ export const Referrals = () => {
         .filter(x => x.parent)
         .map(x => {
           const parent = levels[levelIdx -1].find(node => node.code === x.parent);
+
+          return {
+            id: `edge-${x.code}`,
+            source: x.parent,
+            target: x.code,
+            type: "referral",
+            animated: true,
+            label: ((x?.fee || 0) / ((parent?.fee ?? 0) / 100)).toFixed(2) + "%",
+          }
+        }))
+    }
+
+    for (let levelIdx = maxLevelIdx + 1; levelIdx < levels.length; levelIdx++) {
+      const arrangement = new Array(maxLengthLevel.length); 
+
+      const level = levels[levelIdx]
+      const parentCodes = level.reduce((acc, e) => {
+        if (!acc.some(x => x === e.parent)) {
+          acc.push(e.parent);
+        }
+
+        return acc;
+      }, [] as string[]);
+
+      const parents = data.filter(x => parentCodes.includes(x.id));
+
+      for (const parent of parents) {
+        const idx = levels[levelIdx - 1].findIndex(x => x?.code === parent.id);
+        const subleads = level.filter(x => x.parent === parent.id);
+        const half = Math.floor(subleads.length / 2)
+
+        let start = idx >= half ? idx - half : 0;
+        let end = idx >= half ? idx + (subleads.length - half) : subleads.length;
+
+        while (!arrangement.slice(start, end).every(x => !x)) {
+          start += 1;
+          end += 1;
+        }
+
+        for (let i = start; i <= end; i++) {
+          if (i >= arrangement.length) {
+            arrangement.push(subleads[i - start]);
+          } else {
+            arrangement[i] = subleads[i - start];
+          }
+        }
+
+      }
+
+
+      levels[levelIdx] = arrangement;
+     
+      data.push(...arrangement
+        .map((x, idx) => {
+          if (!x) {
+            return;
+          }
+
+          return ({
+            id: x.code,
+            data: {
+              label: (
+                <ReferralNode 
+                  code={x.code}
+                  walletAddress={x.walletAddress}
+                  fee={x.fee}
+                  amountInUsd={x.amountInUsd}
+                />
+              )
+            },
+
+            style: { 
+              width: NODE_WIDTH,
+              height: NODE_HEIGHT,
+
+              ...edgeStyles,
+            },
+            position: {
+              x: NOFF + ((NODE_WIDTH + NODE_PADDING) * idx),
+              y: 2 * levelIdx * NODE_HEIGHT + NOFF
+            }
+
+          })
+        })
+        .filter(x => !!x)
+      );
+
+      edges.push(...arrangement
+        .filter(x => x && x.parent)
+        .map(x => {
+          const parent = levels[levelIdx -1].find(node => node?.code === x.parent);
 
           return {
             id: `edge-${x.code}`,
