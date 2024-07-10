@@ -20,3 +20,4 @@ export {
     SelectScrollDownButton,
 } from "./select";
 export {BackgroundBeams} from "./background-beams";
+export {Toaster} from "./sonner"
