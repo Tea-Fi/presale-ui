@@ -38,7 +38,6 @@ export interface Referral {
   fee?: number;
   wallet: string;
   referral?: string;
-  amountInUsd?: number;
   subleads?: { [key: string]: Referral };
 }
 

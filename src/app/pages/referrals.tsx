@@ -24,8 +24,88 @@ interface ReferralNodeProps {
   walletAddress: string;
 
   fee?: number;
-  amountInUsd?: number;
+  stats?: ReferralStats;
 }
+
+interface ReferralStats {
+  purchases: number;
+  tokensSold: bigint;
+  soldInUsd: bigint;
+}
+
+type StatsMap = Record<string, ReferralStats>;
+
+
+  const emptyStat =  { purchases: 0, soldInUsd: 0n, tokensSold: 0n } as ReferralStats
+
+function getFeeFactor(node?: Referral) {
+  return BigInt((node?.fee ?? 0));
+}
+
+function addStats(a: ReferralStats, b: ReferralStats): ReferralStats {
+  return {
+    purchases: a.purchases + b.purchases,
+    soldInUsd: a.soldInUsd + b.soldInUsd,
+    tokensSold: a.tokensSold + b.tokensSold,
+  };
+}
+
+function factorStats(a: ReferralStats, factor: bigint): ReferralStats {
+  return {
+    purchases: a.purchases,
+    soldInUsd: a.soldInUsd * factor,
+    tokensSold: a.tokensSold * factor,
+  }
+}
+
+function calculateCommission(node: Referral, stats: StatsMap, memo?: Record<number, ReferralStats>): ReferralStats {
+  const fee = getFeeFactor(node);
+  const stat = stats[node.id]!;
+
+  const current = factorStats(stat, fee);
+
+  const subtreeList = Object.keys(node.subleads ?? {})
+    .map(key => node.subleads?.[key])
+    .map(x => factorStats(subtreeSum(stats, x, memo), (fee - getFeeFactor(x))))
+     
+  const subtree = subtreeList
+    .reduce((acc, e) => addStats(acc, e), emptyStat)
+
+  const result = addStats(current, subtree);
+
+  result.soldInUsd /= BigInt(1e6) * BigInt(1e4);
+  result.tokensSold /= BigInt(1e18) * BigInt(1e4);
+
+  return result; 
+}
+
+function subtreeSum(stats: StatsMap, node?: Referral, memo?: Record<number, ReferralStats>): ReferralStats {
+  if (!node) {
+    return emptyStat;
+  }
+ 
+  if (memo?.[node.id]) return memo[node.id];
+ 
+  const stat = stats[node.id];
+
+  if (!node.subleads || Object.keys(node.subleads ?? {}).length === 0) {
+    return stat;
+  }
+
+  const subleadSum = Object.keys(node.subleads ?? {})
+    .map(key => node.subleads?.[key])
+    .map(x => subtreeSum(stats, x))
+    .reduce((acc, e) => addStats(acc, e), emptyStat);
+   
+  const sum = addStats(subleadSum, stat)
+   
+  if (memo) {
+    memo[node.id] = sum;
+  }
+
+  return sum;
+}
+
 
 const ReferralNode = (props: ReferralNodeProps) => {
   const onNodeClick = useCallback((id: string) => {
@@ -66,8 +146,13 @@ const ReferralNode = (props: ReferralNodeProps) => {
       </div>
 
       <div className="flex justify-between w-full">
-        <div className={cn("text-[0.75rem]")}>
-          {(`${Number(props?.amountInUsd?.toFixed(2) || 0).toLocaleString('en-US')}$` || '')}
+        <div className={cn("text-[0.75rem] flex flex-col items-start")}>
+          <div>
+            {(`${Number(props?.stats?.soldInUsd.toString() || 0).toLocaleString('en-US')}$` || '')}
+          </div> 
+          <div>
+            {(`${Number(props?.stats?.tokensSold.toString() || 0).toLocaleString('en-US')} TEA` || '')}
+          </div>
         </div>
 
         <div className={cn("text-[0.75rem]")}>
@@ -121,6 +206,7 @@ export const Referrals = () => {
   const [referralCode, setReferralCode] = useState('');
   const [referralTree, setReferralTree] = useState<Referral>();
   // const [referralGains, setReferralGains] = useState<any>();
+  const [referralStats, setReferralStats] = useState<StatsMap>();
 
 
   const [treeNode, setTreeNodes] = useState<Node<any, string>[]>([]);
@@ -130,7 +216,7 @@ export const Referrals = () => {
   const [edges, setEdges] = useEdgesState(treeEdges);
   const chainId = getChainId(wagmiConfig);
 
-  const getReferralAmounts = useCallback(async (referralId: any) => {
+  const getReferralAmounts = useCallback(async (referralId: any): Promise<ReferralStats> => {
     /*
       struct Referral {
           /// @dev Number of purchases
@@ -147,6 +233,7 @@ export const Referrals = () => {
       args: [referralId],
       functionName: "referrals",
     });
+
     const [ purchases, tokensSold, soldInUsd ]: any = result;
     
     return {
@@ -156,8 +243,8 @@ export const Referrals = () => {
     };
   }, [chainId]);
 
-  const getRefTreeStats = async (refTree: Referral) => {
-    let stats: any = {};
+  const getRefTreeStats = async (refTree?: Referral): Promise<Record<number, ReferralStats>> => {
+    let stats = {} as Record<number, ReferralStats>;
 
     if (refTree != undefined) {  
       stats[refTree.id] = await getReferralAmounts(refTree.id);
@@ -193,7 +280,9 @@ export const Referrals = () => {
 
   const processReferralsTreeGains = async (refTree: Referral) => {
     const stats = await getRefTreeStats(refTree);
-    console.log('stats', stats)
+   
+    setReferralStats(stats);
+    // console.log('stats', stats)
     // const gains = convertStatsToGains(refTree, stats);
     // setReferralGains(gains);
     //
@@ -248,21 +337,24 @@ export const Referrals = () => {
   }, [treeNode, treeEdges]) 
 
   useEffect(() => {
-    if (!referralTree || !referralCode) return;
+    if (!referralTree || !referralCode || !referralStats) return;
+   
 
     const NODE_WIDTH = 160;
-    const NODE_HEIGHT = 80;
+    const NODE_HEIGHT = 100;
     const NODE_PADDING = 15;
     const NOFF = 10;
 
     const data = [] as Node<any, string>[];
     const edges = [] as Edge<any>[];
+   
+    const memo = {} as Record<number, ReferralStats>;
 
     const root = {
       code: referralTree.referral!,
       walletAddress: referralTree.wallet,
       fee: referralTree.fee,
-      amountInUsd: referralTree.amountInUsd,
+      stats: calculateCommission(referralTree, referralStats, memo),
       subleads: Object.keys(referralTree.subleads ?? {}).length,
       parent: '',
       level: 0
@@ -274,7 +366,7 @@ export const Referrals = () => {
         ...referralTree.subleads?.[x],
         parent: referralTree.referral!,
         level: 1 
-      }));
+      } as Referral & { parent: string, level: number }));
 
     let levels = [[root], []]
 
@@ -291,7 +383,7 @@ export const Referrals = () => {
         code: current.referral!,
         walletAddress: current.wallet!,
         fee: current.fee,
-        amountInUsd: current.amountInUsd,
+        stats: calculateCommission(current, referralStats, memo),
         subleads: Object.keys(current.subleads ?? {}).length,
         parent: current.parent,
         level: current.level,
@@ -303,7 +395,7 @@ export const Referrals = () => {
           ...current.subleads?.[x],
           parent: current.referral!,
           level: current.level + 1 
-        }))
+        } as Referral & { parent: string, level: number }))
       );
     }
 
@@ -323,7 +415,7 @@ export const Referrals = () => {
               code={x.code}
               walletAddress={x.walletAddress}
               fee={x.fee}
-              amountInUsd={x.amountInUsd}
+              stats={x.stats}
             />
           )
         },
@@ -411,7 +503,7 @@ export const Referrals = () => {
                   code={x.code}
                   walletAddress={x.walletAddress}
                   fee={x.fee}
-                  amountInUsd={x.amountInUsd}
+                  stats={x.amountInUsd}
                 />
               )
             },
@@ -450,7 +542,7 @@ export const Referrals = () => {
 
     setTreeNodes(data)
     setTreeEdges(edges)
-  }, [referralTree])
+  }, [referralTree, referralStats])
 
   return (
     <div className="referrals page">
