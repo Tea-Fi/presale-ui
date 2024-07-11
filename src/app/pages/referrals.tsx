@@ -62,9 +62,9 @@ const ReferralNode = (props: ReferralNodeProps) => {
       </div>
 
       <div className="flex justify-between w-full">
-        {/* <div className={cn("text-[0.75rem]")}>
+        <div className={cn("text-[0.75rem]")}>
           {(`${Number(props?.amountInUsd?.toFixed(2) || 0).toLocaleString('en-US')}$` || '')}
-        </div> */}
+        </div>
 
         <div className={cn("text-[0.75rem]")}>
           {(props?.fee || 0) / 100}%
