@@ -5,6 +5,7 @@ import { Copy } from "lucide-react";
 import { toast } from 'react-toastify';
 import {
   getChainId,
+  readContract
 } from "@wagmi/core";
 
 import "reactflow/dist/style.css";
@@ -14,6 +15,9 @@ import { getReferralTreeByWallet, Referral } from '../utils/referrals';
 import { ReferralForm } from "../components/referral-form";
 import { cn } from "../utils";
 import { wagmiConfig } from "../config";
+import { PRESALE_ABI } from "../utils/presale_abi";
+import { PRESALE_CONTRACT_ADDRESS } from "../utils/constants";
+import { Address } from "viem";
 
 interface ReferralNodeProps {
   code: string;
@@ -116,6 +120,7 @@ export const Referrals = () => {
 
   const [referralCode, setReferralCode] = useState('');
   const [referralTree, setReferralTree] = useState<Referral>();
+  // const [referralGains, setReferralGains] = useState<any>();
 
 
   const [treeNode, setTreeNodes] = useState<Node<any, string>[]>([]);
@@ -125,44 +130,106 @@ export const Referrals = () => {
   const [edges, setEdges] = useEdgesState(treeEdges);
   const chainId = getChainId(wagmiConfig);
 
+  const getReferralAmounts = useCallback(async (referralId: any) => {
+    /*
+      struct Referral {
+          /// @dev Number of purchases
+          uint16 referrals;
+          /// @dev The amount of tokens sold through referrals
+          uint256 sold;
+          /// @dev The total amount of USD equivalent of tokens sold through referrals
+          uint256 soldInUsd;
+      }
+    */
+    const result = await readContract(wagmiConfig, {
+      abi: PRESALE_ABI,
+      address: PRESALE_CONTRACT_ADDRESS[chainId] as Address,
+      args: [referralId],
+      functionName: "referrals",
+    });
+    const [ purchases, tokensSold, soldInUsd ]: any = result;
+    
+    return {
+      purchases,
+      soldInUsd: soldInUsd, // / BigInt(10**6),
+      tokensSold: tokensSold, // / BigInt(10**18),
+    };
+  }, [chainId]);
+
+  const getRefTreeStats = async (refTree: Referral) => {
+    let stats: any = {};
+
+    if (refTree != undefined) {  
+      stats[refTree.id] = await getReferralAmounts(refTree.id);
+
+      for (const sublead of Object.values(refTree?.subleads || {})) {
+        stats = {...stats, ...(await getRefTreeStats(sublead))};
+      }
+    }
+
+    return stats;
+  };
+
+  // const convertStatsToGains = (refTree: Referral, stats: any) => {
+  //   let gains: any = {};
+  //   gains[refTree.id] = {
+  //     ...stats[refTree.id],
+  //     subleadsPurchases: 0,
+  //     subleadsSoldInUsd: BigInt(0),
+  //     subleadsTokensSold: BigInt(0),
+  //   };
+
+  //   for (const subleadTree of Object.values(refTree?.subleads || {})) {
+  //     const subleadGains = convertStatsToGains(subleadTree, stats);
+  //     gains[subleadTree.id] = subleadGains;
+
+  //     gains[refTree.id].subleadsPurchases += subleadGains.purchases + subleadGains.subleadsPurchases;
+  //     gains[refTree.id].subleadsSoldInUsd += subleadGains.soldInUsd + subleadGains.subleadsSoldInUsd;
+  //     gains[refTree.id].subleadsTokensSold += subleadGains.tokensSold + subleadGains.subleadsTokensSold;
+  //   }
+
+  //   return gains;
+  // };
+
+  const processReferralsTreeGains = async (refTree: Referral) => {
+    const stats = await getRefTreeStats(refTree);
+    console.log('stats', stats)
+    // const gains = convertStatsToGains(refTree, stats);
+    // setReferralGains(gains);
+    //
+    // Use referralGains this tree to display usd referal gains in the react flow graph (for each node):
+    //       (referralGains[node.id].soldInUsd + referralGains[node.id].subleadsSoldInUsd) / BigInt(100) * BigInt(node.fee / 100) / BigInt(10**6)
+    //        Explanation:
+    //              1. Total sold by him and his subleads —— "(referralGains[node.id].soldInUsd + referralGains[node.id].subleadsSoldInUsd)"
+    //              2. Extract gains amount using his referal fee —— "BigInt(100) * BigInt(node.fee / 100)"
+    //              3. USD is held in contract with 6 decimals, convert to human amount —— "/ BigInt(10**6)"
+  };
 
   const getReferralTree = useCallback(() => {
-    if (address) {
-      getReferralTreeByWallet(address, chainId).then(referralTree => {
-        if (referralTree !== undefined) {
-          setReferralTree(referralTree);
-          setReferralCode(referralTree.referral as string);
+    const search = window.location.search;
+    const urlParams = new URLSearchParams(search);
+    const refAddress = urlParams.get("address") || address;
+
+    if (refAddress) {
+      getReferralTreeByWallet(refAddress, chainId).then(refTree => {
+        if (refTree !== undefined) {
+          setReferralTree(refTree);
+          setReferralCode(refTree?.referral as string);
+          processReferralsTreeGains(refTree);
         }
       });
     }
-  }, [address])
+  }, [address, chainId])
 
   useEffect(() => {
-    if (isConnected && address != undefined) {
-      getReferralTreeByWallet(address, chainId).then(referralTree => {
-        if (referralTree !== undefined) {
-          setReferralTree(referralTree);
-          setReferralCode(referralTree.referral as string);
-        }
-      });
-  
+    if (isConnected) {
+      getReferralTree();
     }
-  }, [address, isConnected]);
+  }, [isConnected]);
 
   useAccountEffect({
-    onConnect({ address }) {
-      getReferralTreeByWallet(address, chainId)
-        .then(refTree => {
-          if (refTree !== undefined) {
-            const refCode = refTree?.referral as string;
-
-            if (referralTree == undefined || referralTree.id != refTree.id) {
-              setReferralTree(refTree);
-            } else if (referralCode == undefined || referralCode != refCode) {
-              setReferralCode(refCode);
-            }
-          }
-        });
+    onConnect() {
+      getReferralTree();
     },
     onDisconnect() {
       setReferralCode('');
@@ -362,7 +429,7 @@ export const Referrals = () => {
 
           })
         })
-        .filter(x => !!x)
+        .filter(x => !!x) as any[]
       );
 
       edges.push(...arrangement

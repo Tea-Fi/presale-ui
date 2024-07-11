@@ -41,9 +41,9 @@ export const wagmiConfig = createConfig(
     walletConnectProjectId: WALLET_CONNECT_PROJECT_ID,
 
     // Required App Info
-    appName: "Teaswap",
+    appName: "Tea-Fi",
     // Optional App Info
-    appDescription: "Teaswap presale",
+    appDescription: "Tea-Fi Presale",
     appUrl: "https://presale.tea-fi.com",
     appIcon: "https://presale.tea-fi.com/favicon.svg",
   })
