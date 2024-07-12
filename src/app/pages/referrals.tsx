@@ -155,17 +155,16 @@ const ReferralNode = (props: ReferralNodeProps) => {
 
       <div className="flex justify-between w-full">
         <div className={cn("text-[0.75rem] flex flex-col items-start")}>
-          <div>
             [ {(`$${Number(props?.stats?.soldInUsd.toString() || 0).toLocaleString('en-US')}` || '')} ]
-          </div> 
-          <div>
-            Sold {(`${Number(props?.stats?.tokensSold.toString() || 0).toLocaleString('en-US')} $TEA` || '')}
-          </div>
         </div>
 
         <div className={cn("text-[0.75rem]")}>
           / {(props?.fee || 0) / 100}%
         </div>
+      </div>
+      
+      <div className={cn("text-[0.75rem]")}>
+        Sold {(`${Number(props?.stats?.tokensSold.toString() || 0).toLocaleString('en-US')} $TEA` || '')}
       </div>
     </div>
   )
@@ -314,8 +313,7 @@ export const Referrals = () => {
   useEffect(() => {
     if (!referralTree || !referralCode || !referralStats) return;
    
-
-    const NODE_WIDTH = 160;
+    const NODE_WIDTH = 180;
     const NODE_HEIGHT = 100;
     const NODE_PADDING = 15;
     const NOFF = 10;
