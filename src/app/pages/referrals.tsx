@@ -27,6 +27,16 @@ interface ReferralNodeProps {
   stats?: ReferralStats;
 }
 
+interface ReferralLevelEntry {
+  code: string;
+  walletAddress: string;
+  fee: number | undefined;
+  stats: ReferralStats;
+  subleads: number;
+  parent: string;
+  level: number;
+}
+
 interface ReferralStats {
   purchases: number;
   tokensSold: bigint;
@@ -358,7 +368,7 @@ export const Referrals = () => {
       subleads: Object.keys(referralTree.subleads ?? {}).length,
       parent: '',
       level: 0
-    };
+    } as ReferralLevelEntry;
     
     const queue = Object
       .keys(referralTree.subleads ?? {})
@@ -368,7 +378,7 @@ export const Referrals = () => {
         level: 1 
       } as Referral & { parent: string, level: number }));
 
-    let levels = [[root], []]
+    let levels: ReferralLevelEntry[][] = [[root], []]
 
     while (queue.length > 0) {
       const current = queue.pop()!;
@@ -387,7 +397,7 @@ export const Referrals = () => {
         subleads: Object.keys(current.subleads ?? {}).length,
         parent: current.parent,
         level: current.level,
-      }
+      } as ReferralLevelEntry
 
       level.push(node);
       queue.push(...Object.keys(current.subleads ?? {})
@@ -503,7 +513,7 @@ export const Referrals = () => {
                   code={x.code}
                   walletAddress={x.walletAddress}
                   fee={x.fee}
-                  stats={x.amountInUsd}
+                  stats={x.stats}
                 />
               )
             },
