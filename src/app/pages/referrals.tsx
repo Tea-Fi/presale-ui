@@ -283,6 +283,11 @@ export const Referrals = () => {
       });
     }
   }, [address, chainId])
+  
+  const refertchReferralTree = useCallback(() => {
+    setReferralStats(undefined)
+    getReferralTree()
+  }, [getReferralTree])
 
   useEffect(() => {
     if (isConnected) {
@@ -523,7 +528,7 @@ export const Referrals = () => {
         <div className="title">YOUR SETUP: Code "<b>{referralCode.toUpperCase()}</b>" with {(referralTree?.fee || 0) / 100}% Fee </div>
 
         {referralTree && referralCode && (
-          <ReferralForm referralTree={referralTree} onSubmit={getReferralTree} />
+          <ReferralForm referralTree={referralTree} onSubmit={refertchReferralTree} />
         )}
       </div>
 
