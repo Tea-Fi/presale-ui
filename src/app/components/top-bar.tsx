@@ -12,7 +12,7 @@ import { RiMenu3Fill } from "react-icons/ri";
 import { Button } from "./ui";
 import { useModal } from "connectkit";
 import Countdown from 'react-countdown';
-import { buildStyles, CircularProgressbar, CircularProgressbarWithChildren } from 'react-circular-progressbar';
+import { buildStyles, CircularProgressbarWithChildren } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 export const TopBar = ({
   isBuyPageActive,
