@@ -85,8 +85,6 @@ export const CountdownSmall = ({ finishTime }: {finishTime?: Date | string | num
                     </div>
                   </CircularProgressbarWithChildren>
                 </div>
-  
-                  
               </div>
             </div>
           );
