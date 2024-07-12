@@ -472,7 +472,6 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
           !teaIsSufficient
         }
         onClick={async () => {
-          console.log('is mobile', rdd.isMobile)
           if(rdd.isMobile) {
             soonerToast(
               "You need to approve transaction in your wallet", {

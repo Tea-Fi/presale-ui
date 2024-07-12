@@ -44,9 +44,7 @@ interface ReferralStats {
 }
 
 type StatsMap = Record<string, ReferralStats>;
-
-
-  const emptyStat =  { purchases: 0, soldInUsd: 0n, tokensSold: 0n } as ReferralStats
+const emptyStat =  { purchases: 0, soldInUsd: 0n, tokensSold: 0n } as ReferralStats;
 
 function getFeeFactor(node?: Referral) {
   return BigInt((node?.fee ?? 0));
@@ -64,7 +62,7 @@ function factorStats(a: ReferralStats, factor: bigint): ReferralStats {
   return {
     purchases: a.purchases,
     soldInUsd: a.soldInUsd * factor,
-    tokensSold: a.tokensSold * factor,
+    tokensSold: a.tokensSold,
   }
 }
 
@@ -84,7 +82,7 @@ function calculateCommission(node: Referral, stats: StatsMap, memo?: Record<numb
   const result = addStats(current, subtree);
 
   result.soldInUsd /= BigInt(1e6) * BigInt(1e4);
-  result.tokensSold /= BigInt(1e18) * BigInt(1e4);
+  result.tokensSold /= BigInt(1e18);
 
   return result; 
 }
@@ -158,15 +156,15 @@ const ReferralNode = (props: ReferralNodeProps) => {
       <div className="flex justify-between w-full">
         <div className={cn("text-[0.75rem] flex flex-col items-start")}>
           <div>
-            {(`${Number(props?.stats?.soldInUsd.toString() || 0).toLocaleString('en-US')}$` || '')}
+            [ {(`$${Number(props?.stats?.soldInUsd.toString() || 0).toLocaleString('en-US')}` || '')} ]
           </div> 
           <div>
-            {(`${Number(props?.stats?.tokensSold.toString() || 0).toLocaleString('en-US')} TEA` || '')}
+            Sold {(`${Number(props?.stats?.tokensSold.toString() || 0).toLocaleString('en-US')} $TEA` || '')}
           </div>
         </div>
 
         <div className={cn("text-[0.75rem]")}>
-          {(props?.fee || 0) / 100}%
+          / {(props?.fee || 0) / 100}%
         </div>
       </div>
     </div>
@@ -215,7 +213,6 @@ export const Referrals = () => {
 
   const [referralCode, setReferralCode] = useState('');
   const [referralTree, setReferralTree] = useState<Referral>();
-  // const [referralGains, setReferralGains] = useState<any>();
   const [referralStats, setReferralStats] = useState<StatsMap>();
 
 
@@ -266,42 +263,10 @@ export const Referrals = () => {
 
     return stats;
   };
-
-  // const convertStatsToGains = (refTree: Referral, stats: any) => {
-  //   let gains: any = {};
-  //   gains[refTree.id] = {
-  //     ...stats[refTree.id],
-  //     subleadsPurchases: 0,
-  //     subleadsSoldInUsd: BigInt(0),
-  //     subleadsTokensSold: BigInt(0),
-  //   };
-
-  //   for (const subleadTree of Object.values(refTree?.subleads || {})) {
-  //     const subleadGains = convertStatsToGains(subleadTree, stats);
-  //     gains[subleadTree.id] = subleadGains;
-
-  //     gains[refTree.id].subleadsPurchases += subleadGains.purchases + subleadGains.subleadsPurchases;
-  //     gains[refTree.id].subleadsSoldInUsd += subleadGains.soldInUsd + subleadGains.subleadsSoldInUsd;
-  //     gains[refTree.id].subleadsTokensSold += subleadGains.tokensSold + subleadGains.subleadsTokensSold;
-  //   }
-
-  //   return gains;
-  // };
-
   const processReferralsTreeGains = async (refTree: Referral) => {
     const stats = await getRefTreeStats(refTree);
-   
+    console.info('REF STATS', stats);
     setReferralStats(stats);
-    // console.log('stats', stats)
-    // const gains = convertStatsToGains(refTree, stats);
-    // setReferralGains(gains);
-    //
-    // Use referralGains this tree to display usd referal gains in the react flow graph (for each node):
-    //       (referralGains[node.id].soldInUsd + referralGains[node.id].subleadsSoldInUsd) / BigInt(100) * BigInt(node.fee / 100) / BigInt(10**6)
-    //        Explanation:
-    //              1. Total sold by him and his subleads —— "(referralGains[node.id].soldInUsd + referralGains[node.id].subleadsSoldInUsd)"
-    //              2. Extract gains amount using his referal fee —— "BigInt(100) * BigInt(node.fee / 100)"
-    //              3. USD is held in contract with 6 decimals, convert to human amount —— "/ BigInt(10**6)"
   };
 
   const getReferralTree = useCallback(() => {
