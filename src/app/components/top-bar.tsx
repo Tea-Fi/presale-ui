@@ -28,8 +28,8 @@ export const TopBar = ({
   const {setOpen} = useModal();
   
   useAccountEffect({
-    onConnect({ address }) {
-      getReferralTreeByWallet(address)
+    onConnect({ address, chainId }) {
+      getReferralTreeByWallet(address, chainId)
         .then(referralTree => {
           if (referralTree !== undefined) {
             setReferralTree(referralTree);

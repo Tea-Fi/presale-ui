@@ -5,6 +5,7 @@ import { Copy } from "lucide-react";
 import { toast } from 'react-toastify';
 import {
   getChainId,
+  readContract
 } from "@wagmi/core";
 
 import "reactflow/dist/style.css";
@@ -14,14 +15,105 @@ import { getReferralTreeByWallet, Referral } from '../utils/referrals';
 import { ReferralForm } from "../components/referral-form";
 import { cn } from "../utils";
 import { wagmiConfig } from "../config";
+import { PRESALE_ABI } from "../utils/presale_abi";
+import { PRESALE_CONTRACT_ADDRESS } from "../utils/constants";
+import { Address } from "viem";
 
 interface ReferralNodeProps {
   code: string;
   walletAddress: string;
 
   fee?: number;
-  amountInUsd?: number;
+  stats?: ReferralStats;
 }
+
+interface ReferralLevelEntry {
+  code: string;
+  walletAddress: string;
+  fee: number | undefined;
+  stats: ReferralStats;
+  subleads: number;
+  parent: string;
+  level: number;
+}
+
+interface ReferralStats {
+  purchases: number;
+  tokensSold: bigint;
+  soldInUsd: bigint;
+}
+
+type StatsMap = Record<string, ReferralStats>;
+const emptyStat =  { purchases: 0, soldInUsd: 0n, tokensSold: 0n } as ReferralStats;
+
+function getFeeFactor(node?: Referral) {
+  return BigInt((node?.fee ?? 0));
+}
+
+function addStats(a: ReferralStats, b: ReferralStats): ReferralStats {
+  return {
+    purchases: a.purchases + b.purchases,
+    soldInUsd: a.soldInUsd + b.soldInUsd,
+    tokensSold: a.tokensSold + b.tokensSold,
+  };
+}
+
+function factorStats(a: ReferralStats, factor: bigint): ReferralStats {
+  return {
+    purchases: a.purchases,
+    soldInUsd: a.soldInUsd * factor,
+    tokensSold: a.tokensSold,
+  }
+}
+
+function calculateCommission(node: Referral, stats: StatsMap, memo?: Record<number, ReferralStats>): ReferralStats {
+  const fee = getFeeFactor(node);
+  const stat = stats[node.id]!;
+
+  const current = factorStats(stat, fee);
+
+  const subtreeList = Object.keys(node.subleads ?? {})
+    .map(key => node.subleads?.[key])
+    .map(x => factorStats(subtreeSum(stats, x, memo), (fee - getFeeFactor(x))))
+     
+  const subtree = subtreeList
+    .reduce((acc, e) => addStats(acc, e), emptyStat)
+
+  const result = addStats(current, subtree);
+
+  result.soldInUsd /= BigInt(1e6) * BigInt(1e4);
+  result.tokensSold /= BigInt(1e18);
+
+  return result; 
+}
+
+function subtreeSum(stats: StatsMap, node?: Referral, memo?: Record<number, ReferralStats>): ReferralStats {
+  if (!node) {
+    return emptyStat;
+  }
+ 
+  if (memo?.[node.id]) return memo[node.id];
+ 
+  const stat = stats[node.id];
+
+  if (!node.subleads || Object.keys(node.subleads ?? {}).length === 0) {
+    return stat;
+  }
+
+  const subleadSum = Object.keys(node.subleads ?? {})
+    .map(key => node.subleads?.[key])
+    .map(x => subtreeSum(stats, x))
+    .reduce((acc, e) => addStats(acc, e), emptyStat);
+   
+  const sum = addStats(subleadSum, stat)
+   
+  if (memo) {
+    memo[node.id] = sum;
+  }
+
+  return sum;
+}
+
 
 const ReferralNode = (props: ReferralNodeProps) => {
   const onNodeClick = useCallback((id: string) => {
@@ -62,13 +154,17 @@ const ReferralNode = (props: ReferralNodeProps) => {
       </div>
 
       <div className="flex justify-between w-full">
-        <div className={cn("text-[0.75rem]")}>
-          {(`${Number(props?.amountInUsd?.toFixed(2) || 0).toLocaleString('en-US')}$` || '')}
+        <div className={cn("text-[0.75rem] flex flex-col items-start")}>
+            [ {(`$${Number(props?.stats?.soldInUsd.toString() || 0).toLocaleString('en-US')}` || '')} ]
         </div>
 
         <div className={cn("text-[0.75rem]")}>
-          {(props?.fee || 0) / 100}%
+          / {(props?.fee || 0) / 100}%
         </div>
+      </div>
+      
+      <div className={cn("text-[0.75rem]")}>
+        Sold {(`${Number(props?.stats?.tokensSold.toString() || 0).toLocaleString('en-US')} $TEA` || '')}
       </div>
     </div>
   )
@@ -116,6 +212,7 @@ export const Referrals = () => {
 
   const [referralCode, setReferralCode] = useState('');
   const [referralTree, setReferralTree] = useState<Referral>();
+  const [referralStats, setReferralStats] = useState<StatsMap>();
 
 
   const [treeNode, setTreeNodes] = useState<Node<any, string>[]>([]);
@@ -125,44 +222,82 @@ export const Referrals = () => {
   const [edges, setEdges] = useEdgesState(treeEdges);
   const chainId = getChainId(wagmiConfig);
 
+  const getReferralAmounts = useCallback(async (referralId: any): Promise<ReferralStats> => {
+    /*
+      struct Referral {
+          /// @dev Number of purchases
+          uint16 referrals;
+          /// @dev The amount of tokens sold through referrals
+          uint256 sold;
+          /// @dev The total amount of USD equivalent of tokens sold through referrals
+          uint256 soldInUsd;
+      }
+    */
+    const result = await readContract(wagmiConfig, {
+      abi: PRESALE_ABI,
+      address: PRESALE_CONTRACT_ADDRESS[chainId] as Address,
+      args: [referralId],
+      functionName: "referrals",
+    });
+
+    const [ purchases, tokensSold, soldInUsd ]: any = result;
+    
+    return {
+      purchases,
+      soldInUsd: soldInUsd, // / BigInt(10**6),
+      tokensSold: tokensSold, // / BigInt(10**18),
+    };
+  }, [chainId]);
+
+  const getRefTreeStats = async (refTree?: Referral): Promise<Record<number, ReferralStats>> => {
+    let stats = {} as Record<number, ReferralStats>;
+
+    if (refTree != undefined) {  
+      stats[refTree.id] = await getReferralAmounts(refTree.id);
+
+      for (const sublead of Object.values(refTree?.subleads || {})) {
+        stats = {...stats, ...(await getRefTreeStats(sublead))};
+      }
+    }
+
+    return stats;
+  };
+  const processReferralsTreeGains = async (refTree: Referral) => {
+    const stats = await getRefTreeStats(refTree);
+    console.info('REF STATS', stats);
+    setReferralStats(stats);
+  };
 
   const getReferralTree = useCallback(() => {
-    if (address) {
-      getReferralTreeByWallet(address, chainId).then(referralTree => {
-        if (referralTree !== undefined) {
-          setReferralTree(referralTree);
-          setReferralCode(referralTree.referral as string);
+    const search = window.location.search;
+    const urlParams = new URLSearchParams(search);
+    const refAddress = urlParams.get("address") || address;
+
+    if (refAddress) {
+      getReferralTreeByWallet(refAddress, chainId).then(refTree => {
+        if (refTree !== undefined) {
+          setReferralTree(refTree);
+          setReferralCode(refTree?.referral as string);
+          processReferralsTreeGains(refTree);
         }
       });
     }
-  }, [address])
+  }, [address, chainId])
+  
+  const refertchReferralTree = useCallback(() => {
+    setReferralStats(undefined)
+    getReferralTree()
+  }, [getReferralTree])
 
   useEffect(() => {
-    if (isConnected && address != undefined) {
-      getReferralTreeByWallet(address, chainId).then(referralTree => {
-        if (referralTree !== undefined) {
-          setReferralTree(referralTree);
-          setReferralCode(referralTree.referral as string);
-        }
-      });
-  
+    if (isConnected) {
+      getReferralTree();
     }
-  }, [address, isConnected]);
+  }, [isConnected]);
 
   useAccountEffect({
-    onConnect({ address }) {
-      getReferralTreeByWallet(address, chainId)
-        .then(refTree => {
-          if (refTree !== undefined) {
-            const refCode = refTree?.referral as string;
-
-            if (referralTree == undefined || referralTree.id != refTree.id) {
-              setReferralTree(refTree);
-            } else if (referralCode == undefined || referralCode != refCode) {
-              setReferralCode(refCode);
-            }
-          }
-        });
+    onConnect() {
+      getReferralTree();
     },
     onDisconnect() {
       setReferralCode('');
@@ -181,25 +316,27 @@ export const Referrals = () => {
   }, [treeNode, treeEdges]) 
 
   useEffect(() => {
-    if (!referralTree || !referralCode) return;
-
-    const NODE_WIDTH = 160;
-    const NODE_HEIGHT = 80;
+    if (!referralTree || !referralCode || !referralStats) return;
+   
+    const NODE_WIDTH = 180;
+    const NODE_HEIGHT = 100;
     const NODE_PADDING = 15;
     const NOFF = 10;
 
     const data = [] as Node<any, string>[];
     const edges = [] as Edge<any>[];
+   
+    const memo = {} as Record<number, ReferralStats>;
 
     const root = {
       code: referralTree.referral!,
       walletAddress: referralTree.wallet,
       fee: referralTree.fee,
-      amountInUsd: referralTree.amountInUsd,
+      stats: calculateCommission(referralTree, referralStats, memo),
       subleads: Object.keys(referralTree.subleads ?? {}).length,
       parent: '',
       level: 0
-    };
+    } as ReferralLevelEntry;
     
     const queue = Object
       .keys(referralTree.subleads ?? {})
@@ -207,9 +344,9 @@ export const Referrals = () => {
         ...referralTree.subleads?.[x],
         parent: referralTree.referral!,
         level: 1 
-      }));
+      } as Referral & { parent: string, level: number }));
 
-    let levels = [[root], []]
+    let levels: ReferralLevelEntry[][] = [[root], []]
 
     while (queue.length > 0) {
       const current = queue.pop()!;
@@ -224,11 +361,11 @@ export const Referrals = () => {
         code: current.referral!,
         walletAddress: current.wallet!,
         fee: current.fee,
-        amountInUsd: current.amountInUsd,
+        stats: calculateCommission(current, referralStats, memo),
         subleads: Object.keys(current.subleads ?? {}).length,
         parent: current.parent,
         level: current.level,
-      }
+      } as ReferralLevelEntry
 
       level.push(node);
       queue.push(...Object.keys(current.subleads ?? {})
@@ -236,7 +373,7 @@ export const Referrals = () => {
           ...current.subleads?.[x],
           parent: current.referral!,
           level: current.level + 1 
-        }))
+        } as Referral & { parent: string, level: number }))
       );
     }
 
@@ -256,7 +393,7 @@ export const Referrals = () => {
               code={x.code}
               walletAddress={x.walletAddress}
               fee={x.fee}
-              amountInUsd={x.amountInUsd}
+              stats={x.stats}
             />
           )
         },
@@ -344,7 +481,7 @@ export const Referrals = () => {
                   code={x.code}
                   walletAddress={x.walletAddress}
                   fee={x.fee}
-                  amountInUsd={x.amountInUsd}
+                  stats={x.stats}
                 />
               )
             },
@@ -362,7 +499,7 @@ export const Referrals = () => {
 
           })
         })
-        .filter(x => !!x)
+        .filter(x => !!x) as any[]
       );
 
       edges.push(...arrangement
@@ -383,7 +520,7 @@ export const Referrals = () => {
 
     setTreeNodes(data)
     setTreeEdges(edges)
-  }, [referralTree])
+  }, [referralTree, referralStats])
 
   return (
     <div className="referrals page">
@@ -391,7 +528,7 @@ export const Referrals = () => {
         <div className="title">YOUR SETUP: Code "<b>{referralCode.toUpperCase()}</b>" with {(referralTree?.fee || 0) / 100}% Fee </div>
 
         {referralTree && referralCode && (
-          <ReferralForm referralTree={referralTree} onSubmit={getReferralTree} />
+          <ReferralForm referralTree={referralTree} onSubmit={refertchReferralTree} />
         )}
       </div>
 
