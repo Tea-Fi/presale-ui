@@ -76,7 +76,7 @@ export const Claim = () => {
         });
       }
 
-      setTotalSoldTeaPerAccount(calculatedBalances);
+      setTotalSoldTeaPerAccount(Number(calculatedBalances.toFixed(2)).toLocaleString('en-US'));
       setTgeInfos(newInfo);
     });
   }, []); // <-- if add here account than you get infinite requests to RPC...
