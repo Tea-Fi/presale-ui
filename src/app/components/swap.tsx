@@ -35,6 +35,7 @@ import { SAFE_ERC20_ABI } from "../utils/safe-erc20-abi";
 import { toast } from "react-toastify";
 import { toast as soonerToast } from "sonner";
 import * as rdd from 'react-device-detect';
+import { useCountdownStore } from "../hooks";
 
 
 export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
@@ -42,6 +43,8 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
   const urlParams = new URLSearchParams(search);
   const investment = urlParams.get("opt") || Object.keys(investmentInfo)[0];
   const referrerId = Number(window.localStorage.getItem("referral") || "0");
+
+  const { isFinished } = useCountdownStore();
 
   const [isReversed, setReversed] = useState<boolean>(true);
   const [balance, setBalance] = useState<string | number>(0);
@@ -418,7 +421,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
         )}
       >
         <SwapInput
-          disabled={isLoading || selectedTokenPrice == "" || !isReversed}
+          disabled={isFinished || isLoading || selectedTokenPrice == "" || !isReversed}
           title=""
           balance={balance}
           value={tokenSellValue}
@@ -446,7 +449,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
         </Button>
 
         <SwapInput
-          disabled={isLoading || selectedTokenPrice == "" || isReversed}
+          disabled={isFinished || isLoading || selectedTokenPrice == "" || isReversed}
           title=""
           balance={teaBalance}
           value={tokenBuyValue}
@@ -464,6 +467,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
 
       <Button
         disabled={
+          isFinished ||
           isLoading ||
           selectedTokenPrice == "" ||
           tokenBuyValue.toString() == "" ||
