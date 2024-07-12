@@ -2,7 +2,8 @@ import { buildStyles, CircularProgressbarWithChildren } from "react-circular-pro
 import Countdown from 'react-countdown';
 import { useCountdownStore } from "../hooks";
 
-export const CountdownSmall = ({ finishTime }: {finishTime?: Date | string | number}) => {
+export const CountdownSmall = () => {
+    const finishTime = new Date('09/30/2024 23:59:59');
     const { setFinished } = useCountdownStore();
     const TimerCompletion = () => <span className="text-white">Presale countdown has ended</span>;
 

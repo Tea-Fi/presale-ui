@@ -27,7 +27,6 @@ export const TopBar = ({
   const [referralCode, setReferralCode] = useState('');
   const [referralTree, setReferralTree] = useState<Referral>();
   const { isFinished } = useCountdownStore();
-  const finishTime = new Date('09/30/2024 23:59:59');
 
   const chainId = getChainId(wagmiConfig);
   const {setOpen} = useModal();
@@ -57,11 +56,13 @@ export const TopBar = ({
         <TeaSwapLogoAsset className="size-10"/>
 
         
+        <span className="hidden md:inline-block">
         {isFinished ?
           <span className="text-white">Presale countdown has ended</span> 
         : 
-          <CountdownSmall finishTime={finishTime} />
+          <CountdownSmall />
         }
+        </span>
 
       </div>
 

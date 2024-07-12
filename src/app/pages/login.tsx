@@ -8,7 +8,6 @@ import { TypewriterComponent } from '../components/typewriter-components';
 import { CountdownSmall } from '../components/countdown-sm';
 
 export const Login = () => {
-  const finishTime = new Date('09/30/2024 23:59:59');
   const navigate = useNavigate();
   const [code, setCode] = useState<string>('');
   const [message, setMessage] = useState<string | null>(null);
@@ -46,7 +45,7 @@ export const Login = () => {
       {/* This is a background for start page */}
       <Vortex>
         <div className='px-5 py-7'>
-          <CountdownSmall finishTime={finishTime} />
+          <CountdownSmall />
         </div>
 
         <div className='flex flex-col justify-center min-h-screen w-full z-full'>
