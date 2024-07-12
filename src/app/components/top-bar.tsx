@@ -27,7 +27,7 @@ export const TopBar = ({
   const [referralCode, setReferralCode] = useState('');
   const [referralTree, setReferralTree] = useState<Referral>();
   const { isFinished } = useCountdownStore();
-  const finishTime = new Date('08/31/2024 23:59:59');
+  const finishTime = new Date('09/30/2024 23:59:59');
 
   const chainId = getChainId(wagmiConfig);
   const {setOpen} = useModal();

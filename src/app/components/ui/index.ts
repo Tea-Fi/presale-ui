@@ -20,4 +20,16 @@ export {
     SelectScrollDownButton,
 } from "./select";
 export {BackgroundBeams} from "./background-beams";
-export {Toaster} from "./sonner"
+export {Toaster} from "./sonner";
+export {
+    Dialog,
+    DialogPortal,
+    DialogOverlay,
+    DialogClose,
+    DialogTrigger,
+    DialogContent,
+    DialogHeader,
+    DialogFooter,
+    DialogTitle,
+    DialogDescription,
+} from "./dialog";

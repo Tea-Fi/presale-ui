@@ -8,7 +8,7 @@ import { TypewriterComponent } from '../components/typewriter-components';
 import { CountdownSmall } from '../components/countdown-sm';
 
 export const Login = () => {
-  const finishTime = new Date('08/31/2024 23:59:59');
+  const finishTime = new Date('09/30/2024 23:59:59');
   const navigate = useNavigate();
   const [code, setCode] = useState<string>('');
   const [message, setMessage] = useState<string | null>(null);
