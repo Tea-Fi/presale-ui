@@ -53,7 +53,7 @@ export const TopBar = ({
 
   return (
     <div className="mt-2 w-full max-h-24 inline-flex justify-between items-center px-5 py-3">
-      <div className="inline-flex items-center gap-5 md:w-[250px]">
+      <div className="inline-flex items-center gap-20 md:w-max">
         <TeaSwapLogoAsset className="size-10"/>
 
         
