@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import { Progress } from "./progress";
 import Spinner from "../spinner";
+import { useCountdownStore } from "../../hooks";
 
 export const CardHoverEffect = ({
   items,
@@ -18,6 +19,7 @@ export const CardHoverEffect = ({
   className?: string;
 }) => {
   let [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const { isFinished } = useCountdownStore();
 
   return (
     <div
@@ -28,9 +30,9 @@ export const CardHoverEffect = ({
     >
       {items.map((item, idx) => (
         <a
-          href={item?.link}
+          href={isFinished ? '#' : item?.link}
           key={idx}
-          className="relative group block p-2 h-full w-full"
+          className={cn("relative group block p-2 h-full w-full", isFinished ? 'cursor-not-allowed' : '')}
           onMouseEnter={() => setHoveredIndex(idx)}
           onMouseLeave={() => setHoveredIndex(null)}
         >

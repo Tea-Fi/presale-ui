@@ -14,6 +14,8 @@ import { useModal } from "connectkit";
 import Countdown from 'react-countdown';
 import { buildStyles, CircularProgressbarWithChildren } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
+import { useCountdownStore } from "../hooks";
+
 export const TopBar = ({
   isBuyPageActive,
   isClaimPageActive,
@@ -25,6 +27,8 @@ export const TopBar = ({
 }) => {
   const [referralCode, setReferralCode] = useState('');
   const [referralTree, setReferralTree] = useState<Referral>();
+  const { isFinished, setFinished } = useCountdownStore();
+
   const chainId = getChainId(wagmiConfig);
   const {setOpen} = useModal();
   
@@ -45,12 +49,11 @@ export const TopBar = ({
   });
 
   
-  const TimerCompletion = () => <span className="text-white">Presale is ended!</span>;
+  const TimerCompletion = () => <span className="text-white">Presale countdown has ended</span>;
 
   // Renderer callback with condition
   const renderer = ({ days, hours, minutes, seconds, completed}:{ days: number, hours: number, minutes: number, seconds: number, completed: boolean }) => {
     if (completed) {
-      // Render a completed state
       return <TimerCompletion />;
     } else {
       // Render a countdown
@@ -58,96 +61,105 @@ export const TopBar = ({
       const h = hours < 10 ? `0${hours}`: hours;
       const m = minutes < 10 ? `0${minutes}`: minutes;
       const s = seconds < 10 ? `0${seconds}`: seconds;
-      return <div className="flex flex-col text-white">
-          <div className="inline-flex h-10 gap-1 ">
-            <div className="size-10">
-              <CircularProgressbarWithChildren
-                value={d}
-                maxValue={50}
-                minValue={0}
-                styles={buildStyles({
-                    pathColor: `#ff00a4`,
-                    textColor: `#ff00a4`,
-                })}
-              >
-                <div className="relative flex flex-col gap-0 text-[#ff00a4] text-center mb-2">
-                  <span className="text-[14px] leading-0 h-fit">{d}</span>
-                  <span className="absolute text-[10px] top-[15px] left-1/2 -translate-x-1/2">D</span>
-                </div>
-              </CircularProgressbarWithChildren>
-            </div>
-            <div className="size-10">
-              <CircularProgressbarWithChildren
-                  value={+h}
-                  maxValue={23}
+      return (
+          <div className="relative flex flex-col text-[#ff3aba] gap-2">
+            <span className="absolute text-center text-sm -top-6 left-1/2 -translate-x-1/2 w-full">Presale countdown timer</span>
+          
+            <div className="inline-flex h-10 gap-2">
+              <div className="size-10">
+                <CircularProgressbarWithChildren
+                  value={d}
+                  maxValue={50}
                   minValue={0}
                   styles={buildStyles({
                       pathColor: `#ff00a4`,
                       textColor: `#ff00a4`,
                   })}
-              >
-                <div className="relative flex flex-col gap-0 text-[#ff00a4] text-center mb-2">
-                  <span className="text-[14px] leading-0 h-fit">{h}</span>
-                  <span className="absolute text-[10px] top-[15px] left-1/2 -translate-x-1/2">H</span>
-                </div>
-              </CircularProgressbarWithChildren>
-            </div>
-            <div className="size-10">
-            <CircularProgressbarWithChildren
-                  value={+m}
-                  maxValue={59}
-                  minValue={0}
-                  styles={buildStyles({
-                      pathColor: `#ff00a4`,
-                      textColor: `#ff00a4`,
-                  })}
-              >
-                <div className="relative flex flex-col gap-0 text-[#ff00a4] text-center mb-2">
-                  <span className="text-[14px] leading-0 h-fit">{m}</span>
-                  <span className="absolute text-[10px] top-[15px] left-1/2 -translate-x-1/2">M</span>
-                </div>
-              </CircularProgressbarWithChildren>
-            </div>
-            <div className="size-10">
+                >
+                  <div className="relative flex flex-col gap-0 text-[#ff00a4] text-center mb-2">
+                    <span className="text-[14px] leading-0 h-fit">{d}</span>
+                    <span className="absolute text-[10px] top-[15px] left-1/2 -translate-x-1/2">D</span>
+                  </div>
+                </CircularProgressbarWithChildren>
+              </div>
+              <div className="size-10">
+                <CircularProgressbarWithChildren
+                    value={+h}
+                    maxValue={23}
+                    minValue={0}
+                    styles={buildStyles({
+                        pathColor: `#ff00a4`,
+                        textColor: `#ff00a4`,
+                    })}
+                >
+                  <div className="relative flex flex-col gap-0 text-[#ff00a4] text-center mb-2">
+                    <span className="text-[14px] leading-0 h-fit">{h}</span>
+                    <span className="absolute text-[10px] top-[15px] left-1/2 -translate-x-1/2">H</span>
+                  </div>
+                </CircularProgressbarWithChildren>
+              </div>
+              <div className="size-10">
               <CircularProgressbarWithChildren
-                  value={+s}
-                  maxValue={59}
-                  minValue={0}
-                  styles={buildStyles({
-                      pathColor: `#ff00a4`,
-                      textColor: `#ff00a4`,
-                  })}
-              >
-                <div className="relative flex flex-col gap-0 text-[#ff00a4] text-center mb-2">
-                  <span className="text-[14px] leading-0 h-fit">{s}</span>
-                  <span className="absolute text-[10px] top-[15px] left-1/2 -translate-x-1/2">S</span>
-                </div>
-              </CircularProgressbarWithChildren>
-            </div>
+                    value={+m}
+                    maxValue={59}
+                    minValue={0}
+                    styles={buildStyles({
+                        pathColor: `#ff00a4`,
+                        textColor: `#ff00a4`,
+                    })}
+                >
+                  <div className="relative flex flex-col gap-0 text-[#ff00a4] text-center mb-2">
+                    <span className="text-[14px] leading-0 h-fit">{m}</span>
+                    <span className="absolute text-[10px] top-[15px] left-1/2 -translate-x-1/2">M</span>
+                  </div>
+                </CircularProgressbarWithChildren>
+              </div>
+              <div className="size-10">
+                <CircularProgressbarWithChildren
+                    value={+s}
+                    maxValue={59}
+                    minValue={0}
+                    styles={buildStyles({
+                        pathColor: `#ff00a4`,
+                        textColor: `#ff00a4`,
+                    })}
+                >
+                  <div className="relative flex flex-col gap-0 text-[#ff00a4] text-center mb-2">
+                    <span className="text-[14px] leading-0 h-fit">{s}</span>
+                    <span className="absolute text-[10px] top-[15px] left-1/2 -translate-x-1/2">S</span>
+                  </div>
+                </CircularProgressbarWithChildren>
+              </div>
 
-              
+                
+            </div>
           </div>
-          {/* <span className="text-center bg-red-200">Presale countdown timer</span>
-          <span className="text-white text-center">{d} {d === 1 ? `day` : 'days'} {h}:{m}:{s}</span> */}
-        </div>;
+        );
     }
   };
 
-  const finishTime = new Date('08/31/2024 23:59:59');
-  console.log(finishTime.getTime())
+  // const finishTime = new Date('08/31/2024 23:59:59');
+  const finishTime = Date.now() + 10000;
 
   return (
-    <div className="w-full max-h-24 inline-flex justify-between items-center px-5 py-3">
+    <div className="mt-2 w-full max-h-24 inline-flex justify-between items-center px-5 py-3">
       <div className="inline-flex items-center gap-5 md:w-[250px]">
         <TeaSwapLogoAsset className="size-10"/>
 
         
-        <Countdown
-          date={finishTime}
-          intervalDelay={0}
-          precision={3}
-          renderer={renderer}
-        />
+        {isFinished ?
+          <span className="text-white">Presale countdown has ended</span> 
+        : 
+          <Countdown
+            date={finishTime}
+            intervalDelay={0}
+            precision={3}
+            renderer={renderer}
+            onComplete={() => 
+              setFinished(true)
+            }
+          />
+        }
 
       </div>
 
