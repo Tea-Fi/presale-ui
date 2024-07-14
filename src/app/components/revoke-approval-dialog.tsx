@@ -1,6 +1,14 @@
 import { Address, maxUint256 } from "viem";
 import { CheckmarkText } from "./checkmark-text";
-import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, Input } from "./ui";
+import {
+    Button,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle
+} from "./ui";
 import {
     getChainId, 
     writeContract,
