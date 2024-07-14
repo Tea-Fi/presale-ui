@@ -12,7 +12,7 @@ import { RiMenu3Fill } from "react-icons/ri";
 import { Button } from "./ui";
 import { useModal } from "connectkit";
 import 'react-circular-progressbar/dist/styles.css';
-import { useCountdownStore } from "../hooks";
+import { useCountdownStore, useMobileMenuDrawer } from "../hooks";
 import { CountdownSmall } from "./countdown-sm";
 
 export const TopBar = ({
@@ -27,6 +27,7 @@ export const TopBar = ({
   const [referralCode, setReferralCode] = useState('');
   const [referralTree, setReferralTree] = useState<Referral>();
   const { isFinished } = useCountdownStore();
+  const { setOpened } = useMobileMenuDrawer();
 
   const chainId = getChainId(wagmiConfig);
   const {setOpen} = useModal();
@@ -52,16 +53,16 @@ export const TopBar = ({
 
   return (
     <div className="mt-2 w-full max-h-24 inline-flex justify-between items-center px-5 py-3">
-      <div className="inline-flex items-center gap-20 md:w-max">
+      <div className="inline-flex items-center gap-20 lg:w-max">
         <TeaSwapLogoAsset className="size-10"/>
 
         
-        <span className="hidden md:inline-block">
-        {isFinished ?
-          <span className="text-white">Presale countdown has ended</span> 
-        : 
-          <CountdownSmall />
-        }
+        <span className="hidden lg:inline-block">
+          {isFinished ?
+            <span className="text-white">Presale countdown has ended</span> 
+          : 
+            <CountdownSmall />
+          }
         </span>
 
       </div>
@@ -96,7 +97,7 @@ export const TopBar = ({
         </NavLink>
       </div>
 
-      <span className={"w-[228px] items-center hidden md:inline-flex"}>
+      <span className={"w-[228px] items-center hidden lg:inline-flex"}>
         <span className="text-white">{chainId == ChainId.MAINNET ? 'Mainnet' : 'Sepolia'}</span>
         &nbsp;
         <Wallet />
@@ -105,8 +106,8 @@ export const TopBar = ({
 
       {/* Burger menu for small sizes */}
       <Button
-        className="text-white text-[2.7rem] bg-transparent p-0 hover:bg-transparent hover:text-zinc-400 md:hidden"
-        onClick={() => setOpen(true)}>
+        className="text-white text-[2.7rem] bg-transparent p-0 hover:bg-transparent hover:text-zinc-400 lg:hidden"
+        onClick={() => setOpened(true)}>
         <RiMenu3Fill />
       </Button>
     </div>

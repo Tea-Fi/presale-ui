@@ -25,7 +25,7 @@ export const Wallet = () => {
 
   return (
     <div className="wallet">
-      <ConnectKitButton/>
+      <ConnectKitButton />
     </div>
   );
 };
