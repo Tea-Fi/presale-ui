@@ -4,6 +4,7 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import { LoginStatus, useUserContext } from '../providers/user.context';
 import { BackgroundBeams } from './ui';
 import { MobileDrawerMenu } from './mobile-drawer-menu';
+import { RevokeApprovalDialog } from './revoke-approval-dialog';
 
 export const Layout = () => {
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ export const Layout = () => {
 
       {/* MODALS, DRAWERS */}
       <MobileDrawerMenu />
+      <RevokeApprovalDialog />
     </main>
   );
 };

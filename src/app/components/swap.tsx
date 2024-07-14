@@ -16,6 +16,8 @@ import {
   getAccount,
   getChainId,
   waitForTransactionReceipt,
+  readContract,
+  writeContract,
 } from "@wagmi/core";
 
 import { Token, wagmiConfig } from "../config";
@@ -28,14 +30,14 @@ import {
 } from "../utils/presale";
 import { PRESALE_CONTRACT_ADDRESS, investmentInfo } from "../utils/constants";
 import { useReadContract } from "wagmi";
-import { readContract, writeContract } from "@wagmi/core";
+
 import Spinner from "./spinner";
 import { PRESALE_ABI } from "../utils/presale_abi";
 import { SAFE_ERC20_ABI } from "../utils/safe-erc20-abi";
 import { toast } from "react-toastify";
 import { toast as soonerToast } from "sonner";
 import * as rdd from 'react-device-detect';
-import { useCountdownStore } from "../hooks";
+import { useCountdownStore, useRevokeApprovalDialog } from "../hooks";
 
 
 export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
@@ -44,6 +46,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
   const investment = urlParams.get("opt") || Object.keys(investmentInfo)[0];
   const referrerId = Number(window.localStorage.getItem("referral") || "0");
 
+  const { setOpened, isAllowanceChanged } = useRevokeApprovalDialog();
   const { isFinished } = useCountdownStore();
 
   const [isReversed, setReversed] = useState<boolean>(true);
@@ -113,6 +116,22 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
 
   const approveToken = async (token: Address) => {
     try {
+      if(selectedToken.symbol === 'USDT') {
+        const inputValue = parseUnits(
+          tokenSellValue.toString(),
+          selectedToken.decimals
+        );
+
+        const allowance = allowances.data ?? 0n;
+    
+        if (allowance != 0n && inputValue > allowance) {
+          setOpened(true);
+          return;
+        }
+
+      }
+
+
       setIsLoading(true);
       const hash = await writeContract(wagmiConfig, {
         address: token,
@@ -307,11 +326,11 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
 
   useEffect(() => {
     checkTokenAllowance();
-  }, [allowances]);
+  }, [allowances, isAllowanceChanged]);
 
   useEffect(() => {
     allowances.refetch();
-  }, [tokenIsApproved]);
+  }, [tokenIsApproved, isAllowanceChanged]);
 
   useEffect(() => {
     allowances.refetch();
@@ -521,6 +540,8 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
     </div>
   );
 };
+
+
 
 const SwapInput = ({
   disabled,
