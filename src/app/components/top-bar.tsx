@@ -90,26 +90,28 @@ export const TopBar = ({
           Claim
         </NavLink>
         
-        <NavLink 
-          to="/dashboard"
-          className={cn(
-            "rounded-full h-full min-w-16 items-center hidden lg:inline-flex justify-center ", 
-            isDashboardPageActive ? 'border border-white/[0.2]' : '', 
-            !referralTree ? 'hidden': ''
-          )}
-        >
-          Dashboard
-        </NavLink>
-        <NavLink 
-          to="/referrals"
-          className={cn(
-            "rounded-full h-full min-w-16 items-center hidden lg:inline-flex justify-center", 
-            isReferralTreePageActive ? 'border border-white/[0.2]' : '', 
-            !referralTree ? 'hidden': ''
-          )}
-        >
-          Referrals ({referralCode.toUpperCase()})
-        </NavLink>
+       {referralTree && (
+        <>
+          <NavLink 
+            to="/dashboard"
+            className={cn(
+              "rounded-full h-full min-w-16 items-center hidden lg:inline-flex justify-center ", 
+              isDashboardPageActive ? 'border border-white/[0.2]' : '', 
+            )}
+          >
+            Dashboard
+          </NavLink>
+          <NavLink 
+            to="/referrals"
+            className={cn(
+              "rounded-full h-full min-w-16 items-center hidden lg:inline-flex justify-center", 
+              isReferralTreePageActive ? 'border border-white/[0.2]' : '', 
+            )}
+          >
+            Referrals ({referralCode.toUpperCase()})
+          </NavLink>
+        </>
+       )} 
         
       </div>
 

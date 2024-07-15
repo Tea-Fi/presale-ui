@@ -52,24 +52,29 @@ export const MobileDrawerMenu = () => {
                             <CountdownSmall size="lg" />
                         </div>
 
-                        <NavLink
-                            to="/dashboard"
-                            className={cn(
-                                "rounded-full h-full min-w-16 items-center inline-flex justify-center text-white",
-                                !referralTree ? 'hidden' : ''
-                            )}
-                        >
-                            Dashboard
-                        </NavLink>
-                        <NavLink
-                            to="/referrals"
-                            className={cn(
-                                "rounded-full h-full min-w-16 items-center inline-flex justify-center text-white",
-                                !referralTree ? 'hidden' : ''
-                            )}
-                        >
-                            Referrals ({referralCode.toUpperCase()})
-                        </NavLink>
+                        {referralTree && (
+                            <>
+                                <NavLink
+                                    to="/dashboard"
+                                    className={cn(
+                                        "rounded-full h-full min-w-16 items-center inline-flex justify-center text-white",
+                                        !referralTree ? 'hidden' : ''
+                                    )}
+                                >
+                                    Dashboard
+                                </NavLink>
+                                <NavLink
+                                    to="/referrals"
+                                    className={cn(
+                                        "rounded-full h-full min-w-16 items-center inline-flex justify-center text-white",
+                                        !referralTree ? 'hidden' : ''
+                                    )}
+                                >
+                                    Referrals ({referralCode.toUpperCase()})
+                                </NavLink>
+                            </>
+                        )}
+
                     </DrawerHeader>
 
 
