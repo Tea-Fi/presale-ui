@@ -8,7 +8,7 @@ interface Store {
 }
 
 export const useRevokeApprovalDialog = create<Store>(set => ({
-	isOpened: true,
+	isOpened: false,
 	isAllowanceChanged: false,
 	setOpened: (status: boolean) => set({ isOpened: status }),
 	setAllowanceChanged: (status: boolean) => set({ isAllowanceChanged: status}),
