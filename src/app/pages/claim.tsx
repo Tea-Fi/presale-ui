@@ -104,7 +104,7 @@ export const Claim = () => {
               <CardDescription className='flex flex-col gap-3'>
                 <span className='text-lg'>{projectInfo.balance !== null ? projectInfo.balance.toLocaleString('en-US') : <Spinner />} $TEA</span>
                 <span className='mt-2 text-base'>
-                  Claim at TGE ({`${projectInfo.tge}%`}): {projectInfo.tge !== null && handleCalculateTgeAmount(projectInfo.balance, projectInfo.tge) !== null
+                  Claim at TGE{projectInfo.tge !== null ? ` (${projectInfo.tge}%)` : ''}: {projectInfo.tge !== null && handleCalculateTgeAmount(projectInfo.balance, projectInfo.tge) !== null
                     ? ` ${handleCalculateTgeAmount(projectInfo.balance, projectInfo.tge)?.toLocaleString()} $TEA`
                     : <Spinner />}
                 </span>
