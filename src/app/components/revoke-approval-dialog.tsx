@@ -149,6 +149,10 @@ export const RevokeApprovalDialog = () => {
                         disabled={isLoading}
                         type="submit"
                         onClick={async () => {
+                            if(isRevokeSuccess && isApproveSuccess) {
+                                setOpened(false);
+                                return;
+                            }
                             await handleApproveUSDT(true);
                         }} 
                         className="outline-none w-full bg-[#ff00a6] rounded-lg text-[#330121] hover:bg-[#880357] text-xl font-bold"
