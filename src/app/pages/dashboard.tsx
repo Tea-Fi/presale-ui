@@ -195,7 +195,7 @@ export const DashboardPage = () => {
   }, [referralTree])
   
   const info = React.useMemo(() => {
-    if (!referralTree || !referralStats || !team) return;
+    if (!referralTree || !referralStats || !team || !address) return;
 
     const memo = {}
     const stat = referralStats[referralTree.id] ?? emptyStat;
@@ -209,7 +209,9 @@ export const DashboardPage = () => {
 
     return {
       purchases: stat.purchases,
-      teamSize: team.length,
+      teamSize: team
+        .filter(x => x.wallet !== address)
+        .length,
 
       earing: calculateCommission(referralTree, referralStats, memo),
 
@@ -219,7 +221,7 @@ export const DashboardPage = () => {
 
       
     };
-  }, [referralTree, referralStats, team])
+  }, [referralTree, referralStats, team, address])
 
   const getFilterLogs = React.useCallback(async (boundary: Date) => {
     const client = getClient(wagmiConfig);
@@ -229,7 +231,6 @@ export const DashboardPage = () => {
     const logs = await getLogs(client!, {
       address: PRESALE_CONTRACT_ADDRESS[chainId] as `0x${string}`,
       fromBlock: 0n,
-      toBlock: BigInt(to),
       event: abi
     });
 
