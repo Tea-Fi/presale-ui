@@ -18,7 +18,7 @@ import { wagmiConfig } from "../config";
 import { PRESALE_CONTRACT_ADDRESS, USDT } from "../utils/constants";
 import { SAFE_ERC20_ABI } from "../utils/safe-erc20-abi";
 import { useEffect, useState } from "react";
-import { useConnectedWalletMobile, useRevokeApprovalDialog } from "../hooks";
+import {  useRevokeApprovalDialog } from "../hooks";
 import Spinner from "./spinner";
 
 
