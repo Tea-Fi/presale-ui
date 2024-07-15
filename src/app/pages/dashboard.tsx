@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 
 import { useAccount, useAccountEffect } from "wagmi";
-import { getChainId } from "@wagmi/core";
+import { getChainId, getClient } from "@wagmi/core";
 
 import { PRESALE_CONTRACT_ADDRESS, Referral } from "../utils/constants";
 import { PRESALE_ABI } from "../utils/presale_abi";
@@ -10,7 +10,9 @@ import { wagmiConfig } from "../config";
 import { getReferralTreeByWallet } from '../utils/referrals';
 
 import { ShoppingCart, BarChart2, ShoppingBag, Download, PersonStanding } from 'lucide-react';
-import { ethers, EventLog } from 'ethers';
+import { ethers } from 'ethers';
+import { AbiEvent, getAbiItem } from 'viem';
+import { getLogs, getBlock } from 'viem/actions';
 
 interface ReferralStats {
   purchases: number;
@@ -247,6 +249,8 @@ export const DashboardPage = () => {
   // }, [chainId]);
 
   const getFilterLogs = React.useCallback(async (boundary: Date) => {
+    const client = getClient(wagmiConfig);
+
     const provider = ethers.getDefaultProvider(
       import.meta.env.VITE_PUBLIC_INFURA_URL
     );
@@ -258,54 +262,71 @@ export const DashboardPage = () => {
     );
 
     const to = await provider.getBlockNumber() 
-    const step = 50000;
+    const step = 50000n;
   
-    let start = to - step; 
-    let end = to; 
+    let start = BigInt(to) - step; 
+    let end = BigInt(to); 
 
-    const logs: EventLog[] = [];
 
     const filter = presaleContract.filters.BuyTokens();
+    const abi = getAbiItem({
+      abi: PRESALE_ABI,
+      name: 'BuyTokens',
+    }) as AbiEvent;
+    
+    const logs = await getLogs(client!, {
+      address: PRESALE_CONTRACT_ADDRESS[chainId] as `0x${string}`,
+      fromBlock: 0n,
+      toBlock: end,
+      event: abi
+    });
 
-    while (true) {
-      const temp = await presaleContract.queryFilter(filter, start, end);
-     
-      if (temp.length === 0) {
-        break;
-      }
-
-      logs.push(...temp as EventLog[]);
+    // while (true) {
+    //   // const temp = await presaleContract.queryFilter(filter, start, end);
       
-      start -= step; 
-      end -= step; 
-    } 
+    //   const temp = 
+     
+    //   if (temp.length === 0) {
+    //     break;
+    //   }
 
-    const ids = new Set(team?.map(x => BigInt(x.id)) ?? []);
+    //   logs.push(...temp as any[]);
+      
+    //   start -= step; 
+    //   end -= step; 
+    // } 
+
+    const ids = new Set(team?.map(x => x.id) ?? []);
     const relevantLogs = await Promise.all(
       logs
-        .filter(x => ids.has(x.args[4]))
-        .map(async x => ({ ...x, timestamp: await provider.getBlock(x.blockNumber).then(x => x?.timestamp) }))
+        .filter(x => ids.has((x.args as any)['referrerId'] as number))
+        .map(async x => ({ 
+          ...x,
+          timestamp: await getBlock(client!, { blockNumber: x.blockNumber })
+            .then(x => x?.timestamp) 
+          }))
     );
    
     const targetLogs = relevantLogs
-      .filter(x => x.timestamp && new Date(x.timestamp * 1e3) >= boundary);
+      .filter(x => x.timestamp && new Date(Number(x.timestamp) *1e3) >= boundary);
 
     console.log(targetLogs);
 
     const stats = {} as StatsMap;
 
     for (const entry of targetLogs) {
-      const stat = stats[Number(entry.args[4])] ?? {
+      const args = (entry.args as any)
+      const stat = stats[Number(args['referrerId'] as number)] ?? {
         purchases: 0,
         soldInUsd: 0n,
         tokensSold: 0n
       };
 
       stat.purchases += 1;
-      stat.soldInUsd += entry.args[5];
-      stat.tokensSold += entry.args[6];
+      stat.soldInUsd += BigInt(args['tokensSoldAmountInUsd']);
+      stat.tokensSold += BigInt(args['tokenSoldAmount']);
 
-      stats[Number(entry.args[4])] = stat;
+      stats[Number(args['referrerId'] as number)] = stat;
     }
 
     console.log(stats);
@@ -373,7 +394,7 @@ export const DashboardPage = () => {
     <article className="dashboard-container">
 
       <header className='flex flex-row justify-between items-center w-full gap-8'>
-        <div>Leaders Dashboard</div>
+        <div>Dashboard</div>
 
         <DashboardPeriodSelector onChange={setDateBoundary} />
       </header>
