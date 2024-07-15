@@ -3,6 +3,9 @@ import React, { useEffect } from 'react';
 import { useAccount, useAccountEffect } from "wagmi";
 import { getChainId, getClient } from "@wagmi/core";
 
+import { AbiEvent, getAbiItem } from 'viem';
+import { getLogs, getBlock, getBlockNumber } from 'viem/actions';
+
 import { PRESALE_CONTRACT_ADDRESS, Referral } from "../utils/constants";
 import { PRESALE_ABI } from "../utils/presale_abi";
 
@@ -10,9 +13,6 @@ import { wagmiConfig } from "../config";
 import { getReferralTreeByWallet } from '../utils/referrals';
 
 import { ShoppingCart, BarChart2, ShoppingBag, Download, PersonStanding } from 'lucide-react';
-import { ethers } from 'ethers';
-import { AbiEvent, getAbiItem } from 'viem';
-import { getLogs, getBlock } from 'viem/actions';
 
 interface ReferralStats {
   purchases: number;
@@ -66,7 +66,7 @@ function calculateCommission(node: Referral, stats: StatsMap, memo?: Record<numb
 
   const result = addStats(current, subtree);
 
-  result.soldInUsd /= BigInt(1e6) * BigInt(1e4);
+  result.soldInUsd /= BigInt(1e6 * 1e2);
   result.tokensSold /= BigInt(1e18);
 
   return result; 
@@ -107,7 +107,7 @@ function subtreeSum(stats: StatsMap, node?: Referral, memo?: Record<number, Refe
   return sum;
 }
 
-const usdFormatter = Intl.NumberFormat('en-US', { currency: 'usd' })
+const usdFormatter = Intl.NumberFormat('en-US', { currency: 'usd', maximumFractionDigits: 2 })
 
 enum PeriodFilter {
   day = '1D',
@@ -221,80 +221,17 @@ export const DashboardPage = () => {
     };
   }, [referralTree, referralStats, team])
 
-  // const getReferralAmounts = React.useCallback(async (referralId: any): Promise<ReferralStats> => {
-  //   /*
-  //     struct Referral {
-  //         /// @dev Number of purchases
-  //         uint16 referrals;
-  //         /// @dev The amount of tokens sold through referrals
-  //         uint256 sold;
-  //         /// @dev The total amount of USD equivalent of tokens sold through referrals
-  //         uint256 soldInUsd;
-  //     }
-  //   */
-  //   const result = await readContract(wagmiConfig, {
-  //     abi: PRESALE_ABI,
-  //     address: PRESALE_CONTRACT_ADDRESS[chainId] as Address,
-  //     args: [referralId],
-  //     functionName: "referrals",
-  //   });
-
-  //   const [purchases, tokensSold, soldInUsd]: any = result;
-
-  //   return {
-  //     purchases,
-  //     soldInUsd: soldInUsd, // / BigInt(10**6),
-  //     tokensSold: tokensSold, // / BigInt(10**18),
-  //   };
-  // }, [chainId]);
-
   const getFilterLogs = React.useCallback(async (boundary: Date) => {
     const client = getClient(wagmiConfig);
 
-    const provider = ethers.getDefaultProvider(
-      import.meta.env.VITE_PUBLIC_INFURA_URL
-    );
-
-    const presaleContract = new ethers.Contract(
-      PRESALE_CONTRACT_ADDRESS[chainId],
-      PRESALE_ABI,
-      provider
-    );
-
-    const to = await provider.getBlockNumber() 
-    const step = 50000n;
-  
-    let start = BigInt(to) - step; 
-    let end = BigInt(to); 
-
-
-    const filter = presaleContract.filters.BuyTokens();
-    const abi = getAbiItem({
-      abi: PRESALE_ABI,
-      name: 'BuyTokens',
-    }) as AbiEvent;
-    
+    const to = await getBlockNumber(client!);
+    const abi = getAbiItem({ abi: PRESALE_ABI, name: 'BuyTokens' }) as AbiEvent;
     const logs = await getLogs(client!, {
       address: PRESALE_CONTRACT_ADDRESS[chainId] as `0x${string}`,
       fromBlock: 0n,
-      toBlock: end,
+      toBlock: BigInt(to),
       event: abi
     });
-
-    // while (true) {
-    //   // const temp = await presaleContract.queryFilter(filter, start, end);
-      
-    //   const temp = 
-     
-    //   if (temp.length === 0) {
-    //     break;
-    //   }
-
-    //   logs.push(...temp as any[]);
-      
-    //   start -= step; 
-    //   end -= step; 
-    // } 
 
     const ids = new Set(team?.map(x => x.id) ?? []);
     const relevantLogs = await Promise.all(
@@ -334,24 +271,6 @@ export const DashboardPage = () => {
     setReferralStats(stats);
   }, [team]);
 
-  // const getRefTreeStats = async (refTree?: Referral): Promise<Record<number, ReferralStats>> => {
-  //   let stats = {} as Record<number, ReferralStats>;
-
-  //   if (refTree != undefined) {
-  //     stats[refTree.id] = await getReferralAmounts(refTree.id);
-
-  //     for (const sublead of Object.values(refTree?.subleads || {})) {
-  //       stats = { ...stats, ...(await getRefTreeStats(sublead)) };
-  //     }
-  //   }
-
-  //   return stats;
-  // };
-  // const processReferralsTreeGains = async (refTree: Referral) => {
-  //   const stats = await getRefTreeStats(refTree);
-  //   setReferralStats(stats);
-  // };
-
   const getReferralTree = React.useCallback(() => {
     const search = window.location.search;
     const urlParams = new URLSearchParams(search);
@@ -361,7 +280,6 @@ export const DashboardPage = () => {
       getReferralTreeByWallet(refAddress, chainId).then(refTree => {
         if (refTree !== undefined) {
           setReferralTree(refTree);
-          // processReferralsTreeGains(refTree);
         }
       });
     }
@@ -449,7 +367,7 @@ export const DashboardPage = () => {
               My earnings
             </div>
             <div className='dashboard-card__value'>
-              ${usdFormatter.format(info.earing.soldInUsd)}
+              ${usdFormatter.format(Number(info.earing.soldInUsd) / 100)}
             </div>
           </div>
           <div className='dashboard-card'>
@@ -460,7 +378,7 @@ export const DashboardPage = () => {
               Average Team Earning
             </div>
             <div className='dashboard-card__value'>
-              ${usdFormatter.format(info.teamEarnings)}
+              ${usdFormatter.format(Number(info.teamEarnings) / 100)}
             </div>
           </div>
         </main>
