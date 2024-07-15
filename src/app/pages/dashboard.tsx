@@ -218,9 +218,8 @@ export const DashboardPage = () => {
 
       teamEarnings: averageTeamEarnings,
       teamPurchases: Object.keys(referralStats)
+        .filter(key  => Number(key) !== referralTree.id)
         .reduce((acc, e) => acc + referralStats[e].purchases, 0),
-
-      
     };
   }, [referralTree, referralStats, team, address])
 
