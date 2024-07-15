@@ -12,7 +12,7 @@ import { RiMenu3Fill } from "react-icons/ri";
 import { Button } from "./ui";
 import 'react-circular-progressbar/dist/styles.css';
 import { useCountdownStore } from "../hooks";
-import { CountdownSmall } from "./countdown-sm";
+// import { CountdownSmall } from "./countdown-sm";
 import { useModal } from "connectkit";
 
 export const TopBar = ({
@@ -28,7 +28,7 @@ export const TopBar = ({
 }) => {
   const [referralCode, setReferralCode] = useState('');
   const [referralTree, setReferralTree] = useState<Referral>();
-  const { isFinished } = useCountdownStore();
+  // const { isFinished } = useCountdownStore();
   const { setOpen } = useModal();
   // const { setOpened } = useMobileMenuDrawer();
 
