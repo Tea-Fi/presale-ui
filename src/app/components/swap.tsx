@@ -37,7 +37,7 @@ import { SAFE_ERC20_ABI } from "../utils/safe-erc20-abi";
 import { toast } from "react-toastify";
 import { toast as soonerToast } from "sonner";
 import * as rdd from 'react-device-detect';
-import { useCountdownStore, useRevokeApprovalDialog } from "../hooks";
+import { useCountdownStore, useRevokeApprovalDialog, useConnectedWalletMobile } from "../hooks";
 import { useModal } from "connectkit";
 
 
@@ -47,6 +47,8 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
   const investment = urlParams.get("opt") || Object.keys(investmentInfo)[0];
   const referrerId = Number(window.localStorage.getItem("referral") || "0");
 
+
+  const { open } = useConnectedWalletMobile();
   const { setOpened, isAllowanceChanged } = useRevokeApprovalDialog();
   const { setOpen } = useModal();
   const { isFinished } = useCountdownStore();
@@ -502,13 +504,13 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
             setOpen(true);
             return;
           }
-          if(rdd.isMobile) {
+          if(rdd.isMobile && selectedToken.symbol !== "USDT") {
             soonerToast(
               "You need to approve transaction in your wallet", {
               duration: 20000,
               action: {
                 label: "Open Wallet",
-                onClick: () => window.open("https://metamask.app.link")
+                onClick: () => open()
               }
             });
           }

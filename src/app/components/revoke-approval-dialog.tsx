@@ -18,13 +18,14 @@ import { wagmiConfig } from "../config";
 import { PRESALE_CONTRACT_ADDRESS, USDT } from "../utils/constants";
 import { SAFE_ERC20_ABI } from "../utils/safe-erc20-abi";
 import { useEffect, useState } from "react";
-import { useRevokeApprovalDialog } from "../hooks";
+import { useConnectedWalletMobile, useRevokeApprovalDialog } from "../hooks";
 import Spinner from "./spinner";
 
 
 export const RevokeApprovalDialog = () => {
     const chainId = getChainId(wagmiConfig);
     const { isOpened, setOpened, setAllowanceChanged } = useRevokeApprovalDialog();
+    const { open } = useConnectedWalletMobile();
 
     const [isLoading, setIsLoading] = useState<boolean>();
 
@@ -52,6 +53,9 @@ export const RevokeApprovalDialog = () => {
                 setApprovePending(true);
             }
 
+            // open wallet on mobile
+            open();
+            
             const hash = await writeContract(wagmiConfig, {
                 address: USDT[chainId],
                 abi: SAFE_ERC20_ABI,
@@ -61,6 +65,8 @@ export const RevokeApprovalDialog = () => {
                     isRevoke ? 0 : maxUint256,
                 ],
             });
+
+            
 
         
             const transactionReceipt = await waitForTransactionReceipt(wagmiConfig, {
@@ -146,7 +152,7 @@ export const RevokeApprovalDialog = () => {
                         }} 
                         className="outline-none w-full bg-[#ff00a6] rounded-lg text-[#330121] hover:bg-[#880357] text-xl font-bold"
                     >
-                        {isLoading ? <Spinner /> : "Revoke"}
+                        {isLoading ? <Spinner /> : isRevokeSuccess && isApproveSuccess ? "Close" : "Revoke"}
                     </Button>
                 </DialogFooter>
             </DialogContent>
