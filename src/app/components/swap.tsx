@@ -16,6 +16,8 @@ import {
   getAccount,
   getChainId,
   waitForTransactionReceipt,
+  readContract,
+  writeContract,
 } from "@wagmi/core";
 
 import { Token, wagmiConfig } from "../config";
@@ -28,14 +30,15 @@ import {
 } from "../utils/presale";
 import { PRESALE_CONTRACT_ADDRESS, investmentInfo } from "../utils/constants";
 import { useReadContract } from "wagmi";
-import { readContract, writeContract } from "@wagmi/core";
+
 import Spinner from "./spinner";
 import { PRESALE_ABI } from "../utils/presale_abi";
 import { SAFE_ERC20_ABI } from "../utils/safe-erc20-abi";
 import { toast } from "react-toastify";
 import { toast as soonerToast } from "sonner";
 import * as rdd from 'react-device-detect';
-import { useCountdownStore } from "../hooks";
+import { useCountdownStore, useRevokeApprovalDialog, useConnectedWalletMobile } from "../hooks";
+import { useModal } from "connectkit";
 
 
 export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
@@ -44,6 +47,10 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
   const investment = urlParams.get("opt") || Object.keys(investmentInfo)[0];
   const referrerId = Number(window.localStorage.getItem("referral") || "0");
 
+
+  const { open } = useConnectedWalletMobile();
+  const { setOpened, isAllowanceChanged } = useRevokeApprovalDialog();
+  const { setOpen } = useModal();
   const { isFinished } = useCountdownStore();
 
   const [isReversed, setReversed] = useState<boolean>(true);
@@ -113,6 +120,22 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
 
   const approveToken = async (token: Address) => {
     try {
+      if(selectedToken.symbol === 'USDT') {
+        const inputValue = parseUnits(
+          tokenSellValue.toString(),
+          selectedToken.decimals
+        );
+
+        const allowance = allowances.data ?? 0n;
+    
+        if (allowance != 0n && inputValue > allowance) {
+          setOpened(true);
+          return;
+        }
+
+      }
+
+
       setIsLoading(true);
       const hash = await writeContract(wagmiConfig, {
         address: token,
@@ -307,11 +330,11 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
 
   useEffect(() => {
     checkTokenAllowance();
-  }, [allowances]);
+  }, [allowances, isAllowanceChanged]);
 
   useEffect(() => {
     allowances.refetch();
-  }, [tokenIsApproved]);
+  }, [tokenIsApproved, isAllowanceChanged]);
 
   useEffect(() => {
     allowances.refetch();
@@ -467,6 +490,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
 
       <Button
         disabled={
+          !account.isConnected ? false :
           isFinished ||
           isLoading ||
           selectedTokenPrice == "" ||
@@ -476,13 +500,17 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
           !teaIsSufficient
         }
         onClick={async () => {
-          if(rdd.isMobile) {
+          if(!account.isConnected) {
+            setOpen(true);
+            return;
+          }
+          if(rdd.isMobile || rdd.isMobile && !tokenIsApproved && selectedToken.symbol === "USDT") {
             soonerToast(
               "You need to approve transaction in your wallet", {
               duration: 20000,
               action: {
                 label: "Open Wallet",
-                onClick: () => window.open("https://metamask.app.link")
+                onClick: () => open()
               }
             });
           }
@@ -496,7 +524,9 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
         }}
         className="bg-[#680043] hover:bg-[#aa006f] text-xl font-bold text-[#ff00a6] py-6"
       >
-        {isLoading ? (
+        {!account.isConnected ? (
+            "Connect wallet"
+        ) : isLoading ? (
           <Spinner />
         ) : !balanceIsSufficient ? (
           "Insufficient funds"
@@ -521,6 +551,8 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
     </div>
   );
 };
+
+
 
 const SwapInput = ({
   disabled,

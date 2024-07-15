@@ -1,11 +1,11 @@
 import { create } from 'zustand';
 
-interface CountdownStore {
+interface Store {
 	isFinished: boolean;
 	setFinished: (status: boolean) => void;
 }
 
-export const useCountdownStore = create<CountdownStore>(set => ({
+export const useCountdownStore = create<Store>(set => ({
 	isFinished: false,
 	setFinished: (status: boolean) => set({ isFinished: status }),
 }));
