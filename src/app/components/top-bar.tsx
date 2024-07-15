@@ -17,11 +17,13 @@ import { CountdownSmall } from "./countdown-sm";
 export const TopBar = ({
   isBuyPageActive,
   isClaimPageActive,
-  isReferralTreePageActive
+  isReferralTreePageActive,
+  isDashboardPageActive
 }:{
   isBuyPageActive?: boolean,
   isClaimPageActive?: boolean,
   isReferralTreePageActive?: boolean
+  isDashboardPageActive?: boolean
 }) => {
   const [referralCode, setReferralCode] = useState('');
   const [referralTree, setReferralTree] = useState<Referral>();
@@ -82,7 +84,20 @@ export const TopBar = ({
             "rounded-full h-full min-w-16 items-center inline-flex justify-center",
             isClaimPageActive ? 'border border-white/[0.2]' : ''
           )}
-        >Claim</NavLink>
+        >
+          Claim
+        </NavLink>
+        
+        <NavLink 
+          to="/dashboard"
+          className={cn(
+            "rounded-full h-full min-w-16 items-center inline-flex justify-center", 
+            isDashboardPageActive ? 'border border-white/[0.2]' : '', 
+            !referralTree ? 'hidden': ''
+          )}
+        >
+          Leaders Dashboard
+        </NavLink>
         <NavLink 
           to="/referrals"
           className={cn(
@@ -93,6 +108,7 @@ export const TopBar = ({
         >
           Referrals ({referralCode.toUpperCase()})
         </NavLink>
+        
       </div>
 
       <span className={"w-[228px] items-center hidden lg:inline-flex"}>
