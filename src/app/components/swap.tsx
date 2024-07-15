@@ -38,6 +38,7 @@ import { toast } from "react-toastify";
 import { toast as soonerToast } from "sonner";
 import * as rdd from 'react-device-detect';
 import { useCountdownStore, useRevokeApprovalDialog } from "../hooks";
+import { useModal } from "connectkit";
 
 
 export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
@@ -47,6 +48,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
   const referrerId = Number(window.localStorage.getItem("referral") || "0");
 
   const { setOpened, isAllowanceChanged } = useRevokeApprovalDialog();
+  const { setOpen } = useModal();
   const { isFinished } = useCountdownStore();
 
   const [isReversed, setReversed] = useState<boolean>(true);
@@ -486,6 +488,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
 
       <Button
         disabled={
+          !account.isConnected ? false :
           isFinished ||
           isLoading ||
           selectedTokenPrice == "" ||
@@ -495,6 +498,10 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
           !teaIsSufficient
         }
         onClick={async () => {
+          if(!account.isConnected) {
+            setOpen(true);
+            return;
+          }
           if(rdd.isMobile) {
             soonerToast(
               "You need to approve transaction in your wallet", {
@@ -515,7 +522,9 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
         }}
         className="bg-[#680043] hover:bg-[#aa006f] text-xl font-bold text-[#ff00a6] py-6"
       >
-        {isLoading ? (
+        {!account.isConnected ? (
+            "Connect wallet"
+        ) : isLoading ? (
           <Spinner />
         ) : !balanceIsSufficient ? (
           "Insufficient funds"

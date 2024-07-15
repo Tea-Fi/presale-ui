@@ -11,8 +11,9 @@ import { wagmiConfig, ChainId } from "../config";
 import { RiMenu3Fill } from "react-icons/ri";
 import { Button } from "./ui";
 import 'react-circular-progressbar/dist/styles.css';
-import { useCountdownStore, useMobileMenuDrawer } from "../hooks";
+import { useCountdownStore } from "../hooks";
 import { CountdownSmall } from "./countdown-sm";
+import { useModal } from "connectkit";
 
 export const TopBar = ({
   isBuyPageActive,
@@ -28,7 +29,8 @@ export const TopBar = ({
   const [referralCode, setReferralCode] = useState('');
   const [referralTree, setReferralTree] = useState<Referral>();
   const { isFinished } = useCountdownStore();
-  const { setOpened } = useMobileMenuDrawer();
+  const { setOpen } = useModal();
+  // const { setOpened } = useMobileMenuDrawer();
 
   const chainId = getChainId(wagmiConfig);
   
@@ -53,17 +55,17 @@ export const TopBar = ({
 
   return (
     <div className="mt-2 w-full max-h-24 inline-flex justify-between items-center px-5 py-3">
-      <div className="inline-flex items-center gap-20 lg:w-max">
+      <div className="inline-flex items-center gap-20 lg:w-[228px]">
         <TeaSwapLogoAsset className="size-10"/>
 
-        
-        <span className="hidden lg:inline-block">
+        {/* Maybe will be uncommented later */}
+        {/* <span className="hidden lg:inline-block">
           {isFinished ?
             <span className="text-white">Presale countdown has ended</span> 
           : 
             <CountdownSmall />
           }
-        </span>
+        </span> */}
 
       </div>
 
@@ -121,7 +123,7 @@ export const TopBar = ({
       {/* Burger menu for small sizes */}
       <Button
         className="text-white text-[2.7rem] bg-transparent p-0 hover:bg-transparent hover:text-zinc-400 lg:hidden"
-        onClick={() => setOpened(true)}>
+        onClick={() => setOpen(true)}>
         <RiMenu3Fill />
       </Button>
     </div>
