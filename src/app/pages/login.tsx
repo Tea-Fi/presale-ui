@@ -44,9 +44,9 @@ export const Login = () => {
     <>
       {/* This is a background for start page */}
       <Vortex>
-        <div className='px-5 py-7'>
+        {/* <div className='px-5 py-7'>
           <CountdownSmall />
-        </div>
+        </div> */}
 
         <div className='flex flex-col justify-center min-h-screen w-full z-full'>
           <div className='mb-60'>
