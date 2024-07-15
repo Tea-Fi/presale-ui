@@ -311,7 +311,7 @@ export const DashboardPage = () => {
   return (
     <article className="dashboard-container">
 
-      <header className='flex flex-row justify-between items-center w-full gap-8'>
+      <header className='flex flex-row flex-wrap justify-between items-center w-full gap-8'>
         <div>Dashboard</div>
 
         <DashboardPeriodSelector onChange={setDateBoundary} />
