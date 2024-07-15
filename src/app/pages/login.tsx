@@ -5,7 +5,7 @@ import { SlButton, SlDialog, SlIcon  } from '@shoelace-style/shoelace/dist/react
 import { useNavigate } from 'react-router-dom';
 import { VanishInput, Vortex } from '../components/ui';
 import { TypewriterComponent } from '../components/typewriter-components';
-import { CountdownSmall } from '../components/countdown-sm';
+// import { CountdownSmall } from '../components/countdown-sm';
 
 export const Login = () => {
   const navigate = useNavigate();

@@ -11,7 +11,7 @@ import { wagmiConfig, ChainId } from "../config";
 import { RiMenu3Fill } from "react-icons/ri";
 import { Button } from "./ui";
 import 'react-circular-progressbar/dist/styles.css';
-import { useCountdownStore } from "../hooks";
+// import { useCountdownStore } from "../hooks";
 // import { CountdownSmall } from "./countdown-sm";
 import { useModal } from "connectkit";
 
