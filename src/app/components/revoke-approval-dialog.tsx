@@ -25,7 +25,7 @@ import Spinner from "./spinner";
 export const RevokeApprovalDialog = () => {
     const chainId = getChainId(wagmiConfig);
     const { isOpened, setOpened, setAllowanceChanged } = useRevokeApprovalDialog();
-    const { open } = useConnectedWalletMobile();
+    // const { open } = useConnectedWalletMobile();
 
     const [isLoading, setIsLoading] = useState<boolean>();
 
@@ -53,8 +53,8 @@ export const RevokeApprovalDialog = () => {
                 setApprovePending(true);
             }
 
-            // open wallet on mobile
-            open();
+            // // open wallet on mobile
+            // open();
 
             const hash = await writeContract(wagmiConfig, {
                 address: USDT[chainId],
@@ -66,7 +66,6 @@ export const RevokeApprovalDialog = () => {
                 ],
             });
 
-            
 
         
             const transactionReceipt = await waitForTransactionReceipt(wagmiConfig, {
