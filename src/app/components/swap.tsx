@@ -504,7 +504,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
             setOpen(true);
             return;
           }
-          if(rdd.isMobile && selectedToken.symbol !== "USDT") {
+          if(rdd.isMobile || rdd.isMobile && !tokenIsApproved && selectedToken.symbol === "USDT") {
             soonerToast(
               "You need to approve transaction in your wallet", {
               duration: 20000,

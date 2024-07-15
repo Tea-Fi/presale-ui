@@ -98,6 +98,10 @@ export const RevokeApprovalDialog = () => {
     };
 
     useEffect(() => {
+        if(isRevokePending || isApprovePending) {
+            return;
+        }
+
         setRevokePending(false);
         setRevokeError(false);
         setRevokeSuccess(false);
