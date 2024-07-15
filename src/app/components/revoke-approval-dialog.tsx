@@ -55,7 +55,7 @@ export const RevokeApprovalDialog = () => {
 
             // open wallet on mobile
             open();
-            
+
             const hash = await writeContract(wagmiConfig, {
                 address: USDT[chainId],
                 abi: SAFE_ERC20_ABI,
@@ -83,10 +83,7 @@ export const RevokeApprovalDialog = () => {
                     setApproveSuccess(true);
                     setAllowanceChanged(true);
                 }
-                return;
             }
-
-
         } catch (error) {
             if(isRevoke) {
                 setRevokeError(true);
