@@ -1,7 +1,10 @@
 import React, { useEffect } from 'react';
 
 import { useAccount, useAccountEffect } from "wagmi";
-import { getChainId } from "@wagmi/core";
+import { getChainId, getClient } from "@wagmi/core";
+
+import { AbiEvent, getAbiItem } from 'viem';
+import { getLogs, getBlock, getBlockNumber } from 'viem/actions';
 
 import { PRESALE_CONTRACT_ADDRESS, Referral } from "../utils/constants";
 import { PRESALE_ABI } from "../utils/presale_abi";
@@ -10,7 +13,6 @@ import { wagmiConfig } from "../config";
 import { getReferralTreeByWallet } from '../utils/referrals';
 
 import { ShoppingCart, BarChart2, ShoppingBag, Download, PersonStanding } from 'lucide-react';
-import { ethers, EventLog } from 'ethers';
 
 interface ReferralStats {
   purchases: number;
@@ -64,7 +66,7 @@ function calculateCommission(node: Referral, stats: StatsMap, memo?: Record<numb
 
   const result = addStats(current, subtree);
 
-  result.soldInUsd /= BigInt(1e6) * BigInt(1e4);
+  result.soldInUsd /= BigInt(1e6 * 1e2);
   result.tokensSold /= BigInt(1e18);
 
   return result; 
@@ -105,7 +107,7 @@ function subtreeSum(stats: StatsMap, node?: Referral, memo?: Record<number, Refe
   return sum;
 }
 
-const usdFormatter = Intl.NumberFormat('en-US', { currency: 'usd' })
+const usdFormatter = Intl.NumberFormat('en-US', { currency: 'usd', maximumFractionDigits: 2 })
 
 enum PeriodFilter {
   day = '1D',
@@ -219,117 +221,55 @@ export const DashboardPage = () => {
     };
   }, [referralTree, referralStats, team])
 
-  // const getReferralAmounts = React.useCallback(async (referralId: any): Promise<ReferralStats> => {
-  //   /*
-  //     struct Referral {
-  //         /// @dev Number of purchases
-  //         uint16 referrals;
-  //         /// @dev The amount of tokens sold through referrals
-  //         uint256 sold;
-  //         /// @dev The total amount of USD equivalent of tokens sold through referrals
-  //         uint256 soldInUsd;
-  //     }
-  //   */
-  //   const result = await readContract(wagmiConfig, {
-  //     abi: PRESALE_ABI,
-  //     address: PRESALE_CONTRACT_ADDRESS[chainId] as Address,
-  //     args: [referralId],
-  //     functionName: "referrals",
-  //   });
-
-  //   const [purchases, tokensSold, soldInUsd]: any = result;
-
-  //   return {
-  //     purchases,
-  //     soldInUsd: soldInUsd, // / BigInt(10**6),
-  //     tokensSold: tokensSold, // / BigInt(10**18),
-  //   };
-  // }, [chainId]);
-
   const getFilterLogs = React.useCallback(async (boundary: Date) => {
-    const provider = ethers.getDefaultProvider(
-      import.meta.env.VITE_PUBLIC_INFURA_URL
-    );
+    const client = getClient(wagmiConfig);
 
-    const presaleContract = new ethers.Contract(
-      PRESALE_CONTRACT_ADDRESS[chainId],
-      PRESALE_ABI,
-      provider
-    );
+    const to = await getBlockNumber(client!);
+    const abi = getAbiItem({ abi: PRESALE_ABI, name: 'BuyTokens' }) as AbiEvent;
+    const logs = await getLogs(client!, {
+      address: PRESALE_CONTRACT_ADDRESS[chainId] as `0x${string}`,
+      fromBlock: 0n,
+      toBlock: BigInt(to),
+      event: abi
+    });
 
-    const to = await provider.getBlockNumber() 
-    const step = 50000;
-  
-    let start = to - step; 
-    let end = to; 
-
-    const logs: EventLog[] = [];
-
-    const filter = presaleContract.filters.BuyTokens();
-
-    while (true) {
-      const temp = await presaleContract.queryFilter(filter, start, end);
-     
-      if (temp.length === 0) {
-        break;
-      }
-
-      logs.push(...temp as EventLog[]);
-      
-      start -= step; 
-      end -= step; 
-    } 
-
-    const ids = new Set(team?.map(x => BigInt(x.id)) ?? []);
+    const ids = new Set(team?.map(x => x.id) ?? []);
     const relevantLogs = await Promise.all(
       logs
-        .filter(x => ids.has(x.args[4]))
-        .map(async x => ({ ...x, timestamp: await provider.getBlock(x.blockNumber).then(x => x?.timestamp) }))
+        .filter(x => ids.has((x.args as any)['referrerId'] as number))
+        .map(async x => ({ 
+          ...x,
+          timestamp: await getBlock(client!, { blockNumber: x.blockNumber })
+            .then(x => x?.timestamp) 
+          }))
     );
    
     const targetLogs = relevantLogs
-      .filter(x => x.timestamp && new Date(x.timestamp * 1e3) >= boundary);
+      .filter(x => x.timestamp && new Date(Number(x.timestamp) *1e3) >= boundary);
 
     console.log(targetLogs);
 
     const stats = {} as StatsMap;
 
     for (const entry of targetLogs) {
-      const stat = stats[Number(entry.args[4])] ?? {
+      const args = (entry.args as any)
+      const stat = stats[Number(args['referrerId'] as number)] ?? {
         purchases: 0,
         soldInUsd: 0n,
         tokensSold: 0n
       };
 
       stat.purchases += 1;
-      stat.soldInUsd += entry.args[5];
-      stat.tokensSold += entry.args[6];
+      stat.soldInUsd += BigInt(args['tokensSoldAmountInUsd']);
+      stat.tokensSold += BigInt(args['tokenSoldAmount']);
 
-      stats[Number(entry.args[4])] = stat;
+      stats[Number(args['referrerId'] as number)] = stat;
     }
 
     console.log(stats);
 
     setReferralStats(stats);
   }, [team]);
-
-  // const getRefTreeStats = async (refTree?: Referral): Promise<Record<number, ReferralStats>> => {
-  //   let stats = {} as Record<number, ReferralStats>;
-
-  //   if (refTree != undefined) {
-  //     stats[refTree.id] = await getReferralAmounts(refTree.id);
-
-  //     for (const sublead of Object.values(refTree?.subleads || {})) {
-  //       stats = { ...stats, ...(await getRefTreeStats(sublead)) };
-  //     }
-  //   }
-
-  //   return stats;
-  // };
-  // const processReferralsTreeGains = async (refTree: Referral) => {
-  //   const stats = await getRefTreeStats(refTree);
-  //   setReferralStats(stats);
-  // };
 
   const getReferralTree = React.useCallback(() => {
     const search = window.location.search;
@@ -340,7 +280,6 @@ export const DashboardPage = () => {
       getReferralTreeByWallet(refAddress, chainId).then(refTree => {
         if (refTree !== undefined) {
           setReferralTree(refTree);
-          // processReferralsTreeGains(refTree);
         }
       });
     }
@@ -373,7 +312,7 @@ export const DashboardPage = () => {
     <article className="dashboard-container">
 
       <header className='flex flex-row justify-between items-center w-full gap-8'>
-        <div>Leaders Dashboard</div>
+        <div>Dashboard</div>
 
         <DashboardPeriodSelector onChange={setDateBoundary} />
       </header>
@@ -428,7 +367,7 @@ export const DashboardPage = () => {
               My earnings
             </div>
             <div className='dashboard-card__value'>
-              ${usdFormatter.format(info.earing.soldInUsd)}
+              ${usdFormatter.format(Number(info.earing.soldInUsd) / 100)}
             </div>
           </div>
           <div className='dashboard-card'>
@@ -439,7 +378,7 @@ export const DashboardPage = () => {
               Average Team Earning
             </div>
             <div className='dashboard-card__value'>
-              ${usdFormatter.format(info.teamEarnings)}
+              ${usdFormatter.format(Number(info.teamEarnings) / 100)}
             </div>
           </div>
         </main>

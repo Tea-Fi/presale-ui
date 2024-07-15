@@ -93,17 +93,17 @@ export const TopBar = ({
         <NavLink 
           to="/dashboard"
           className={cn(
-            "rounded-full h-full min-w-16 items-center inline-flex justify-center", 
+            "rounded-full h-full min-w-16 items-center hidden lg:inline-flex justify-center ", 
             isDashboardPageActive ? 'border border-white/[0.2]' : '', 
             !referralTree ? 'hidden': ''
           )}
         >
-          Leaders Dashboard
+          Dashboard
         </NavLink>
         <NavLink 
           to="/referrals"
           className={cn(
-            "rounded-full h-full min-w-16 items-center inline-flex justify-center", 
+            "rounded-full h-full min-w-16 items-center hidden lg:inline-flex justify-center", 
             isReferralTreePageActive ? 'border border-white/[0.2]' : '', 
             !referralTree ? 'hidden': ''
           )}
