@@ -19,11 +19,14 @@ import { PRESALE_CONTRACT_ADDRESS, USDT } from "../utils/constants";
 import { SAFE_ERC20_ABI } from "../utils/safe-erc20-abi";
 import { useEffect, useState } from "react";
 import { useRevokeApprovalDialog } from "../hooks";
+import Spinner from "./spinner";
 
 
 export const RevokeApprovalDialog = () => {
     const chainId = getChainId(wagmiConfig);
     const { isOpened, setOpened, setAllowanceChanged } = useRevokeApprovalDialog();
+
+    const [isLoading, setIsLoading] = useState<boolean>();
 
     const [isRevokePending, setRevokePending] = useState<boolean>(false);
     const [isRevokeError, setRevokeError] = useState<boolean>(false);
@@ -127,16 +130,19 @@ export const RevokeApprovalDialog = () => {
 
                 <DialogFooter>
                     <Button
+                        disabled={isLoading}
                         type="submit"
                         onClick={async () => {
+                            setIsLoading(true);
                             await handleApproveUSDT(true);
                             await handleApproveUSDT(false);
+                            setIsLoading(false);
 
                             setOpened(false);
                         }} 
                         className="outline-none w-full bg-[#ff00a6] rounded-lg text-[#330121] hover:bg-[#880357] text-xl font-bold"
                     >
-                        Revoke
+                        {isLoading ? <Spinner /> : "Revoke"}
                     </Button>
                 </DialogFooter>
             </DialogContent>

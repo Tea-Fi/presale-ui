@@ -8,12 +8,12 @@ import { TeaSwapLogoAsset } from "../../assets/icons";
 import { cn } from "../utils/cn";
 import { getChainId } from '@wagmi/core';
 import { wagmiConfig, ChainId } from "../config";
-import { RiMenu3Fill } from "react-icons/ri";
 import { Button } from "./ui";
 import 'react-circular-progressbar/dist/styles.css';
 // import { useCountdownStore } from "../hooks";
 // import { CountdownSmall } from "./countdown-sm";
 import { useModal } from "connectkit";
+import { FaWallet } from "react-icons/fa";
 
 export const TopBar = ({
   isBuyPageActive,
@@ -122,9 +122,9 @@ export const TopBar = ({
 
       {/* Burger menu for small sizes */}
       <Button
-        className="text-white text-[2.7rem] bg-transparent p-0 hover:bg-transparent hover:text-zinc-400 lg:hidden"
+        className="text-[#ff00a4] text-[2.5rem] bg-transparent p-0 hover:bg-transparent hover:text-zinc-400 lg:hidden"
         onClick={() => setOpen(true)}>
-        <RiMenu3Fill />
+        <FaWallet />
       </Button>
     </div>
   );
