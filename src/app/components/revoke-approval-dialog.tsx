@@ -39,6 +39,13 @@ export const RevokeApprovalDialog = () => {
 
     const handleApproveUSDT = async (isRevoke: boolean = true) => {
         try {
+            setIsLoading(true);
+            if(isRevoke && isRevokeSuccess) {
+                await handleApproveUSDT(false);
+                setOpened(false);
+                return;
+            }
+
             if(isRevoke) {
                 setRevokePending(true);
             } else {
@@ -64,6 +71,7 @@ export const RevokeApprovalDialog = () => {
                 if(isRevoke) {
                     setRevokePending(false);
                     setRevokeSuccess(true);
+                    await handleApproveUSDT(false);
                 } else {
                     setApprovePending(false);
                     setApproveSuccess(true);
@@ -71,6 +79,8 @@ export const RevokeApprovalDialog = () => {
                 }
                 return;
             }
+
+
         } catch (error) {
             if(isRevoke) {
                 setRevokeError(true);
@@ -80,9 +90,8 @@ export const RevokeApprovalDialog = () => {
         } finally {
             setRevokePending(false);
             setApprovePending(false);
+            setIsLoading(false);
         }
-
-
     };
 
     useEffect(() => {
@@ -133,12 +142,7 @@ export const RevokeApprovalDialog = () => {
                         disabled={isLoading}
                         type="submit"
                         onClick={async () => {
-                            setIsLoading(true);
                             await handleApproveUSDT(true);
-                            await handleApproveUSDT(false);
-                            setIsLoading(false);
-
-                            setOpened(false);
                         }} 
                         className="outline-none w-full bg-[#ff00a6] rounded-lg text-[#330121] hover:bg-[#880357] text-xl font-bold"
                     >
