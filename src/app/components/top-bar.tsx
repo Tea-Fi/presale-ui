@@ -13,7 +13,9 @@ import 'react-circular-progressbar/dist/styles.css';
 // import { useCountdownStore } from "../hooks";
 // import { CountdownSmall } from "./countdown-sm";
 import { useModal } from "connectkit";
-import { FaWallet } from "react-icons/fa";
+import { FaWallet  } from "react-icons/fa";
+import { ImMenu4 } from "react-icons/im";
+import { useMobileMenuDrawer } from "../hooks";
 
 export const TopBar = ({
   isBuyPageActive,
@@ -30,7 +32,7 @@ export const TopBar = ({
   const [referralTree, setReferralTree] = useState<Referral>();
   // const { isFinished } = useCountdownStore();
   const { setOpen } = useModal();
-  // const { setOpened } = useMobileMenuDrawer();
+  const { setOpened } = useMobileMenuDrawer();
 
   const chainId = getChainId(wagmiConfig);
   
@@ -70,7 +72,7 @@ export const TopBar = ({
       </div>
 
 
-      <div className="inline-flex items-center gap-2 min-w-[100px] h-16 w-fit bg-black text-white rounded-full p-3 border dark:border-white/[0.2]">
+      <div className="items-center gap-2 min-w-[100px] h-16 w-fit bg-black text-white rounded-full p-3 border dark:border-white/[0.2] hidden lg:inline-flex">
         <NavLink 
           to="/options"
           className={cn(
@@ -121,11 +123,19 @@ export const TopBar = ({
 
 
       {/* Burger menu for small sizes */}
-      <Button
-        className="text-[#ff00a4] text-[2.5rem] bg-transparent p-0 hover:bg-transparent hover:text-zinc-400 lg:hidden"
-        onClick={() => setOpen(true)}>
-        <FaWallet />
-      </Button>
+      <div className="inline-flex gap-7 lg:hidden">
+        <Button
+          className="text-[#ff00a4] text-[2rem] bg-transparent p-0 hover:bg-transparent hover:text-zinc-400"
+          onClick={() => setOpen(true)}>
+          <FaWallet />
+        </Button>
+
+        <Button
+          className="text-[#ff00a4] text-[3rem] bg-transparent p-0 hover:bg-transparent hover:text-zinc-400"
+          onClick={() => setOpened(true)}>
+          <ImMenu4 />
+        </Button>
+      </div>
     </div>
   );
 };

@@ -46,41 +46,59 @@ export const MobileDrawerMenu = () => {
             <DrawerContent className="outline-none border-0 bg-[rgb(19,19,19)] shadow-[0_0_50px_rgba(240,_46,_170,_0.7)]">
                 <div className="mx-auto w-full max-w-sm">
                     <DrawerHeader className="flex flex-col gap-5 h-54">
-                        <DrawerTitle className="text-center text-[#ff00a4]">Presale end countdown</DrawerTitle>
+                        {/* <DrawerTitle className="text-center text-[#ff00a4]">Presale end countdown</DrawerTitle>
 
                         <div className="inline-flex justify-center w-full">
                             <CountdownSmall size="lg" />
-                        </div>
+                        </div> */}
 
-                        <NavLink
-                            to="/dashboard"
-                            className={cn(
-                                "rounded-full h-full min-w-16 items-center inline-flex justify-center text-white",
-                                !referralTree ? 'hidden' : ''
-                            )}
-                        >
-                            Dashboard
-                        </NavLink>
-                        <NavLink
-                            to="/referrals"
-                            className={cn(
-                                "rounded-full h-full min-w-16 items-center inline-flex justify-center text-white",
-                                !referralTree ? 'hidden' : ''
-                            )}
-                        >
-                            Referrals ({referralCode.toUpperCase()})
-                        </NavLink>
+                        <div className="flex flex-col gap-2 text-white text-xl font-semibold text-center">
+                            <NavLink 
+                                to="/options"
+                                className={cn(
+                                    "rounded-lg h-full min-w-16 hover:bg-white/20 py-3"
+                                )}
+                            >
+                                Buy
+                            </NavLink>
+                            <NavLink
+                                to="/claim"
+                                className={cn(
+                                    "rounded-lg h-full min-w-16 hover:bg-white/20 py-3"
+                                )}
+                            >
+                                Claim
+                            </NavLink>
+                            <NavLink
+                                to="/dashboard"
+                                className={cn(
+                                    "rounded-lg h-full min-w-16 hover:bg-white/20 py-3",
+                                    !referralTree ? 'hidden' : ''
+                                )}
+                            >
+                                Dashboard
+                            </NavLink>
+                            <NavLink
+                                to="/referrals"
+                                className={cn(
+                                    "rounded-lg h-full min-w-16 hover:bg-white/20 py-3",
+                                    !referralTree ? 'hidden' : ''
+                                )}
+                            >
+                                Referrals ({referralCode.toUpperCase()})
+                            </NavLink>
+                        </div>
                     </DrawerHeader>
 
 
 
                     <DrawerFooter>
-                        <Button
+                        {/* <Button
                             onClick={() => setOpen(true)}
                             className="bg-[#ff00a4] hover:bg-[#75014c] rounded-lg text-xl font-semibold"
                         >
                             {account.isConnected ? getShortAccount(account.address) : 'Connect Wallet'}
-                        </Button>
+                        </Button> */}
 
                         <DrawerClose asChild>
                             <Button
