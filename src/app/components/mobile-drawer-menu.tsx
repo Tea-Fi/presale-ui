@@ -1,8 +1,8 @@
-import { useModal } from "connectkit";
-import { CountdownSmall } from "./countdown-sm";
-import { Button, Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle } from "./ui";
-import { useCallback, useState } from "react";
-import { useAccount, useAccountEffect } from "wagmi";
+// import { useModal } from "connectkit";
+// import { CountdownSmall } from "./countdown-sm";
+import { Button, Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader } from "./ui";
+import { useState } from "react";
+import { useAccountEffect } from "wagmi";
 import { useMobileMenuDrawer } from "../hooks";
 import { NavLink } from "react-router-dom";
 import { cn } from "../utils";
@@ -10,12 +10,12 @@ import { Referral } from "../utils/constants";
 import { getReferralTreeByWallet } from "../utils/referrals";
 
 export const MobileDrawerMenu = () => {
-    const { setOpen } = useModal();
-    const account = useAccount();
-    const getShortAccount = useCallback(
-        (account = "") => `${account.slice(0, 6)}...${account.slice(-4)}`,
-        []
-    );
+    // const { setOpen } = useModal();
+    // const account = useAccount();
+    // const getShortAccount = useCallback(
+    //     (account = "") => `${account.slice(0, 6)}...${account.slice(-4)}`,
+    //     []
+    // );
     const { isOpened, setOpened } = useMobileMenuDrawer();
 
     const [referralCode, setReferralCode] = useState('');
