@@ -54,6 +54,7 @@ export const MobileDrawerMenu = () => {
 
                         <div className="flex flex-col gap-2 text-white text-xl font-semibold text-center">
                             <NavLink 
+                                onClick={() => setOpened(false)}
                                 to="/options"
                                 className={cn(
                                     "rounded-lg h-full min-w-16 hover:bg-white/20 py-3"
@@ -62,6 +63,7 @@ export const MobileDrawerMenu = () => {
                                 Buy
                             </NavLink>
                             <NavLink
+                                onClick={() => setOpened(false)}
                                 to="/claim"
                                 className={cn(
                                     "rounded-lg h-full min-w-16 hover:bg-white/20 py-3"
@@ -70,6 +72,7 @@ export const MobileDrawerMenu = () => {
                                 Claim
                             </NavLink>
                             <NavLink
+                                onClick={() => setOpened(false)}
                                 to="/dashboard"
                                 className={cn(
                                     "rounded-lg h-full min-w-16 hover:bg-white/20 py-3",
@@ -79,6 +82,7 @@ export const MobileDrawerMenu = () => {
                                 Dashboard
                             </NavLink>
                             <NavLink
+                                onClick={() => setOpened(false)}
                                 to="/referrals"
                                 className={cn(
                                     "rounded-lg h-full min-w-16 hover:bg-white/20 py-3",
