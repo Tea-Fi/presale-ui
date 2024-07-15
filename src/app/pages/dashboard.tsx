@@ -226,7 +226,6 @@ export const DashboardPage = () => {
   const getFilterLogs = React.useCallback(async (boundary: Date) => {
     const client = getClient(wagmiConfig);
 
-    const to = await getBlockNumber(client!);
     const abi = getAbiItem({ abi: PRESALE_ABI, name: 'BuyTokens' }) as AbiEvent;
     const logs = await getLogs(client!, {
       address: PRESALE_CONTRACT_ADDRESS[chainId] as `0x${string}`,
