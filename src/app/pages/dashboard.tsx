@@ -337,7 +337,7 @@ export const DashboardPage = () => {
     const refAddress = urlParams.get("address") || address;
 
     if (refAddress) {
-      getReferralTreeByWallet('0x8F70F2783Ba1164B82542f3060B2d32cefEc05E4', chainId).then(refTree => {
+      getReferralTreeByWallet(refAddress, chainId).then(refTree => {
         if (refTree !== undefined) {
           setReferralTree(refTree);
           // processReferralsTreeGains(refTree);
