@@ -4,7 +4,7 @@ import { useAccount, useAccountEffect } from "wagmi";
 import { getChainId, getClient } from "@wagmi/core";
 
 import { AbiEvent, getAbiItem } from 'viem';
-import { getLogs, getBlock, getBlockNumber } from 'viem/actions';
+import { getLogs, getBlock } from 'viem/actions';
 
 import { PRESALE_CONTRACT_ADDRESS, Referral } from "../utils/constants";
 import { PRESALE_ABI } from "../utils/presale_abi";
