@@ -203,10 +203,12 @@ export const DashboardPage = () => {
     const subs = team
       .filter(x => x.wallet !== address);
 
-    const averageTeamEarnings = subs 
-      .map(x => calculateCommission(x, referralStats, memo))
-      .reduce((acc, e) => acc + e.soldInUsd, 0n)
-        / BigInt(subs.length);
+    const averageTeamEarnings = subs.length > 0
+      ? subs 
+        .map(x => calculateCommission(x, referralStats, memo))
+        .reduce((acc, e) => acc + e.soldInUsd, 0n)
+          / BigInt(subs.length)
+      : 0;
 
     return {
       purchases: stat.purchases,
