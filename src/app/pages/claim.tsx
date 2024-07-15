@@ -3,71 +3,18 @@ import { PRESALE_ABI } from '../utils/presale_abi';
 import { PRESALE_CONTRACT_ADDRESS } from '../utils/constants';
 import { wagmiConfig } from '../config';
 import { Address, erc20Abi } from 'viem';
-import { useReadContract } from 'wagmi';
 import { useEffect, useState } from 'react';
 import { parseHumanReadable } from '../utils';
-import { toast } from "sonner";
 import Spinner from '../components/spinner';
 import { investmentInfo } from "../utils/constants";
 import { Card, CardDescription, CardTitle } from '../components/ui';
 
 
 export const Claim = () => {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [, setIsError] = useState<boolean>(false);
-  const [totalSoldTea, setTotalSoldTea] = useState<string | number>(0);
-  // const [totalAvailableTea, setTotalAvailableTea] = useState<string | number>(0);
+  const [totalSoldTeaPerAccount, setTotalSoldTeaPerAccount] = useState<string | number | undefined>(undefined);
 
   const chainId = getChainId(wagmiConfig);
   const account = getAccount(wagmiConfig);
-
-  const totalSoldTeaResult = useReadContract({
-    abi: PRESALE_ABI,
-    address: PRESALE_CONTRACT_ADDRESS[chainId] as Address,
-    functionName: 'totalSold',
-  });
-
-  const totalAvailableTeaResult = useReadContract({
-    abi: PRESALE_ABI,
-    address: PRESALE_CONTRACT_ADDRESS[chainId] as Address,
-    functionName: 'tokensAvailableForPresale',
-  });
-
-
-  useEffect(() => {
-    const handleQueryResults = () => {
-      if(
-        totalSoldTeaResult.isLoading || 
-        totalAvailableTeaResult.isLoading
-      ) {
-        setIsLoading(true);
-      } else if(
-        totalSoldTeaResult.isSuccess &&
-        totalAvailableTeaResult.isSuccess
-      ) {
-        const totalSoldNormal = parseHumanReadable(totalSoldTeaResult.data as bigint, 18, 2);
-        // const totalAvailableNormal = parseHumanReadable(totalAvailableTeaResult.data as bigint, 18, 0);
-
-        setTotalSoldTea(totalSoldNormal.toLocaleString('en-US'));
-        // setTotalAvailableTea(totalAvailableNormal.toLocaleString('en-US'));
-        
-        setIsLoading(false);
-        setIsError(false);
-      } else if(
-        totalSoldTeaResult.isError &&
-        totalAvailableTeaResult.isError
-      ) {
-        toast.error(
-          "An error occured due to fetching data ", {
-          duration: 5000,
-        });
-
-        setIsError(true);
-      }
-    }
-
-    handleQueryResults();
-  }, [account, totalAvailableTeaResult, totalSoldTeaResult]);
 
 
   const [tgeInfos, setTgeInfos] = useState<any>(
@@ -110,20 +57,26 @@ export const Claim = () => {
     handleOptionsInfo().then((data: any) => {
       const balances = data[0];
       const optionInfos = data[1];
-      
+
       if(balances === undefined) {
         return;
       }
 
 
       const newInfo = [];
+      let calculatedBalances = 0;
       for(let i = 0; i < balances.length; i++) {
+        calculatedBalances += parseHumanReadable(balances[i], 18, 2);
+        
+        
         newInfo.push({
           ...tgeInfos[i],
           balance: parseHumanReadable(balances[i], 18, 2),
           tge: optionInfos[i][0]
         });
       }
+
+      setTotalSoldTeaPerAccount(Number(calculatedBalances.toFixed(2)).toLocaleString('en-US'));
       setTgeInfos(newInfo);
     });
   }, []); // <-- if add here account than you get infinite requests to RPC...
@@ -141,7 +94,7 @@ export const Claim = () => {
       <h1>Claim</h1>
       <p>Token claim will be available at $TEA token's TGE</p>
 
-      <span className='text-center'>Total Bought: {isLoading ? <Spinner /> : `${totalSoldTea}`} $TEA</span>
+      <span className='text-center'>Total Bought: {totalSoldTeaPerAccount === undefined ? <Spinner /> : totalSoldTeaPerAccount} $TEA</span>
 
       <div className="mt-10 inline-flex gap-4 px-8 justify-center w-full max-w-[1400px] items-center mx-auto flex-wrap">
         {tgeInfos && tgeInfos.length ? 

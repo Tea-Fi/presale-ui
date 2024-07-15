@@ -10,8 +10,9 @@ import { getChainId } from '@wagmi/core';
 import { wagmiConfig, ChainId } from "../config";
 import { RiMenu3Fill } from "react-icons/ri";
 import { Button } from "./ui";
-import { useModal } from "connectkit";
-
+import 'react-circular-progressbar/dist/styles.css';
+import { useCountdownStore, useMobileMenuDrawer } from "../hooks";
+import { CountdownSmall } from "./countdown-sm";
 
 export const TopBar = ({
   isBuyPageActive,
@@ -26,8 +27,10 @@ export const TopBar = ({
 }) => {
   const [referralCode, setReferralCode] = useState('');
   const [referralTree, setReferralTree] = useState<Referral>();
+  const { isFinished } = useCountdownStore();
+  const { setOpened } = useMobileMenuDrawer();
+
   const chainId = getChainId(wagmiConfig);
-  const {setOpen} = useModal();
   
   useAccountEffect({
     onConnect({ address, chainId }) {
@@ -46,11 +49,24 @@ export const TopBar = ({
   });
 
 
+  
+
   return (
-    <div className="w-full max-h-24 inline-flex justify-between items-center px-5 py-3">
-      <span className="md:w-[228px]">
+    <div className="mt-2 w-full max-h-24 inline-flex justify-between items-center px-5 py-3">
+      <div className="inline-flex items-center gap-20 lg:w-max">
         <TeaSwapLogoAsset className="size-10"/>
-      </span>
+
+        
+        <span className="hidden lg:inline-block">
+          {isFinished ?
+            <span className="text-white">Presale countdown has ended</span> 
+          : 
+            <CountdownSmall />
+          }
+        </span>
+
+      </div>
+
 
       <div className="inline-flex items-center gap-2 min-w-[100px] h-16 w-fit bg-black text-white rounded-full p-3 border dark:border-white/[0.2]">
         <NavLink 
@@ -95,7 +111,7 @@ export const TopBar = ({
         
       </div>
 
-      <span className={"w-[228px] items-center hidden md:inline-flex"}>
+      <span className={"w-[228px] items-center hidden lg:inline-flex"}>
         <span className="text-white">{chainId == ChainId.MAINNET ? 'Mainnet' : 'Sepolia'}</span>
         &nbsp;
         <Wallet />
@@ -104,8 +120,8 @@ export const TopBar = ({
 
       {/* Burger menu for small sizes */}
       <Button
-        className="text-white text-[2.7rem] bg-transparent p-0 hover:bg-transparent hover:text-zinc-400 md:hidden"
-        onClick={() => setOpen(true)}>
+        className="text-white text-[2.7rem] bg-transparent p-0 hover:bg-transparent hover:text-zinc-400 lg:hidden"
+        onClick={() => setOpened(true)}>
         <RiMenu3Fill />
       </Button>
     </div>
