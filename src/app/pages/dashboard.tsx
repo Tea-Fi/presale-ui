@@ -200,20 +200,19 @@ export const DashboardPage = () => {
     const memo = {}
     const stat = referralStats[referralTree.id] ?? emptyStat;
 
+    const subs = team
+      .filter(x => x.wallet !== address);
 
-    const teamEarnings = team
+    const averageTeamEarnings = subs 
       .map(x => calculateCommission(x, referralStats, memo))
-
-    const averageTeamEarnings = teamEarnings.reduce((acc, e) => acc + e.soldInUsd, 0n)
-      / BigInt(team.length);
+      .reduce((acc, e) => acc + e.soldInUsd, 0n)
+        / BigInt(subs.length);
 
     return {
       purchases: stat.purchases,
-      teamSize: team
-        .filter(x => x.wallet !== address)
-        .length,
+      teamSize: subs.length,
 
-      earing: calculateCommission(referralTree, referralStats, memo),
+      earnings: calculateCommission(referralTree, referralStats, memo),
 
       teamEarnings: averageTeamEarnings,
       teamPurchases: Object.keys(referralStats)
@@ -226,7 +225,6 @@ export const DashboardPage = () => {
   const getFilterLogs = React.useCallback(async (boundary: Date) => {
     const client = getClient(wagmiConfig);
 
-    const to = await getBlockNumber(client!);
     const abi = getAbiItem({ abi: PRESALE_ABI, name: 'BuyTokens' }) as AbiEvent;
     const logs = await getLogs(client!, {
       address: PRESALE_CONTRACT_ADDRESS[chainId] as `0x${string}`,
@@ -368,7 +366,7 @@ export const DashboardPage = () => {
               My earnings
             </div>
             <div className='dashboard-card__value'>
-              ${usdFormatter.format(Number(info.earing.soldInUsd) / 100)}
+              ${usdFormatter.format(Number(info.earnings.soldInUsd) / 100)}
             </div>
           </div>
           <div className='dashboard-card'>
