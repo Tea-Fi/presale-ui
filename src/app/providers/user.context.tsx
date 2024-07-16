@@ -13,10 +13,15 @@ export enum LoginStatus {
   LOGGED_IN = 'logged-in',
 }
 
+interface TermsOfService {
+  agree: () => void;
+  disagree: () => void;
+}
+
 export interface UserContext {
   status: LoginStatus | null;
   login: (code: string) => Promise<void>;
-  agreeToTerms: () => void;
+  terms: TermsOfService; 
 }
 
 export const UserContext = createContext<UserContext | null>(null);
@@ -59,6 +64,11 @@ export const UserContextProvider: FunctionComponent<{ children: ReactNode }> = (
     validateAgreedToTerms(true);
   }, [validateAgreedToTerms]);
 
+  const disagreeToTerms = useCallback(async () => {
+    window.localStorage.setItem('agreedToTerms', 'false');
+    validateAgreedToTerms(false);
+  }, [validateAgreedToTerms]);
+
   useEffect(() => {
     validateAgreedToTerms(window.localStorage.getItem('agreedToTerms') === 'true');
   }, [validateAgreedToTerms]);
@@ -67,8 +77,11 @@ export const UserContextProvider: FunctionComponent<{ children: ReactNode }> = (
     <UserContext.Provider
       value={{
         status,
-        agreeToTerms,
         login,
+        terms: {
+          agree: agreeToTerms,
+          disagree: disagreeToTerms
+        }
       }}
       children={children}
     />
