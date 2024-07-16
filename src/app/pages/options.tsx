@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ZeroAddress } from "ethers/constants";
-import { CardHoverEffect } from "../components/ui";
+import { CardHoverEffect, Collapsible, CollapsibleContent, CollapsibleTrigger, Progress } from "../components/ui";
 import {
   getOptionInfo,
   getSaleOptionsCout,
@@ -8,6 +8,7 @@ import {
 } from "../utils/presale";
 import { parseHumanReadable } from "../utils";
 import { investmentInfo } from "../utils/constants";
+import Spinner from "../components/spinner";
 
 export const Options = () => {
   const [projectInfos, setProjectInfos] = useState<any>(
@@ -74,9 +75,38 @@ export const Options = () => {
   if (!projectInfos) return null;
 
   return (
-    <div className="inline-flex grow justify-center w-full items-center">
+    <div className="flex flex-col-reverse mt-20 lg-mt-0 lg:flex-row grow justify-center w-full items-center gap-8">
       <div className="w-96">
         <CardHoverEffect items={projectInfos} />
+      </div>
+      <div>
+        <div>
+          <Collapsible className="text-zinc-400">
+            <CollapsibleTrigger>
+              <div className="w-56 p-3 border-2 border-white/20">
+                Get more info
+              </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="">
+                {projectInfos && projectInfos.length ?
+                  projectInfos.map((info: any, index: number) => 
+                    <div key={index} className="flex flex-col gap-3 mt-4">
+                      <div className="inline-flex justify-between text-zinc-400 text-sm">
+                        <span>{info.max == null ? <Spinner/> : `100%`}</span>
+                        <span>{info.value == null ? <Spinner/> : `${parseFloat((info.value / (info.max ?? 100) * 100).toFixed(2))}%`}</span>
+                      </div>
+
+                      <Progress value={info.value}  max={info.max}/>
+                    </div>
+                  )
+                  :
+                  <></>
+                }
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        </div>
       </div>
     </div>
   );
