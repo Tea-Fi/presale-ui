@@ -1,8 +1,8 @@
 import { cn } from "../../utils/cn";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
-import { Progress } from "./progress";
-import Spinner from "../spinner";
+// import { Progress } from "./progress";
+// import Spinner from "../spinner";
 import { useCountdownStore } from "../../hooks";
 
 export const CardHoverEffect = ({
@@ -39,7 +39,7 @@ export const CardHoverEffect = ({
           <AnimatePresence>
             {hoveredIndex === idx && (
               <motion.span
-                className="absolute inset-0 h-full w-full bg-neutral-200 dark:bg-slate-800/[0.8] block  rounded-3xl"
+                className="absolute inset-0 h-full w-full bg-[#880058] dark:bg-[#880058] block  rounded-3xl"
                 layoutId="hoverBackground"
                 initial={{ opacity: 0 }}
                 animate={{
@@ -57,14 +57,14 @@ export const CardHoverEffect = ({
             <CardTitle>{item.title}</CardTitle>
             <CardDescription>{item.description}</CardDescription>
 
-            <div className="flex flex-col gap-3 mt-4">
+            {/* <div className="flex flex-col gap-3 mt-4">
               <div className="inline-flex justify-between text-zinc-400 text-sm">
                 <span>{item.value == null ? <Spinner/> : `${parseFloat((item.value / (item.max ?? 100) * 100).toFixed(2))}%`}</span>
                 <span>{item.max == null ? <Spinner/> : `100%`}</span>
               </div>
 
               <Progress value={item.value}  max={item.max}/>
-            </div>
+            </div> */}
           </Card>
         </a>
       ))}

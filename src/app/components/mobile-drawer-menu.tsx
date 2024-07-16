@@ -1,8 +1,8 @@
-// import { useModal } from "connectkit";
+import { useModal } from "connectkit";
 // import { CountdownSmall } from "./countdown-sm";
-import { Button, Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader } from "./ui";
-import { useState } from "react";
-import { useAccountEffect } from "wagmi";
+import { Button, Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle } from "./ui";
+import { useCallback, useState } from "react";
+import { useAccount, useAccountEffect } from "wagmi";
 import { useMobileMenuDrawer } from "../hooks";
 import { NavLink } from "react-router-dom";
 import { cn } from "../utils";
@@ -10,12 +10,12 @@ import { Referral } from "../utils/constants";
 import { getReferralTreeByWallet } from "../utils/referrals";
 
 export const MobileDrawerMenu = () => {
-    // const { setOpen } = useModal();
-    // const account = useAccount();
-    // const getShortAccount = useCallback(
-    //     (account = "") => `${account.slice(0, 6)}...${account.slice(-4)}`,
-    //     []
-    // );
+    const { setOpen } = useModal();
+    const account = useAccount();
+    const getShortAccount = useCallback(
+        (account = "") => `${account.slice(0, 6)}...${account.slice(-4)}`,
+        []
+    );
     const { isOpened, setOpened } = useMobileMenuDrawer();
 
     const [referralCode, setReferralCode] = useState('');
@@ -40,10 +40,14 @@ export const MobileDrawerMenu = () => {
     return (
         <Drawer
             open={isOpened}
-            onOpenChange={(open) => setOpened(open)}
+            onOpenChange={(open) => {
+                setOpened(open);
+                document.body.removeAttribute('style')
+            }}
             shouldScaleBackground
         >
             <DrawerContent className="outline-none border-0 bg-[rgb(19,19,19)] shadow-[0_0_50px_rgba(240,_46,_170,_0.7)]">
+                <DrawerTitle className="text-center text-white/80 text-2xl mt-5">Menu</DrawerTitle>
                 <div className="mx-auto w-full max-w-sm">
                     <DrawerHeader className="flex flex-col gap-5 h-54">
                         {/* <DrawerTitle className="text-center text-[#ff00a4]">Presale end countdown</DrawerTitle>
@@ -52,7 +56,7 @@ export const MobileDrawerMenu = () => {
                             <CountdownSmall size="lg" />
                         </div> */}
 
-                        <div className="flex flex-col gap-2 text-white text-xl font-semibold text-center">
+                        <div className="flex flex-col gap-2 text-white/50 text-xl font-semibold text-center">
                             <NavLink 
                                 onClick={() => setOpened(false)}
                                 to="/options"
@@ -97,12 +101,18 @@ export const MobileDrawerMenu = () => {
 
 
                     <DrawerFooter>
-                        {/* <Button
-                            onClick={() => setOpen(true)}
-                            className="bg-[#ff00a4] hover:bg-[#75014c] rounded-lg text-xl font-semibold"
-                        >
-                            {account.isConnected ? getShortAccount(account.address) : 'Connect Wallet'}
-                        </Button> */}
+                        {/* <DrawerClose asChild> */}
+                            <Button
+                                onClick={() => {
+                                    setOpen(true);
+                                    // setOpened(false);
+                                }}
+                                className="bg-[#ff00a4] hover:bg-[#75014c] rounded-lg text-xl font-semibold"
+                            >
+                                {account.isConnected ? getShortAccount(account.address) : 'Connect Wallet'}
+                            </Button>
+                        {/* </DrawerClose> */}
+
 
                         <DrawerClose asChild>
                             <Button

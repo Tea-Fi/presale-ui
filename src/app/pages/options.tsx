@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ZeroAddress } from "ethers/constants";
-import { CardHoverEffect } from "../components/ui";
+import { CardHoverEffect, Collapsible, CollapsibleContent, CollapsibleTrigger, Progress } from "../components/ui";
 import {
   getOptionInfo,
   getSaleOptionsCout,
@@ -8,6 +8,7 @@ import {
 } from "../utils/presale";
 import { parseHumanReadable } from "../utils";
 import { investmentInfo } from "../utils/constants";
+import Spinner from "../components/spinner";
 
 export const Options = () => {
   const [projectInfos, setProjectInfos] = useState<any>(
@@ -74,9 +75,45 @@ export const Options = () => {
   if (!projectInfos) return null;
 
   return (
-    <div className="inline-flex grow justify-center w-full items-center">
+    <div className="flex flex-col-reverse mt-20 lg-mt-0 lg:flex-row grow justify-center w-full items-center gap-8">
       <div className="w-96">
         <CardHoverEffect items={projectInfos} />
+      </div>
+      <div>
+        <div>
+          <Collapsible className="flex flex-col text-zinc-400 gap-5">
+            <CollapsibleTrigger>
+              <div className="py-3 px-14 border rounded-2xl border-white/20">
+                Allocation Status V
+              </div>
+            </CollapsibleTrigger>
+
+            <CollapsibleContent>
+              <div className="w-72">
+                {projectInfos && projectInfos.length ?
+                  projectInfos.map((info: any, index: number) => 
+                    <div key={index} className="flex flex-col gap-3 mt-4">
+                      <div className="inline-flex justify-between text-zinc-400 text-sm">
+                        <span>{info.title == null ? <Spinner/> : info.title}</span>
+
+                        <div>
+                          <span>
+                            {info.value == null ? <Spinner/> : (+info.value).toLocaleString('en-US')} / {info.max == null ? <Spinner/> : (+info.max).toLocaleString('en-US')}
+                          </span>
+                          {/* <span>{info.value == null ? <Spinner/> : `${parseFloat((info.value / (info.max ?? 100) * 100).toFixed(2))}%`}</span> */}
+                        </div>
+                      </div>
+
+                      <Progress value={info.value}  max={info.max}/>
+                    </div>
+                  )
+                  :
+                  <></>
+                }
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        </div>
       </div>
     </div>
   );

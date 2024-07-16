@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 
 import { Wallet } from "./wallet";
 import { useAccount, useAccountEffect } from 'wagmi';
@@ -12,9 +12,8 @@ import { Button } from "./ui";
 import 'react-circular-progressbar/dist/styles.css';
 // import { useCountdownStore } from "../hooks";
 // import { CountdownSmall } from "./countdown-sm";
-import { useModal } from "connectkit";
-import { FaWallet  } from "react-icons/fa";
-import { ImMenu4 } from "react-icons/im";
+// import { useModal } from "connectkit";
+import { GiHamburgerMenu } from "react-icons/gi";
 import { useMobileMenuDrawer } from "../hooks";
 
 export const TopBar = ({
@@ -31,7 +30,7 @@ export const TopBar = ({
   const [referralCode, setReferralCode] = useState('');
   const [referralTree, setReferralTree] = useState<Referral>();
   // const { isFinished } = useCountdownStore();
-  const { setOpen } = useModal();
+  // const { setOpen } = useModal();
   const { setOpened } = useMobileMenuDrawer();
 
   const { address, isConnected } = useAccount();
@@ -65,12 +64,13 @@ export const TopBar = ({
         })
     }
   }, [address, isConnected])
-  
 
   return (
-    <div className="mt-2 w-full max-h-24 inline-flex justify-between items-center px-5 py-3">
+    <div className="w-full max-h-24 inline-flex justify-between items-center px-5 py-3">
       <div className="inline-flex items-center gap-20 lg:w-[228px]">
-        <TeaSwapLogoAsset className="size-10"/>
+        <Link to="/options">
+          <TeaSwapLogoAsset className="w-48"/>
+        </Link>
 
         {/* Maybe will be uncommented later */}
         {/* <span className="hidden lg:inline-block">
@@ -138,16 +138,16 @@ export const TopBar = ({
 
       {/* Burger menu for small sizes */}
       <div className="inline-flex gap-7 lg:hidden">
-        <Button
+        {/* <Button
           className="text-[#ff00a4] text-[2rem] bg-transparent p-0 hover:bg-transparent hover:text-zinc-400"
           onClick={() => setOpen(true)}>
           <FaWallet />
-        </Button>
+        </Button> */}
 
         <Button
           className="text-[#ff00a4] text-[3rem] bg-transparent p-0 hover:bg-transparent hover:text-zinc-400"
           onClick={() => setOpened(true)}>
-          <ImMenu4 />
+          <GiHamburgerMenu />
         </Button>
       </div>
     </div>
