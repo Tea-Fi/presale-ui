@@ -1,6 +1,6 @@
 export const TeaSwapLogoAsset = ({ className }: { className?: string }) => {
     return (
-      <svg width="1017" height="477" viewBox="0 0 1017 477" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <svg width="1017" viewBox="0 0 1017 477" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
         <g clipPath="url(#clip0_65_1772)">
           <path fillRule="evenodd" clipRule="evenodd" d="M230.179 211.068L276.766 211.067C276.766 211.067 276.969 224.41 274.507 232.429C271.738 241.445 262.617 253.45 262.617 253.45V222.601H241.712V270.712L230.179 276.999L230.179 211.068Z" fill="#FF00A4"/>
           <path d="M238.851 238.171H264.667" stroke="#FF00A4" strokeWidth="9"/>
