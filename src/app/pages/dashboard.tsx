@@ -66,7 +66,7 @@ function calculateCommission(node: Referral, stats: StatsMap, memo?: Record<numb
 
   const result = addStats(current, subtree);
 
-  result.soldInUsd /= BigInt(1e6 * 1e2);
+  result.soldInUsd /= BigInt(1e6);
   result.tokensSold /= BigInt(1e18);
 
   return result; 
@@ -199,22 +199,29 @@ export const DashboardPage = () => {
 
     const memo = {}
     const stat = referralStats[referralTree.id] ?? emptyStat;
-
+   
     const subs = team
-      .filter(x => x.wallet !== address);
+      .filter(x => x.wallet !== address)
+      .map(x => referralStats[x.id])
 
-    const averageTeamEarnings = subs.length > 0
-      ? subs 
-        .map(x => calculateCommission(x, referralStats, memo))
-        .reduce((acc, e) => acc + e.soldInUsd, 0n)
-          / BigInt(subs.length)
+    const subStats = subs.filter(x => !!x);
+      
+    const purchases = subStats
+      .reduce((acc, e) => acc + e.purchases, 0);
+     
+    const totalPurchasesUsd = subStats
+      .reduce((acc, e) => acc + e.soldInUsd, 0n) / BigInt(1e6);
+
+    const averageTeamEarnings = purchases > 0
+      ? totalPurchasesUsd / BigInt(purchases)
       : 0;
 
     return {
-      purchases: stat.purchases,
+      purchases: totalPurchasesUsd,
       teamSize: subs.length,
 
-      earnings: calculateCommission(referralTree, referralStats, memo),
+      earnings: calculateCommission(referralTree, referralStats, memo).soldInUsd
+        - (stat.soldInUsd * BigInt(referralTree.fee!) / BigInt(1e6)),
 
       teamEarnings: averageTeamEarnings,
       teamPurchases: Object.keys(referralStats)
@@ -330,7 +337,21 @@ export const DashboardPage = () => {
             </div>
 
             <div className='dashboard-card__value'>
-              {info.purchases}
+              ${usdFormatter.format(info.purchases)}
+            </div>
+          </div>
+
+          <div className='dashboard-card'>
+            <div className='dashboard-card__icon'>
+              <ShoppingBag />
+            </div>
+            
+            <div className='dashboard-card__title'>
+              NO. of Purchases
+            </div>
+
+            <div className='dashboard-card__value'>
+              {info.teamPurchases}
             </div>
           </div>
 
@@ -348,26 +369,13 @@ export const DashboardPage = () => {
 
           <div className='dashboard-card'>
             <div className='dashboard-card__icon'>
-              <ShoppingBag />
-            </div>
-            
-            <div className='dashboard-card__title'>
-              NO. of Purchases
-            </div>
-
-            <div className='dashboard-card__value'>
-              {info.teamPurchases}
-            </div>
-          </div>
-          <div className='dashboard-card'>
-            <div className='dashboard-card__icon'>
               <Download />
             </div>
             <div className='dashboard-card__title'>
               My earnings
             </div>
             <div className='dashboard-card__value'>
-              ${usdFormatter.format(Number(info.earnings.soldInUsd) / 100)}
+              ${usdFormatter.format(Number(info.earnings / BigInt(100)) / 100)}
             </div>
           </div>
           <div className='dashboard-card'>
@@ -378,7 +386,7 @@ export const DashboardPage = () => {
               Average Team Earning
             </div>
             <div className='dashboard-card__value'>
-              ${usdFormatter.format(Number(info.teamEarnings) / 100)}
+              ${usdFormatter.format(info.teamEarnings)}
             </div>
           </div>
         </main>
