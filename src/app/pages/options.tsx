@@ -81,20 +81,27 @@ export const Options = () => {
       </div>
       <div>
         <div>
-          <Collapsible className="text-zinc-400">
+          <Collapsible className="flex flex-col text-zinc-400 gap-5">
             <CollapsibleTrigger>
-              <div className="w-56 p-3 border-2 border-white/20">
-                Get more info
+              <div className="py-3 px-14 border rounded-2xl border-white/20">
+                Allocation Status V
               </div>
             </CollapsibleTrigger>
+
             <CollapsibleContent>
-              <div className="">
+              <div className="w-72">
                 {projectInfos && projectInfos.length ?
                   projectInfos.map((info: any, index: number) => 
                     <div key={index} className="flex flex-col gap-3 mt-4">
                       <div className="inline-flex justify-between text-zinc-400 text-sm">
-                        <span>{info.max == null ? <Spinner/> : `100%`}</span>
-                        <span>{info.value == null ? <Spinner/> : `${parseFloat((info.value / (info.max ?? 100) * 100).toFixed(2))}%`}</span>
+                        <span>{info.title == null ? <Spinner/> : info.title}</span>
+
+                        <div>
+                          <span>
+                            {info.value == null ? <Spinner/> : (+info.value).toLocaleString('en-US')} / {info.max == null ? <Spinner/> : (+info.max).toLocaleString('en-US')}
+                          </span>
+                          {/* <span>{info.value == null ? <Spinner/> : `${parseFloat((info.value / (info.max ?? 100) * 100).toFixed(2))}%`}</span> */}
+                        </div>
                       </div>
 
                       <Progress value={info.value}  max={info.max}/>
