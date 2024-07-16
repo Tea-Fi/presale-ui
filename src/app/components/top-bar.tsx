@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 
 import { Wallet } from "./wallet";
-import { useAccountEffect } from 'wagmi';
+import { useAccount, useAccountEffect } from 'wagmi';
 import { getReferralTreeByWallet, Referral } from '../utils/referrals';
 import { TeaSwapLogoAsset } from "../../assets/icons";
 import { cn } from "../utils/cn";
@@ -33,6 +33,8 @@ export const TopBar = ({
   // const { setOpen } = useModal();
   const { setOpened } = useMobileMenuDrawer();
 
+  const { address, isConnected } = useAccount();
+
   const chainId = getChainId(wagmiConfig);
   
   useAccountEffect({
@@ -51,8 +53,17 @@ export const TopBar = ({
     },
   });
 
-
-
+  useEffect(() => {
+    if (address && isConnected) {
+      getReferralTreeByWallet(address, chainId)
+        .then(referralTree => {
+          if (referralTree !== undefined) {
+            setReferralTree(referralTree);
+            setReferralCode(referralTree.referral as string);
+          }
+        })
+    }
+  }, [address, isConnected])
 
   return (
     <div className="w-full max-h-24 inline-flex justify-between items-center px-5 py-3">

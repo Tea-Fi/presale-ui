@@ -457,10 +457,10 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
           onType={(e) => {
             clearTimeout(searchTimeout.current);
             searchTimeout.current = setTimeout(
-              () => onCurrencyAmountChange(e.target.value),
+              () => onCurrencyAmountChange(e.target.value.replace(',', '.')),
               500
             );
-            setTokenSellValue(e.target.value);
+            setTokenSellValue(e.target.value.replace(',', '.'));
           }}
         />
 
@@ -480,10 +480,10 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
           onType={(e) => {
             clearTimeout(searchTimeout.current);
             searchTimeout.current = setTimeout(
-              () => onTeaAmountChange(e.target.value),
+              () => onTeaAmountChange(e.target.value.replace(',', '.')),
               500
             );
-            setTokenBuyValue(e.target.value);
+            setTokenBuyValue(e.target.value.replace(',', '.'));
           }}
         />
       </div>
@@ -590,7 +590,7 @@ const SwapInput = ({
           onKeyDown={(e: any) => {
             const prevVals = e.target.value;
             const value = e.key;
-            const pattern = /^[\d]\d*\.?\d*$/;
+            const pattern = /^[\d]\d*[.,]?\d*$/;
             const isPatternTested = pattern.test(prevVals + value);
 
             if (
@@ -604,8 +604,8 @@ const SwapInput = ({
               e.preventDefault();
             }
           }}
-          type="number"
-          inputMode="decimal"
+          type="text"
+          inputMode="text"
           onChange={onType}
           placeholder="0"
           className="bg-transparent text-3xl px-0 text-zinc-300 placeholder:text-zinc-600 h-full"

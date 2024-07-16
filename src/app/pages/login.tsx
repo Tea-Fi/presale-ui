@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { FormEvent } from 'react';
 import { LoginStatus, useUserContext } from '../providers/user.context';
 import { SlButton, SlDialog, SlIcon  } from '@shoelace-style/shoelace/dist/react';
@@ -12,7 +12,7 @@ export const Login = () => {
   const [code, setCode] = useState<string>('');
   const [message, setMessage] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const { login, status, agreeToTerms } = useUserContext();
+  const { login, status, terms } = useUserContext();
 
   function onLoginSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -23,6 +23,15 @@ export const Login = () => {
       setTimeout(setMessage, 3000, null);
     }
   }
+ 
+  const closeDialog = useCallback(() => {
+    if (status === LoginStatus.CODE_VERIFIED) {
+      terms.disagree();
+    }
+
+    setDialogOpen(false);
+  }, [status, terms])
+
 
   useEffect(() => {
     switch (status) {
@@ -30,6 +39,12 @@ export const Login = () => {
         setDialogOpen(false);
         setTimeout(() => navigate('/options', { replace: true }), 250);
         break;
+
+      case LoginStatus.LOGGED_OUT:
+        setDialogOpen(false);
+        setCode('');
+        break;
+
       case LoginStatus.CODE_VERIFIED:
         setDialogOpen(true);
         break;
@@ -68,7 +83,7 @@ export const Login = () => {
           </div>
         </div>
 
-        <SlDialog className="terms" label="Agree to terms" open={dialogOpen} onSlAfterHide={() => setDialogOpen(false)}>
+        <SlDialog className="terms" label="Agree to terms" open={dialogOpen} onSlAfterHide={closeDialog}>
           <section className="terms__content">
             <p>THE UTILITY TOKENS BEING OFFERED OR SOLD BY THE COMPANY HEREUNDER (THE &ldquo;TOKENS&rdquo;) HAVE NOT BEEN REGISTERED UNDER THE SECURITIES LAWS OF ANY JURISDICTION. THE RIGHTS AND OBLIGATIONS CONTEMPLATED UNDER THESE TERMS, MAY&#8239;NOT BE OFFERED, SOLD OR OTHERWISE TRANSFERRED WITHOUT THE WRITTEN CONSENT OF TEASWAP. THIS DOCUMENT IS NOT A PROSPECTUS OR ANY FORM OF OFFERING MEMORANDUM. THIS AGREEMENT, THE TOKEN WHITEPAPER OR ANY OTHER DOCUMENT RELATING TO THE TOKENS OR THEIR SALE WERE NOT APPROVED, REVIEWED OR ENDORSED BY ANY REGULATOR IN ANY JURISDICTION, NOR SUBMITTED FOR SUCH A REVIEW.</p>
             <br/>
@@ -171,7 +186,7 @@ export const Login = () => {
             <p className='text-center'>* * * * *</p>
           </section>
           <div slot="footer">
-            <SlButton variant="primary" size="small" className="terms__actions" onClick={agreeToTerms}>
+            <SlButton variant="primary" size="small" className="terms__actions" onClick={terms.agree}>
               <SlIcon name="check2-circle" style={{ marginRight: '0.5em' }} />I agree to the terms
             </SlButton>
           </div>
