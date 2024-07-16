@@ -71,7 +71,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-black text-foreground;
+    @apply bg-black text-foreground min-w-full;
   }
 
   input::-webkit-outer-spin-button,
@@ -84,6 +84,8 @@
   input[type="number"] {
     -moz-appearance: textfield;
   }
+
+
 }
 
 #__CONNECTKIT__ svg[height="268"] {

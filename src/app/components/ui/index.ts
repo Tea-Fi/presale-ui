@@ -46,3 +46,8 @@ export {
     DrawerTitle,
     DrawerDescription,
 } from "./drawer";
+export {
+    Collapsible,
+    CollapsibleTrigger,
+    CollapsibleContent
+} from "./collapsible";
