@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 
 import { Wallet } from "./wallet";
 import { useAccountEffect } from 'wagmi';
@@ -57,7 +57,9 @@ export const TopBar = ({
   return (
     <div className="w-full max-h-24 inline-flex justify-between items-center px-5 py-3">
       <div className="inline-flex items-center gap-20 lg:w-[228px]">
-        <TeaSwapLogoAsset className="w-48"/>
+        <Link to="/">
+          <TeaSwapLogoAsset className="w-48"/>
+        </Link>
 
         {/* Maybe will be uncommented later */}
         {/* <span className="hidden lg:inline-block">
