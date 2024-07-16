@@ -1,18 +1,19 @@
 import { useEffect, useState } from "react";
 import { ZeroAddress } from "ethers/constants";
-import { CardHoverEffect, Collapsible, CollapsibleContent, CollapsibleTrigger, Progress } from "../components/ui";
+// import { CardHoverEffect, Collapsible, CollapsibleContent, CollapsibleTrigger, Progress } from "../components/ui";
+import { CardHoverEffect }  from "../components/ui";
 import {
   getOptionInfo,
   getSaleOptionsCout,
   getTokensAvailable,
 } from "../utils/presale";
-import { cn, parseHumanReadable } from "../utils";
+import { parseHumanReadable } from "../utils";
 import { investmentInfo } from "../utils/constants";
-import Spinner from "../components/spinner";
-import { MdKeyboardArrowDown } from "react-icons/md";
+// import Spinner from "../components/spinner";
+// import { MdKeyboardArrowDown } from "react-icons/md";
 
 export const Options = () => {
-  const [dropdownOpened, setDropdownOpened] = useState<boolean>(false);
+  // const [dropdownOpened, setDropdownOpened] = useState<boolean>(false);
 
   const [projectInfos, setProjectInfos] = useState<any>(
     Object.keys(investmentInfo).map((price) => ({
