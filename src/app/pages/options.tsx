@@ -82,7 +82,7 @@ export const Options = () => {
       <div className="w-96">
         <CardHoverEffect items={projectInfos} />
       </div>
-      <div>
+      {/* <div>
         <div>
           <Collapsible className="flex flex-col text-zinc-400 gap-5">
             <CollapsibleTrigger onClick={() => setDropdownOpened(!dropdownOpened)}>
@@ -120,7 +120,7 @@ export const Options = () => {
             </CollapsibleContent>
           </Collapsible>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
