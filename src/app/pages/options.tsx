@@ -6,11 +6,14 @@ import {
   getSaleOptionsCout,
   getTokensAvailable,
 } from "../utils/presale";
-import { parseHumanReadable } from "../utils";
+import { cn, parseHumanReadable } from "../utils";
 import { investmentInfo } from "../utils/constants";
 import Spinner from "../components/spinner";
+import { MdKeyboardArrowDown } from "react-icons/md";
 
 export const Options = () => {
+  const [dropdownOpened, setDropdownOpened] = useState<boolean>(false);
+
   const [projectInfos, setProjectInfos] = useState<any>(
     Object.keys(investmentInfo).map((price) => ({
       title: `$${price} / $TEA`,
@@ -82,9 +85,13 @@ export const Options = () => {
       <div>
         <div>
           <Collapsible className="flex flex-col text-zinc-400 gap-5">
-            <CollapsibleTrigger>
-              <div className="py-3 px-14 border rounded-2xl border-white/20">
-                Allocation Status V
+            <CollapsibleTrigger onClick={() => setDropdownOpened(!dropdownOpened)}>
+              <div className="inline-flex items-center justify-between py-3 px-2 min-w-72 border rounded-2xl border-white/20">
+                <div className="grow">
+                  Allocation Status
+                </div>
+
+              <MdKeyboardArrowDown className={cn("transition-all", dropdownOpened ? "rotate-180" : "")}/>
               </div>
             </CollapsibleTrigger>
 
@@ -100,7 +107,6 @@ export const Options = () => {
                           <span>
                             {info.value == null ? <Spinner/> : (+info.value).toLocaleString('en-US')} / {info.max == null ? <Spinner/> : (+info.max).toLocaleString('en-US')}
                           </span>
-                          {/* <span>{info.value == null ? <Spinner/> : `${parseFloat((info.value / (info.max ?? 100) * 100).toFixed(2))}%`}</span> */}
                         </div>
                       </div>
 
