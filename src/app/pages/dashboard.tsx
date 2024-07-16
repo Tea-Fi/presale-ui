@@ -66,7 +66,7 @@ function calculateCommission(node: Referral, stats: StatsMap, memo?: Record<numb
 
   const result = addStats(current, subtree);
 
-  result.soldInUsd /= BigInt(1e6);
+  result.soldInUsd /= BigInt(1e4);
   result.tokensSold /= BigInt(1e18);
 
   return result; 
@@ -210,7 +210,7 @@ export const DashboardPage = () => {
       .reduce((acc, e) => acc + e.purchases, 0);
      
     const totalPurchasesUsd = subStats
-      .reduce((acc, e) => acc + e.soldInUsd, 0n) / BigInt(1e6);
+      .reduce((acc, e) => acc + e.soldInUsd, 0n) / BigInt(1e4);
 
     const averageTeamEarnings = purchases > 0
       ? totalPurchasesUsd / BigInt(purchases)
@@ -221,7 +221,7 @@ export const DashboardPage = () => {
       teamSize: subs.length,
 
       earnings: calculateCommission(referralTree, referralStats, memo).soldInUsd
-        - (stat.soldInUsd * BigInt(referralTree.fee!) / BigInt(1e6)),
+        - (stat.soldInUsd * BigInt(referralTree.fee!) / BigInt(1e4)),
 
       teamEarnings: averageTeamEarnings,
       teamPurchases: Object.keys(referralStats)
@@ -337,7 +337,7 @@ export const DashboardPage = () => {
             </div>
 
             <div className='dashboard-card__value'>
-              ${usdFormatter.format(info.purchases)}
+              ${usdFormatter.format(Number(info.purchases) / 100)}
             </div>
           </div>
 
@@ -375,7 +375,7 @@ export const DashboardPage = () => {
               My earnings
             </div>
             <div className='dashboard-card__value'>
-              ${usdFormatter.format(Number(info.earnings / BigInt(100)) / 100)}
+              ${usdFormatter.format(Number(info.earnings / BigInt(1e4)) / 100)}
             </div>
           </div>
           <div className='dashboard-card'>
@@ -386,7 +386,7 @@ export const DashboardPage = () => {
               Average Team Earning
             </div>
             <div className='dashboard-card__value'>
-              ${usdFormatter.format(info.teamEarnings)}
+              ${usdFormatter.format(Number(info.teamEarnings) / 100)}
             </div>
           </div>
         </main>
