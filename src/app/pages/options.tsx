@@ -85,7 +85,9 @@ export const Options = () => {
         <CardHoverEffect items={projectInfos} />
       </div>
       <div className="flex flex-col gap-8 lg:mb-20">
-        <img src={TeaCup} className="w-64 lg:w-96 -rotate-6"/>
+        <div className="relative w-full">
+          <img src={TeaCup} className="w-64 lg:w-96 -rotate-6 lg:mr-16"/>
+        </div>
 
         <Collapsible className="flex flex-col text-zinc-400 gap-5">
             <CollapsibleTrigger onClick={() => setDropdownOpened(!dropdownOpened)}>
