@@ -33,7 +33,7 @@ export const Progress: FC<Props> = ({ max, value, className }) => {
 
 	return (
 		<div
-			className={cn('w-full h-3 rounded-full overflow-hidden', className)}
+			className={cn('w-full h-3 rounded-full overflow-hidden inline-flex flex-row-reverse', className)}
 			style={Parentdiv}
 		>
 			<div className={`h-full rounded-full`} style={Childdiv}></div>
