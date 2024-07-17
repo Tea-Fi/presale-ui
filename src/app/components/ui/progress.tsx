@@ -1,6 +1,7 @@
 import { FC } from 'react';
 import { cn } from '../../utils/cn';
 
+
 type Props = {
 	max?: number;
 	value?: number;
@@ -19,24 +20,16 @@ export const Progress: FC<Props> = ({ max, value, className }) => {
 			: CURRENT;
 
 
-	const Parentdiv = {
-		backgroundImage:
-			'linear-gradient(180deg, rgba(255,255,255, 0.4) 0%, rgba(138,138,138, 0.4) 82%, rgba(210,203,203, 0.1) 100%)'
-	};
-
-
 	const Childdiv = {
 		transition: "0.2s",
 		width: `${currentInPerc >= MAX ? MAX : currentInPerc}%`,
-		backgroundImage: 'linear-gradient(90deg, #FF3187 0%, #B22383 100%)'
 	};
 
 	return (
 		<div
-			className={cn('w-full h-3 rounded-full overflow-hidden', className)}
-			style={Parentdiv}
+			className={cn('w-full h-3 rounded-full overflow-hidden bg-loader-parent inline-flex flex-row-reverse', className)}
 		>
-			<div className={`h-full rounded-full`} style={Childdiv}></div>
+			<div className={`h-full rounded-full bg-loader-child`} style={Childdiv}></div>
 		</div>
 	);
 };

@@ -87,7 +87,7 @@ export const Options = () => {
         </div>
         <div className="flex flex-col gap-8 lg:mb-20">
           <div className="relative w-full">
-            <img src={TeaCup} className="w-64 lg:w-80 -rotate-6 lg:mr-14"/>
+            <img src={TeaCup} className="w-64 lg:w-80 lg:mr-14"/>
           </div>
           <Collapsible className="flex flex-col text-zinc-400 gap-5">
               <CollapsibleTrigger onClick={() => setDropdownOpened(!dropdownOpened)}>
@@ -115,7 +115,7 @@ export const Options = () => {
                           </div>
                         </div>
 
-                        <Progress value={info.value}  max={info.max}/>
+                        <Progress value={info.max - info.value}  max={info.max}/>
                       </div>
                     )
                     :

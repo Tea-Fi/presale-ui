@@ -86,6 +86,14 @@
   }
 
 
+  .bg-loader-child {
+    background: linear-gradient(180deg, #FF3187 0%, #970542 45%, #861946 80%, #B22383 100%);
+  }
+
+  .bg-loader-parent {
+    background: linear-gradient(90deg, rgba(255,255,255, 1) 0%, rgba(138,138,138, 1) 100%);
+  }
+
 }
 
 #__CONNECTKIT__ svg[height="268"] {
