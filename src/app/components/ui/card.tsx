@@ -1,8 +1,6 @@
 import { cn } from "../../utils/cn";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
-import { Progress } from "./progress";
-import Spinner from "../spinner";
 import { useCountdownStore } from "../../hooks";
 
 export const CardHoverEffect = ({
