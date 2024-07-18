@@ -88,10 +88,11 @@
 
   .bg-loader-child {
     background: linear-gradient(180deg, #FF3187 0%, #970542 45%, #861946 80%, #B22383 100%);
+    box-shadow: -5px 0 5px rgb(0, 0, 0, 0.4);
   }
 
   .bg-loader-parent {
-    background: linear-gradient(90deg, rgba(255,255,255, 1) 0%, rgba(138,138,138, 1) 100%);
+    background: linear-gradient(90deg, rgb(158, 157, 157) 0%, rgba(138,138,138, 1) 100%);
   }
 
 }
