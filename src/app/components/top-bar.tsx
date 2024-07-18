@@ -20,12 +20,10 @@ export const TopBar = ({
   isBuyPageActive,
   isClaimPageActive,
   isReferralTreePageActive,
-  isDashboardPageActive
 }:{
   isBuyPageActive?: boolean,
   isClaimPageActive?: boolean,
   isReferralTreePageActive?: boolean
-  isDashboardPageActive?: boolean
 }) => {
   const [referralCode, setReferralCode] = useState('');
   const [referralTree, setReferralTree] = useState<Referral>();
@@ -106,15 +104,6 @@ export const TopBar = ({
         
        {referralTree && (
         <>
-          <NavLink 
-            to="/dashboard"
-            className={cn(
-              "rounded-full h-full min-w-16 items-center hidden lg:inline-flex justify-center ", 
-              isDashboardPageActive ? 'border border-white/[0.2]' : '', 
-            )}
-          >
-            Dashboard
-          </NavLink>
           <NavLink 
             to="/referrals"
             className={cn(
