@@ -25,7 +25,6 @@ export const TopBar = ({
   isClaimPageActive?: boolean,
   isReferralTreePageActive?: boolean
 }) => {
-  const [referralCode, setReferralCode] = useState('');
   const [referralTree, setReferralTree] = useState<Referral>();
   // const { isFinished } = useCountdownStore();
   // const { setOpen } = useModal();
@@ -41,12 +40,10 @@ export const TopBar = ({
         .then(referralTree => {
           if (referralTree !== undefined) {
             setReferralTree(referralTree);
-            setReferralCode(referralTree.referral as string);
           }
         })
     },
     onDisconnect() {
-      setReferralCode('');
       setReferralTree(undefined);
     },
   });
@@ -57,7 +54,6 @@ export const TopBar = ({
         .then(referralTree => {
           if (referralTree !== undefined) {
             setReferralTree(referralTree);
-            setReferralCode(referralTree.referral as string);
           }
         })
     }
@@ -105,13 +101,13 @@ export const TopBar = ({
        {referralTree && (
         <>
           <NavLink 
-            to="/referrals"
+            to="/dashboard"
             className={cn(
               "rounded-full h-full min-w-16 items-center hidden lg:inline-flex justify-center", 
               isReferralTreePageActive ? 'border border-white/[0.2]' : '', 
             )}
           >
-            Referrals ({referralCode.toUpperCase()})
+            Ambassador Dashboard
           </NavLink>
         </>
        )} 
