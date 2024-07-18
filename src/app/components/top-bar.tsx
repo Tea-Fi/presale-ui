@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 
 import { Wallet } from "./wallet";
 import { useAccount, useAccountEffect } from 'wagmi';
@@ -14,7 +14,9 @@ import 'react-circular-progressbar/dist/styles.css';
 // import { CountdownSmall } from "./countdown-sm";
 // import { useModal } from "connectkit";
 import { GiHamburgerMenu } from "react-icons/gi";
+import { IoIosArrowBack } from "react-icons/io";
 import { useMobileMenuDrawer } from "../hooks";
+import { isMobile } from 'react-device-detect';
 
 export const TopBar = ({
   isBuyPageActive,
@@ -25,14 +27,15 @@ export const TopBar = ({
   isClaimPageActive?: boolean,
   isReferralTreePageActive?: boolean
 }) => {
+  const { pathname } = useLocation();
   const [referralTree, setReferralTree] = useState<Referral>();
-  // const { isFinished } = useCountdownStore();
-  // const { setOpen } = useModal();
   const { setOpened } = useMobileMenuDrawer();
 
   const { address, isConnected } = useAccount();
 
   const chainId = getChainId(wagmiConfig);
+
+  console.log(pathname);
   
   useAccountEffect({
     onConnect({ address, chainId }) {
@@ -60,81 +63,92 @@ export const TopBar = ({
   }, [address, isConnected])
 
   return (
-    <div className="w-full max-h-24 inline-flex justify-between items-center px-5 py-3">
-      <div className="inline-flex items-center gap-20 lg:w-[228px]">
-        <Link to="https://tea-fi.com/">
-          <TeaSwapLogoAsset className="w-25 h-auto "/>
+    <div>
+      {pathname === '/options'  || !isMobile ?
+        <></>
+        :
+        <Link to="/options" className="inline-flex items-center gap-2 ml-5 mt-3 text-white">
+          <IoIosArrowBack /> Back
         </Link>
+      }
+    
+      <div className="w-full max-h-24 inline-flex justify-between items-center px-5 py-3">
+        <div className="inline-flex items-center gap-20 lg:w-[228px]">
+          <Link to="https://tea-fi.com/">
+            <TeaSwapLogoAsset className="w-25 h-auto "/>
+          </Link>
 
-        {/* Maybe will be uncommented later */}
-        {/* <span className="hidden lg:inline-block">
-          {isFinished ?
-            <span className="text-white">Presale countdown has ended</span> 
-          : 
-            <CountdownSmall />
-          }
-        </span> */}
+          {/* Maybe will be uncommented later */}
+          {/* <span className="hidden lg:inline-block">
+            {isFinished ?
+              <span className="text-white">Presale countdown has ended</span> 
+            : 
+              <CountdownSmall />
+            }
+          </span> */}
 
-      </div>
+        </div>
 
 
-      <div className="items-center gap-2 min-w-[100px] h-16 w-fit bg-black text-white rounded-full p-3 border dark:border-white/[0.2] hidden lg:inline-flex">
-        <NavLink 
-          to="/options"
-          className={cn(
-            "rounded-full h-full min-w-16 items-center inline-flex justify-center",
-            isBuyPageActive ? 'border border-white/[0.2]' : ''
-          )}
-        >
-          Buy
-        </NavLink>
-        <NavLink
-          to="/claim"
-          className={cn(
-            "rounded-full h-full min-w-16 items-center inline-flex justify-center",
-            isClaimPageActive ? 'border border-white/[0.2]' : ''
-          )}
-        >
-          Claim
-        </NavLink>
-        
-       {referralTree && (
-        <>
+        <div className="items-center gap-2 min-w-[100px] h-16 w-fit bg-black text-white rounded-full p-3 border dark:border-white/[0.2] hidden lg:inline-flex">
           <NavLink 
-            to="/dashboard"
+            to="/options"
             className={cn(
-              "rounded-full h-full min-w-16 items-center hidden lg:inline-flex justify-center", 
-              isReferralTreePageActive ? 'border border-white/[0.2]' : '', 
+              "rounded-full h-full min-w-16 items-center inline-flex justify-center",
+              isBuyPageActive ? 'border border-white/[0.2]' : ''
             )}
           >
-            Ambassador Dashboard
+            Buy
           </NavLink>
-        </>
-       )} 
-        
+          <NavLink
+            to="/claim"
+            className={cn(
+              "rounded-full h-full min-w-16 items-center inline-flex justify-center",
+              isClaimPageActive ? 'border border-white/[0.2]' : ''
+            )}
+          >
+            Claim
+          </NavLink>
+          
+        {referralTree && (
+          <>
+            <NavLink 
+              to="/dashboard"
+              className={cn(
+                "rounded-full h-full min-w-16 items-center hidden lg:inline-flex justify-center", 
+                isReferralTreePageActive ? 'border border-white/[0.2]' : '', 
+              )}
+            >
+              Ambassador Dashboard
+            </NavLink>
+          </>
+        )} 
+          
+        </div>
+
+        <span className={"w-[228px] items-center hidden lg:inline-flex"}>
+          <span className="text-white">{chainId == ChainId.MAINNET ? 'Mainnet' : 'Sepolia'}</span>
+          &nbsp;
+          <Wallet />
+        </span>
+
+
+        {/* Burger menu for small sizes */}
+        <div className="inline-flex gap-7 lg:hidden">
+          {/* <Button
+            className="text-[#ff00a4] text-[2rem] bg-transparent p-0 hover:bg-transparent hover:text-zinc-400"
+            onClick={() => setOpen(true)}>
+            <FaWallet />
+          </Button> */}
+
+          <Button
+            className="text-[#ff00a4] text-[3rem] bg-transparent p-0 hover:bg-transparent hover:text-zinc-400"
+            onClick={() => setOpened(true)}>
+            <GiHamburgerMenu />
+          </Button>
+        </div>
       </div>
 
-      <span className={"w-[228px] items-center hidden lg:inline-flex"}>
-        <span className="text-white">{chainId == ChainId.MAINNET ? 'Mainnet' : 'Sepolia'}</span>
-        &nbsp;
-        <Wallet />
-      </span>
-
-
-      {/* Burger menu for small sizes */}
-      <div className="inline-flex gap-7 lg:hidden">
-        {/* <Button
-          className="text-[#ff00a4] text-[2rem] bg-transparent p-0 hover:bg-transparent hover:text-zinc-400"
-          onClick={() => setOpen(true)}>
-          <FaWallet />
-        </Button> */}
-
-        <Button
-          className="text-[#ff00a4] text-[3rem] bg-transparent p-0 hover:bg-transparent hover:text-zinc-400"
-          onClick={() => setOpened(true)}>
-          <GiHamburgerMenu />
-        </Button>
-      </div>
     </div>
   );
 };
