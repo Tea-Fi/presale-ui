@@ -20,7 +20,6 @@ export const MobileDrawerMenu = () => {
     );
     const { isOpened, setOpened } = useMobileMenuDrawer();
 
-    const [referralCode, setReferralCode] = useState('');
     const [referralTree, setReferralTree] = useState<Referral>();
     
     const chainId = getChainId(wagmiConfig);
@@ -31,12 +30,10 @@ export const MobileDrawerMenu = () => {
                 .then(referralTree => {
                     if (referralTree !== undefined) {
                         setReferralTree(referralTree);
-                        setReferralCode(referralTree.referral as string);
                     }
                 })
         },
         onDisconnect() {
-            setReferralCode('');
             setReferralTree(undefined);
         },
     });
@@ -47,7 +44,6 @@ export const MobileDrawerMenu = () => {
             .then(referralTree => {
             if (referralTree !== undefined) {
                 setReferralTree(referralTree);
-                setReferralCode(referralTree.referral as string);
             }
             })
         }
