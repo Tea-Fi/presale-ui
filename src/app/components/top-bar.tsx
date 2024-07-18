@@ -32,10 +32,7 @@ export const TopBar = ({
   const { setOpened } = useMobileMenuDrawer();
 
   const { address, isConnected } = useAccount();
-
   const chainId = getChainId(wagmiConfig);
-
-  console.log(pathname);
   
   useAccountEffect({
     onConnect({ address, chainId }) {
