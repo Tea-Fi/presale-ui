@@ -167,7 +167,13 @@ export const ReferralForm: React.FC<Props> = (props) => {
 
   return (
     <>
-      <Button onClick={toggleForm} className="create-referral-button px-8 py-8 text-xl bg-[#f716a2] text-secondary-foreground">
+      <Button 
+        onClick={toggleForm}
+        className={cn(
+          'px-8 py-8',
+          'text-xl bg-[#f716a2] text-secondary-foreground',
+          'hover:bg-[#3a0c2a] transition-none'
+        )}>
         Create Referral
       </Button>
 
