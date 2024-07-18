@@ -93,13 +93,13 @@ export const MobileDrawerMenu = () => {
                             </NavLink>
                             <NavLink
                                 onClick={() => setOpened(false)}
-                                to="/referrals"
+                                to="/dashboard"
                                 className={cn(
                                     "rounded-lg h-full min-w-16 hover:bg-white/20 py-3",
                                     !referralTree ? 'hidden' : ''
                                 )}
                             >
-                                Referrals ({referralCode.toUpperCase()})
+                                Ambassador Dashboard
                             </NavLink>
                         </div>
                     </DrawerHeader>

@@ -24,7 +24,7 @@ export function App() {
           <Route path="/buy" element={<Buy />} />
           <Route path="/options" element={<Options />} />
           <Route path="/claim" element={<Claim />} />
-          <Route path="/referrals" element={<Referrals />} />
+          <Route path="/dashboard" element={<Referrals />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

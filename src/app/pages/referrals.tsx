@@ -91,7 +91,6 @@ export const Referrals = () => {
                 Claim
               </Button>
             </div>
-
           </ReferralSection>
 
           <ReferralSection>

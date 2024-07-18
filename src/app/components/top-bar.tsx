@@ -105,13 +105,13 @@ export const TopBar = ({
        {referralTree && (
         <>
           <NavLink 
-            to="/referrals"
+            to="/dashboard"
             className={cn(
               "rounded-full h-full min-w-16 items-center hidden lg:inline-flex justify-center", 
               isReferralTreePageActive ? 'border border-white/[0.2]' : '', 
             )}
           >
-            Referrals ({referralCode.toUpperCase()})
+            Ambassador Dashboard
           </NavLink>
         </>
        )} 
