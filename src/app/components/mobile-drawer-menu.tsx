@@ -1,13 +1,15 @@
 import { useModal } from "connectkit";
 // import { CountdownSmall } from "./countdown-sm";
 import { Button, Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle } from "./ui";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAccount, useAccountEffect } from "wagmi";
 import { useMobileMenuDrawer } from "../hooks";
 import { NavLink } from "react-router-dom";
 import { cn } from "../utils";
 import { Referral } from "../utils/constants";
 import { getReferralTreeByWallet } from "../utils/referrals";
+import { wagmiConfig } from "../config";
+import { getChainId } from '@wagmi/core';
 
 export const MobileDrawerMenu = () => {
     const { setOpen } = useModal();
@@ -18,8 +20,9 @@ export const MobileDrawerMenu = () => {
     );
     const { isOpened, setOpened } = useMobileMenuDrawer();
 
-    const [referralCode, setReferralCode] = useState('');
     const [referralTree, setReferralTree] = useState<Referral>();
+    
+    const chainId = getChainId(wagmiConfig);
 
     useAccountEffect({
         onConnect({ address, chainId }) {
@@ -27,15 +30,24 @@ export const MobileDrawerMenu = () => {
                 .then(referralTree => {
                     if (referralTree !== undefined) {
                         setReferralTree(referralTree);
-                        setReferralCode(referralTree.referral as string);
                     }
                 })
         },
         onDisconnect() {
-            setReferralCode('');
             setReferralTree(undefined);
         },
     });
+
+    useEffect(() => {
+        if (account.address && account.isConnected) {
+        getReferralTreeByWallet(account.address, chainId)
+            .then(referralTree => {
+            if (referralTree !== undefined) {
+                setReferralTree(referralTree);
+            }
+            })
+        }
+    }, [account.address, account.isConnected])
 
     return (
         <Drawer
@@ -83,17 +95,7 @@ export const MobileDrawerMenu = () => {
                                     !referralTree ? 'hidden' : ''
                                 )}
                             >
-                                Dashboard
-                            </NavLink>
-                            <NavLink
-                                onClick={() => setOpened(false)}
-                                to="/referrals"
-                                className={cn(
-                                    "rounded-lg h-full min-w-16 hover:bg-white/20 py-3",
-                                    !referralTree ? 'hidden' : ''
-                                )}
-                            >
-                                Referrals ({referralCode.toUpperCase()})
+                                Ambassador Dashboard
                             </NavLink>
                         </div>
                     </DrawerHeader>

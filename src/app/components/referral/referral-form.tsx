@@ -6,10 +6,10 @@ import { useAccount, useSignMessage } from "wagmi";
 import { Form, Formik, Field, ErrorMessage } from "formik";
 import { SlIcon } from "@shoelace-style/shoelace/dist/react";
 
-import { Button } from "./ui";
-import { cn } from "../utils/cn";
-import * as referrals from "../utils/referrals";
-import type { Referral } from "../utils/referrals";
+import { Button } from "../ui";
+import { cn } from "../../utils/cn";
+import * as referrals from "../../utils/referrals";
+import type { Referral } from "../../utils/referrals";
 
 const ReferralValidationSchema = z.object({
   walletAddress: z.string().refine((x) => isAddress(x), {
@@ -167,7 +167,15 @@ export const ReferralForm: React.FC<Props> = (props) => {
 
   return (
     <>
-      <Button onClick={toggleForm}>Create Referral</Button>
+      <Button 
+        onClick={toggleForm}
+        className={cn(
+          'px-8 py-8',
+          'text-xl bg-[#f716a2] text-secondary-foreground',
+          'hover:bg-[#3a0c2a] transition-none'
+        )}>
+        Create Referral
+      </Button>
 
       {showForm && (
         <Formik

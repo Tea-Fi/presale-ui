@@ -8,7 +8,6 @@ import { useWalletContext } from "./providers/wallet.context";
 import { WrongNetwork } from "./components/wrong-network";
 import { Referrals } from "./pages/referrals";
 import { Options } from "./pages/options";
-import { DashboardPage } from "./pages/dashboard";
 
 export function App() {
   const { chainId, unsupportedChain } = useWalletContext();
@@ -25,8 +24,7 @@ export function App() {
           <Route path="/buy" element={<Buy />} />
           <Route path="/options" element={<Options />} />
           <Route path="/claim" element={<Claim />} />
-          <Route path="/referrals" element={<Referrals />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/dashboard" element={<Referrals />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

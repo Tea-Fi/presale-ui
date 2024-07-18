@@ -1,3 +1,5 @@
+import TeaCup from "./tea-cup.svg";
+
 export const TeaSwapLogoAsset = ({ className }: { className?: string }) => {
     return (
       <svg width="119" height="23" viewBox="0 0 119 23" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
@@ -33,4 +35,8 @@ export const TeaTokenLogoAsset = ({ className }: { className?: string }) => {
 </svg>
 
   );
+}
+
+export {
+  TeaCup,
 }
