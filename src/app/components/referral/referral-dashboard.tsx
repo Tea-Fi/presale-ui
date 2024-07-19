@@ -1,17 +1,18 @@
 import React from "react";
-import { getChainId, getClient } from "@wagmi/core";
+import { ShoppingCart, ShoppingBag, PersonStanding, Download, BarChart2 } from "lucide-react";
 
 import { AbiEvent, getAbiItem } from "viem";
 import { getBlock, getLogs } from "viem/actions";
+import { getChainId, getClient } from "@wagmi/core";
 
-import { calculateCommission, emptyStat, StatsMap, usdFormatter } from "./common";
+import { calculateCommission, StatsMap, usdFormatter } from "./common";
+import { DashboardPeriodSelector } from "./period-selector";
+import { DashboardBlock } from "./dashboard-card";
 
 import { wagmiConfig } from "../../config";
 import { PRESALE_ABI } from "../../utils/presale_abi";
 import { PRESALE_CONTRACT_ADDRESS, Referral } from "../../utils/constants";
-import { DashboardPeriodSelector } from "./period-selector";
-import { ShoppingCart, ShoppingBag, PersonStanding, Download, BarChart2 } from "lucide-react";
-import { DashboardBlock } from "./dashboard-card";
+
 
 interface Props {
   tree: Referral;
@@ -51,8 +52,6 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
     if (!props.tree || !referralStats || !team || !props.address) return;
 
     const memo = {}
-    const stat = referralStats[props.tree.id] ?? emptyStat();
-   
     const subs = team
       .filter(x => x.wallet !== props.address)
       .map(x => referralStats[x.id])
@@ -73,8 +72,7 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
       purchases: totalPurchasesUsd,
       teamSize: subs.length,
 
-      earnings: calculateCommission(props.tree, referralStats, memo).soldInUsd
-        - (stat.soldInUsd * BigInt(props.tree.fee!) / BigInt(1e4)),
+      earnings: calculateCommission(props.tree, referralStats, memo).soldInUsd,
 
       teamEarnings: averageTeamEarnings,
       teamPurchases: Object.keys(referralStats)
