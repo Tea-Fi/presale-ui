@@ -28,8 +28,8 @@ const ReferralSection: React.FC<SectionProps & React.PropsWithChildren> = (props
 
 
 export const Referrals = () => {
-  const TWO_WEEKS_IN_MS = 1_209_600_000;
-  
+  // const TWO_WEEKS_IN_MS = 1_209_600_000;
+
 
   const { address, isConnected } = useAccount();
 
