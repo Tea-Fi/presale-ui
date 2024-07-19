@@ -66,7 +66,7 @@ export const Login = () => {
         <div className='flex flex-col justify-center min-h-screen w-full z-full'>
           <div className='mb-60'>
             <TypewriterComponent />
-            <div className='inline-flex justify-center mt-10 w-full'>
+            <div className='inline-flex justify-center mt-10 w-full px-4'>
               <div className='w-full'>
                 <VanishInput 
                     placeholders={[
