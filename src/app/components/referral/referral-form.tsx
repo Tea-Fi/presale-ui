@@ -222,7 +222,15 @@ export const ReferralForm: React.FC<Props> = (props) => {
 
                 {error && <div className="referral-form__error">{error}</div>}
 
-                <Button type="submit" disabled={isLoading}>
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className={cn(
+                    'px-8 py-4',
+                    'bg-[#f716a2] text-secondary-foreground',
+                    'hover:bg-[#3a0c2a] transition-none'
+                  )}
+                >
                   Create Sublead
                 </Button>
               </Form>

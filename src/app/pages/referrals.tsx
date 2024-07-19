@@ -28,6 +28,9 @@ const ReferralSection: React.FC<SectionProps & React.PropsWithChildren> = (props
 
 
 export const Referrals = () => {
+  // const TWO_WEEKS_IN_MS = 1_209_600_000;
+
+
   const { address, isConnected } = useAccount();
 
   const [referralCode, setReferralCode] = useState('');
@@ -82,7 +85,7 @@ export const Referrals = () => {
             <div className="referral-title-row">
               <div className="text-start">
                 <div className="title">Claim</div>
-                <div className="subtitle">
+                <div className="subtitle pr-2">
                   You will be able to claim your commission every 2 weeks.
                 </div>
               </div>
