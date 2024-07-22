@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-
 import { getChainId, } from "@wagmi/core";
 
 import "reactflow/dist/style.css";
@@ -12,6 +11,7 @@ import { ReferralForm } from "../components/referral/referral-form";
 import { ReferralTree } from "../components/referral/referral-tree";
 import { ReferralDashboard } from "../components/referral/referral-dashboard";
 import { Button } from "../components/ui";
+import { CountdownByCheckpoint } from "../components/countdown-by-checkpoints";
 
 interface SectionProps {
   title?: string;
@@ -26,9 +26,9 @@ const ReferralSection: React.FC<SectionProps & React.PropsWithChildren> = (props
   )
 };
 
-
 export const Referrals = () => {
-  // const TWO_WEEKS_IN_MS = 1_209_600_000;
+  const TWO_WEEKS_IN_MS = 86400000 * 14;//1_209_600_000;
+  const THREE_DAYS_IN_MS = 86_400_000 * 3;
 
 
   const { address, isConnected } = useAccount();
@@ -82,6 +82,13 @@ export const Referrals = () => {
           </ReferralSection>
 
           <ReferralSection>
+            <CountdownByCheckpoint 
+              waitingClaimDuration={THREE_DAYS_IN_MS}
+              pickClaimDuration={TWO_WEEKS_IN_MS}
+              startDate={new Date('07/25/2024 00:00:00')}
+              finishDate={new Date('09/17/2024 59:59:00')}
+              onChange={(inClaim) => console.log("Onchange claim", inClaim)}
+            />
             <div className="referral-title-row">
               <div className="text-start">
                 <div className="title">Claim</div>
