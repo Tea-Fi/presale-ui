@@ -27,6 +27,8 @@ const ReferralSection: React.FC<SectionProps & React.PropsWithChildren> = (props
 };
 
 export const Referrals = () => {
+  const [isClaimActive, setClaimActive] = useState<boolean>(false);
+
   const TWO_WEEKS_IN_MS = 86400000 * 14;//1_209_600_000;
   const THREE_DAYS_IN_MS = 86_400_000 * 3;
 
@@ -73,6 +75,11 @@ export const Referrals = () => {
     },
   })
 
+
+  useEffect(() => {
+    console.log("is Active",isClaimActive)
+  }, [isClaimActive])
+
   return (
     <div className="referrals page">
       {referralTree && address && (
@@ -83,11 +90,11 @@ export const Referrals = () => {
 
           <ReferralSection>
             <CountdownByCheckpoint 
-              waitingClaimDuration={THREE_DAYS_IN_MS}
-              pickClaimDuration={TWO_WEEKS_IN_MS}
+              waitingClaimDuration={TWO_WEEKS_IN_MS}
+              pickClaimDuration={THREE_DAYS_IN_MS}
               startDate={new Date('07/25/2024 00:00:00')}
-              finishDate={new Date('09/17/2024 59:59:00')}
-              onChange={(inClaim) => console.log("Onchange claim", inClaim)}
+              finishDate={new Date('09/17/2024 23:59:00')}
+              onChange={(inClaim) => setClaimActive(inClaim)}
             />
             <div className="referral-title-row">
               <div className="text-start">
@@ -97,7 +104,7 @@ export const Referrals = () => {
                 </div>
               </div>
 
-              <Button disabled={true} className="px-16 py-8 text-xl">
+              <Button disabled={!isClaimActive} className="px-16 py-8 text-xl text-white bg-[#f716a2] hover:bg-[#3a0c2a]">
                 Claim
               </Button>
             </div>

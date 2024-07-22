@@ -1,5 +1,4 @@
 import Countdown from 'react-countdown';
-// import { useCountdownStore } from "../hooks";
 import { useEffect, useState } from 'react';
 
 
@@ -37,10 +36,12 @@ export const CountdownByCheckpoint = (
     const [finishDateReal, setFinishDateReal] = useState(finishDateNormal);
     const [claimRoundStart, setClaimRoundStart] = useState<number>(0);
     const [claimRoundFinish, setClaimRoundFinish] = useState<number>(0);
-    const [waitingRoundStart, setWaitingRoundStart] = useState<number>(0);
     const [waitingRoundFinish, setWaitingRoundFinish] = useState<number>(0);
     const [isRoundComplete, setRoundComplete] = useState<boolean>(false);
 
+
+    const [isInClaimRound, setInClaimRound] = useState<boolean>(false);
+    const [isInWaitingRound, setInWaitingRound] = useState<boolean>(false);
 
     const createCheckpointsForWaitTime = (
       timeStart: number,
@@ -99,7 +100,27 @@ export const CountdownByCheckpoint = (
 
     const isInClaim = (): boolean => {
       const now = Date.now();
-      return now >= claimRoundStart && now < claimRoundFinish;
+      let cpList = checkpoints;
+    
+      
+      if(!cpList) {
+        cpList = createCheckpointsForWaitTime(
+          startDateNormal,
+          finishDateNormal,
+          waitingClaimDurationNormal,
+          pickClaimDurationNormal,
+        );
+      }
+
+
+      const cp = getCheckpointByTimestamp(
+        now,
+        finishDateNormal,
+        cpList
+      );
+
+      
+      return now >= cp.startClaimingRoundAt && now < cp.finishClaimingRoundAt;
     }
 
 
@@ -111,6 +132,12 @@ export const CountdownByCheckpoint = (
       return timeFinish - timestamp;
     }
 
+    useEffect(() => {
+      if(onChange) {
+        console.log(claimRoundStart)
+        onChange(isInClaim())
+      }
+    }, []);
 
     useEffect(() => {
       const now = Date.now();
@@ -139,10 +166,13 @@ export const CountdownByCheckpoint = (
       if(now < finishDateReal) {
         setClaimRoundStart(currentCheckpoint.startClaimingRoundAt);
         setClaimRoundFinish(currentCheckpoint.finishClaimingRoundAt);
-        setWaitingRoundStart(currentCheckpoint.startWaitingRoundAt);
         setWaitingRoundFinish(currentCheckpoint.finishWaitingRountAt);
 
         setRoundComplete(false);
+
+        if(onChange) {
+          onChange(isInClaim());
+        }
       }
     }, [isRoundComplete]);
 
@@ -163,15 +193,15 @@ export const CountdownByCheckpoint = (
           inClaim ? 
           getElapsedDateByTimestamp(now, claimRoundFinish) :
           getElapsedDateByTimestamp(now, waitingRoundFinish)
-          ;
+        ;
 
-        // since the timer has some errors in js, to be safe, 
-        // we take a limit of 100 milliseconds in order to accurately
-        //  get to the desired switching time
-        if(elapsed <= 100) {
-          if(onChange) {
-            onChange(inClaim)
-          }
+        if(inClaim && !isInClaimRound) {
+          setInWaitingRound(false);
+          setInClaimRound(true);
+          setRoundComplete(true);
+        } else if(!inClaim && !isInWaitingRound) {
+          setInClaimRound(false);
+          setInWaitingRound(true);
           setRoundComplete(true);
         }
 
@@ -203,7 +233,7 @@ export const CountdownByCheckpoint = (
         <Countdown
             autoStart
             date={finishDateReal}
-            intervalDelay={999}
+            intervalDelay={1000}
             precision={3}
             renderer={renderer}
         />
