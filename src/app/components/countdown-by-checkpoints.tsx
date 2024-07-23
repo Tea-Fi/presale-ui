@@ -18,6 +18,7 @@ export const CountdownByCheckpoint = (
     pickClaimDuration,
     className,
     onChange,
+    onFinish,
   }:{
     startDate?: Time,
     finishDate?: Time,
@@ -25,6 +26,7 @@ export const CountdownByCheckpoint = (
     pickClaimDuration?: number,
     className?: string,
     onChange?: (claimAvailable: boolean) => void,
+    onFinish?: () => void,
   }) => {
     const startDateNormal = startDate ? (new Date(startDate)).getTime() : Date.now();
     const finishDateNormal = finishDate ? (new Date(finishDate)).getTime() : startDateNormal + 60_000;
@@ -134,7 +136,6 @@ export const CountdownByCheckpoint = (
 
     useEffect(() => {
       if(onChange) {
-        console.log(claimRoundStart)
         onChange(isInClaim())
       }
     }, []);
@@ -156,12 +157,14 @@ export const CountdownByCheckpoint = (
         setFinishDateReal(cp[cp.length - 1].finishClaimingRoundAt)
       }
 
+
+      // console.log("Real finish", new Date(finishDateReal).toDateString())
       // for(let i =0;i<cp.length;i++){
       //   console.log("round", i)
       //   console.log(new Date(cp[i].startClaimingRoundAt).toDateString())
       //   console.log(new Date(cp[i].finishClaimingRoundAt).toDateString())
       //   console.log(new Date(cp[i].startWaitingRoundAt).toDateString())
-      //   console.log(new Date(cp[i].finishClaimingRoundAt).toDateString())
+      //   console.log(new Date(cp[i].finishWaitingRountAt).toDateString())
       //   console.log("-------------------------------------")
       // }
 
@@ -189,6 +192,13 @@ export const CountdownByCheckpoint = (
     // Renderer callback with condition
     const renderer = ({completed}:{completed: boolean}) => {
       if (completed) {
+        setInClaimRound(false);
+        setInWaitingRound(true);
+        setRoundComplete(true);
+
+        if(onFinish) {
+          onFinish();
+        }
         return <></>;
       } else {
         const now = Date.now();

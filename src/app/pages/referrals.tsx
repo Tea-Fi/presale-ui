@@ -28,9 +28,11 @@ const ReferralSection: React.FC<SectionProps & React.PropsWithChildren> = (props
 
 export const Referrals = () => {
   const [isClaimActive, setClaimActive] = useState<boolean>(false);
+  const [isClaimRoundFinished, setClaimRoundFinished] = useState<boolean>(false);
 
-  // const TWO_WEEKS_IN_MS = 86400000 * 14;//1_209_600_000;
-  // const THREE_DAYS_IN_MS = 86_400_000 * 3;
+  const ONE_DAY_IN_MS = 86_400_000;
+  const ROUND_CLAIM_DURATION = ONE_DAY_IN_MS * 3;
+  const ROUND_DURATION = ONE_DAY_IN_MS * 14 - ROUND_CLAIM_DURATION;
 
 
   const { address, isConnected } = useAccount();
@@ -90,17 +92,18 @@ export const Referrals = () => {
 
           <ReferralSection>
             <CountdownByCheckpoint 
-              waitingClaimDuration={180_000}//TWO_WEEKS_IN_MS
-              pickClaimDuration={120_000}//THREE_DAYS_IN_MS
-              startDate={new Date('07/23/2024 12:15:00')}
-              finishDate={new Date('07/23/2024 13:15:00')}
+              waitingClaimDuration={ROUND_DURATION}//ROUND_DURATION
+              pickClaimDuration={ROUND_CLAIM_DURATION}//ROUND_CLAIM_DURATION
+              startDate={new Date('07/25/2024 00:00:00')}
+              finishDate={new Date('09/31/2024 23:59:00')}
               onChange={(inClaim) => setClaimActive(inClaim)}
+              onFinish={() => setClaimRoundFinished(true)}
             />
             <div className="referral-title-row">
               <div className="text-start">
                 <div className="title">Claim</div>
                 <div className="subtitle pr-2">
-                  You will be able to claim your commission every 2 weeks.
+                  {isClaimRoundFinished ? "Claiming has been finished" : "You will be able to claim your commission every 2 weeks."}
                 </div>
               </div>
 
