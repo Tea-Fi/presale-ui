@@ -29,8 +29,8 @@ const ReferralSection: React.FC<SectionProps & React.PropsWithChildren> = (props
 export const Referrals = () => {
   const [isClaimActive, setClaimActive] = useState<boolean>(false);
 
-  const TWO_WEEKS_IN_MS = 86400000 * 14;//1_209_600_000;
-  const THREE_DAYS_IN_MS = 86_400_000 * 3;
+  // const TWO_WEEKS_IN_MS = 86400000 * 14;//1_209_600_000;
+  // const THREE_DAYS_IN_MS = 86_400_000 * 3;
 
 
   const { address, isConnected } = useAccount();
