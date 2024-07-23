@@ -156,6 +156,15 @@ export const CountdownByCheckpoint = (
         setFinishDateReal(cp[cp.length - 1].finishClaimingRoundAt)
       }
 
+      // for(let i =0;i<cp.length;i++){
+      //   console.log("round", i)
+      //   console.log(new Date(cp[i].startClaimingRoundAt).toDateString())
+      //   console.log(new Date(cp[i].finishClaimingRoundAt).toDateString())
+      //   console.log(new Date(cp[i].startWaitingRoundAt).toDateString())
+      //   console.log(new Date(cp[i].finishClaimingRoundAt).toDateString())
+      //   console.log("-------------------------------------")
+      // }
+
       const currentCheckpoint = getCheckpointByTimestamp(
         now,
         finishDateNormal,

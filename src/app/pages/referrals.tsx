@@ -29,8 +29,8 @@ const ReferralSection: React.FC<SectionProps & React.PropsWithChildren> = (props
 export const Referrals = () => {
   const [isClaimActive, setClaimActive] = useState<boolean>(false);
 
-  // const TWO_WEEKS_IN_MS = 86400000 * 14;//1_209_600_000;
-  // const THREE_DAYS_IN_MS = 86_400_000 * 3;
+  const TWO_WEEKS_IN_MS = 86400000 * 14;//1_209_600_000;
+  const THREE_DAYS_IN_MS = 86_400_000 * 3;
 
 
   const { address, isConnected } = useAccount();
@@ -90,10 +90,10 @@ export const Referrals = () => {
 
           <ReferralSection>
             <CountdownByCheckpoint 
-              waitingClaimDuration={40_000}//TWO_WEEKS_IN_MS
-              pickClaimDuration={20_000}//THREE_DAYS_IN_MS
-              startDate={new Date('07/23/2024 10:25:00')}
-              finishDate={new Date('07/23/2024 10:50:00')}
+              waitingClaimDuration={180_000}//TWO_WEEKS_IN_MS
+              pickClaimDuration={120_000}//THREE_DAYS_IN_MS
+              startDate={new Date('07/25/2024 12:00:00')}
+              finishDate={new Date('07/25/2024 12:59:00')}
               onChange={(inClaim) => setClaimActive(inClaim)}
             />
             <div className="referral-title-row">
