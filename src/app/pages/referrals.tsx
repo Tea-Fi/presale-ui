@@ -90,10 +90,10 @@ export const Referrals = () => {
 
           <ReferralSection>
             <CountdownByCheckpoint 
-              waitingClaimDuration={TWO_WEEKS_IN_MS}
-              pickClaimDuration={THREE_DAYS_IN_MS}
-              startDate={new Date('07/25/2024 00:00:00')}
-              finishDate={new Date('09/17/2024 23:59:00')}
+              waitingClaimDuration={40_000}//TWO_WEEKS_IN_MS
+              pickClaimDuration={20_000}//THREE_DAYS_IN_MS
+              startDate={new Date('07/23/2024 10:20:00')}
+              finishDate={new Date('07/23/2024 10:50:00')}
               onChange={(inClaim) => setClaimActive(inClaim)}
             />
             <div className="referral-title-row">
