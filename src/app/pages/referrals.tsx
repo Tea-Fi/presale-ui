@@ -32,9 +32,9 @@ export const Referrals = () => {
   const [isClaimActive, setClaimActive] = useState<boolean>(false);
   const [isClaimRoundFinished, setClaimRoundFinished] = useState<boolean>(false);
 
-  // const ONE_DAY_IN_MS = 86_400_000;
-  // const ROUND_CLAIM_DURATION = ONE_DAY_IN_MS * 3;
-  // const ROUND_DURATION = ONE_DAY_IN_MS * 14 - ROUND_CLAIM_DURATION;
+  const ONE_DAY_IN_MS = 86_400_000;
+  const ROUND_CLAIM_DURATION = ONE_DAY_IN_MS * 3;
+  const ROUND_DURATION = ONE_DAY_IN_MS * 14 - ROUND_CLAIM_DURATION;
 
 
   const { address, isConnected } = useAccount();
@@ -141,10 +141,10 @@ export const Referrals = () => {
 
           <ReferralSection>
             <CountdownByCheckpoint 
-              waitingClaimDuration={180_000}//ROUND_DURATION
-              pickClaimDuration={120_000}//ROUND_CLAIM_DURATION
-              startDate={new Date('07/24/2024 00:00:00')}
-              finishDate={new Date('07/24/2024 18:00:00')}
+              waitingClaimDuration={ROUND_DURATION}//ROUND_DURATION
+              pickClaimDuration={ROUND_CLAIM_DURATION}//ROUND_CLAIM_DURATION
+              startDate={new Date('08/08/2024 00:00:00 GMT')}
+              finishDate={new Date('09/31/2024 23:59:00 GMT')}
               onChange={(inClaim) => setClaimActive(inClaim)}
               onFinish={() => setClaimRoundFinished(true)}
             />

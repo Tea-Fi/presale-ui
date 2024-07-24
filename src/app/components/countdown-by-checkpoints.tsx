@@ -45,6 +45,7 @@ export const CountdownByCheckpoint = (
     const [isInClaimRound, setInClaimRound] = useState<boolean>(false);
     const [isInWaitingRound, setInWaitingRound] = useState<boolean>(false);
 
+    
     const createCheckpointsForWaitTime = (
       timeStart: number,
       timeEnd: number,
