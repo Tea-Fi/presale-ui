@@ -141,10 +141,10 @@ export const Referrals = () => {
 
           <ReferralSection>
             <CountdownByCheckpoint 
-              waitingClaimDuration={ROUND_DURATION}//ROUND_DURATION
-              pickClaimDuration={ROUND_CLAIM_DURATION}//ROUND_CLAIM_DURATION
-              startDate={new Date('07/25/2024 00:00:00')}
-              finishDate={new Date('09/31/2024 23:59:00')}
+              waitingClaimDuration={180_000}//ROUND_DURATION
+              pickClaimDuration={120_000}//ROUND_CLAIM_DURATION
+              startDate={new Date('07/24/2024 00:00:00')}
+              finishDate={new Date('07/24/2024 18:00:00')}
               onChange={(inClaim) => setClaimActive(inClaim)}
               onFinish={() => setClaimRoundFinished(true)}
             />
@@ -157,7 +157,7 @@ export const Referrals = () => {
               </div>
 
               <DashboardClaimButton
-                disabled={isClaimActive}
+                disabled={!isClaimActive}
                 tree={referralTree}
                 address={address}
                 stats={referralStats}
