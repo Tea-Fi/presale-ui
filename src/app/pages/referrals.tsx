@@ -12,7 +12,7 @@ import { ReferralTree } from "../components/referral/referral-tree";
 import { ReferralDashboard } from "../components/referral/referral-dashboard";
 import { DashboardClaimButton } from "../components/referral/dashboard-claim-button";
 import { getReferralAmounts, ReferralStats, StatsMap } from "../components/referral/common";
-import { getClaimedAmount } from "../utils/claim";
+import { getClaimedAmount, getPeriod } from "../utils/claim";
 import { CountdownByCheckpoint } from "../components/countdown-by-checkpoints";
 
 interface SectionProps {
@@ -31,6 +31,8 @@ const ReferralSection: React.FC<SectionProps & React.PropsWithChildren> = (props
 export const Referrals = () => {
   const [isClaimActive, setClaimActive] = useState<boolean>(false);
   const [isClaimRoundFinished, setClaimRoundFinished] = useState<boolean>(false);
+
+  const [claimPeriod, setClaimPeriod] = useState<{ start: string, end: string }>();
 
   const ONE_DAY_IN_MS = 86_400_000;
   const ROUND_CLAIM_DURATION = ONE_DAY_IN_MS * 3;
@@ -93,6 +95,10 @@ export const Referrals = () => {
   };
 
   useEffect(() => {
+    getPeriod().then(setClaimPeriod)
+  }, [])
+
+  useEffect(() => {
     if (!referralTree) {
       return;
     }
@@ -140,14 +146,16 @@ export const Referrals = () => {
           </ReferralSection>
 
           <ReferralSection>
-            <CountdownByCheckpoint 
-              waitingClaimDuration={ROUND_DURATION}//ROUND_DURATION
-              pickClaimDuration={ROUND_CLAIM_DURATION}//ROUND_CLAIM_DURATION
-              startDate={new Date('07/25/2024 00:00:00')}
-              finishDate={new Date('09/31/2024 23:59:00')}
-              onChange={(inClaim) => setClaimActive(inClaim)}
-              onFinish={() => setClaimRoundFinished(true)}
-            />
+            {claimPeriod && (
+              <CountdownByCheckpoint 
+                waitingClaimDuration={ROUND_DURATION}//ROUND_DURATION
+                pickClaimDuration={ROUND_CLAIM_DURATION}//ROUND_CLAIM_DURATION
+                startDate={new Date(claimPeriod.start)}
+                finishDate={new Date(claimPeriod.end)}
+                onChange={(inClaim) => setClaimActive(inClaim)}
+                onFinish={() => setClaimRoundFinished(true)}
+              />
+            )} 
             <div className="referral-title-row">
               <div className="text-start">
                 <div className="title">Claim</div>
