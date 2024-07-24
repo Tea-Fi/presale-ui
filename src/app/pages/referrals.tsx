@@ -34,9 +34,9 @@ export const Referrals = () => {
 
   const [claimPeriod, setClaimPeriod] = useState<{ start: string, end: string }>();
 
-  // const ONE_DAY_IN_MS = 86_400_000;
-  // const ROUND_CLAIM_DURATION = ONE_DAY_IN_MS * 3;
-  // const ROUND_DURATION = ONE_DAY_IN_MS * 14 - ROUND_CLAIM_DURATION;
+  const ONE_DAY_IN_MS = 86_400_000;
+  const ROUND_CLAIM_DURATION = ONE_DAY_IN_MS * 3;
+  const ROUND_DURATION = ONE_DAY_IN_MS * 14 - ROUND_CLAIM_DURATION;
 
 
   const { address, isConnected } = useAccount();
@@ -128,10 +128,6 @@ export const Referrals = () => {
   })
 
 
-  useEffect(() => {
-    console.log("is Active",isClaimActive)
-  }, [isClaimActive])
-
   return (
     <div className="referrals page">
       {referralTree && address && (
@@ -148,8 +144,8 @@ export const Referrals = () => {
           <ReferralSection>
             {claimPeriod && (
               <CountdownByCheckpoint 
-                waitingClaimDuration={180_000}//ROUND_DURATION
-                pickClaimDuration={120_000}//ROUND_CLAIM_DURATION
+                waitingClaimDuration={ROUND_DURATION}//ROUND_DURATION
+                pickClaimDuration={ROUND_CLAIM_DURATION}//ROUND_CLAIM_DURATION
                 startDate={new Date(claimPeriod.start)}
                 finishDate={new Date(claimPeriod.end)}
                 onChange={(inClaim) => setClaimActive(inClaim)}
