@@ -1,4 +1,10 @@
+import { Address } from "viem";
+import { readContract } from "@wagmi/core";
+
+import { wagmiConfig } from "../../config";
 import { Referral } from "../../utils/referrals";
+import { PRESALE_ABI } from "../../utils/presale_abi";
+import { PRESALE_CONTRACT_ADDRESS } from "../../utils/constants";
 
 export interface ReferralStats {
   purchases: number;
@@ -36,27 +42,6 @@ export function factorStats(a: ReferralStats, factor: bigint): ReferralStats {
   }
 }
 
-// export function calculateCommission(node: Referral, stats: StatsMap, memo?: Record<number, ReferralStats>): ReferralStats {
-//   const fee = getFeeFactor(node);
-//   const stat = stats[node.id]!;
-
-//   const current = factorStats(stat, fee);
-
-//   const subtreeList = Object.keys(node.subleads ?? {})
-//     .map(key => node.subleads?.[key])
-//     .map(x => factorStats(subtreeSum(stats, x, memo), (fee - getFeeFactor(x))))
-     
-//   const subtree = subtreeList
-//     .reduce((acc, e) => addStats(acc, e), emptyStat())
-
-//   const result = addStats(current, subtree);
-
-//   result.soldInUsd /= BigInt(1e6) * BigInt(1e4);
-//   result.tokensSold /= BigInt(1e18);
-
-//   return result; 
-// }
-
 export function subtreeSum(stats: StatsMap, node?: Referral, memo?: Record<number, ReferralStats>): ReferralStats {
   if (!node) {
     return emptyStat();
@@ -88,6 +73,22 @@ export function subtreeSum(stats: StatsMap, node?: Referral, memo?: Record<numbe
   return sum;
 }
 
+export async function getReferralAmounts(referralId: number, chainId: number): Promise<ReferralStats> {
+  const result = await readContract(wagmiConfig, {
+    abi: PRESALE_ABI,
+    address: PRESALE_CONTRACT_ADDRESS[chainId] as Address,
+    args: [referralId],
+    functionName: "referrals",
+  });
+
+  const [ purchases, tokensSold, soldInUsd ]: any = result;
+  
+  return {
+    purchases,
+    soldInUsd: soldInUsd, // / BigInt(10**6),
+    tokensSold: tokensSold, // / BigInt(10**18),
+  };
+}
 
 export function calculateCommission(node: Referral, stats: StatsMap, memo?: Record<number, ReferralStats>): ReferralStats {
   const fee = getFeeFactor(node);
