@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-
 import { getChainId, } from "@wagmi/core";
 
 import "reactflow/dist/style.css";
@@ -14,6 +13,7 @@ import { ReferralDashboard } from "../components/referral/referral-dashboard";
 import { DashboardClaimButton } from "../components/referral/dashboard-claim-button";
 import { getReferralAmounts, ReferralStats, StatsMap } from "../components/referral/common";
 import { getClaimedAmount } from "../utils/claim";
+import { CountdownByCheckpoint } from "../components/countdown-by-checkpoints";
 
 interface SectionProps {
   title?: string;
@@ -28,9 +28,13 @@ const ReferralSection: React.FC<SectionProps & React.PropsWithChildren> = (props
   )
 };
 
-
 export const Referrals = () => {
-  // const TWO_WEEKS_IN_MS = 1_209_600_000;
+  const [isClaimActive, setClaimActive] = useState<boolean>(false);
+  const [isClaimRoundFinished, setClaimRoundFinished] = useState<boolean>(false);
+
+  const ONE_DAY_IN_MS = 86_400_000;
+  const ROUND_CLAIM_DURATION = ONE_DAY_IN_MS * 3;
+  const ROUND_DURATION = ONE_DAY_IN_MS * 14 - ROUND_CLAIM_DURATION;
 
 
   const { address, isConnected } = useAccount();
@@ -117,6 +121,11 @@ export const Referrals = () => {
     },
   })
 
+
+  useEffect(() => {
+    console.log("is Active",isClaimActive)
+  }, [isClaimActive])
+
   return (
     <div className="referrals page">
       {referralTree && address && (
@@ -131,16 +140,24 @@ export const Referrals = () => {
           </ReferralSection>
 
           <ReferralSection>
+            <CountdownByCheckpoint 
+              waitingClaimDuration={ROUND_DURATION}//ROUND_DURATION
+              pickClaimDuration={ROUND_CLAIM_DURATION}//ROUND_CLAIM_DURATION
+              startDate={new Date('07/25/2024 00:00:00')}
+              finishDate={new Date('09/31/2024 23:59:00')}
+              onChange={(inClaim) => setClaimActive(inClaim)}
+              onFinish={() => setClaimRoundFinished(true)}
+            />
             <div className="referral-title-row">
               <div className="text-start">
                 <div className="title">Claim</div>
                 <div className="subtitle pr-2">
-                  You will be able to claim your commission every 2 weeks.
+                  {isClaimRoundFinished ? "Claiming has been finished" : "You will be able to claim your commission every 2 weeks."}
                 </div>
               </div>
 
               <DashboardClaimButton
-                disabled={false}
+                disabled={isClaimActive}
                 tree={referralTree}
                 address={address}
                 stats={referralStats}
