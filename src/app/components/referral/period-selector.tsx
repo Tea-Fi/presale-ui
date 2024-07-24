@@ -1,6 +1,6 @@
 import React from "react";
 
-enum PeriodFilter {
+export enum PeriodFilter {
   day = '1D',
   week = '1W',
   month = '1M',
@@ -8,33 +8,34 @@ enum PeriodFilter {
 }
 
 interface PeriodSelectorProps {
-  onChange: (date: Date) => void;
+  onChange: (period: PeriodFilter, date: Date) => void;
 }
 
 export const DashboardPeriodSelector = (props: PeriodSelectorProps) => {
   const [periodFilter, setPeriodFilter] = React.useState<PeriodFilter>(PeriodFilter.threeMonths);
 
   React.useEffect(() => {
-    const now = new Date();
+    const date = new Date();
+
     switch (periodFilter) {
       case PeriodFilter.day:
-        now.setDate(now.getDate() - 1);
+        date.setDate(date.getDate() - 1);
         break;
 
       case PeriodFilter.week:
-        now.setDate(now.getDate() - 7);
+        date.setDate(date.getDate() - 7);
         break;
 
       case PeriodFilter.month:
-        now.setMonth(now.getMonth() - 1);
+        date.setMonth(date.getMonth() - 1);
         break;
 
       case PeriodFilter.threeMonths:
-        now.setMonth(now.getMonth() - 3);
+        date.setMonth(date.getMonth() - 3);
         break;
     }
 
-    props.onChange(now);
+    props.onChange(periodFilter, date);
   }, [periodFilter])
 
   return (
