@@ -1,6 +1,8 @@
 import React from "react";
 import { Button } from "../ui";
 
+import Spinner from "../spinner";
+
 import { calculateCommission, StatsMap, usdFormatter } from "./common";
 
 import { cn } from "../../utils";
@@ -23,6 +25,7 @@ interface Props {
 
 export const DashboardClaimButton: React.FC<Props> = (props) => {
   const [showConfirm, setConfirm] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
 
   const { signMessageAsync } = useSignMessage();
 
@@ -69,6 +72,8 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
     }
 
     try {
+      setLoading(true);
+
       const values = {
         walletAddress: props.address,
         amount: amount.toString(),
@@ -99,6 +104,8 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
       toast.error(`Error occured, try again later`, {
         description: `${err}`
       });
+    } finally {
+      setLoading(false);
     }
 
   }, [amount, props.address])
@@ -140,14 +147,18 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
 
             <footer className="flex flex-row gap-2 bg-">
               <Button
+                disabled={loading}
                 onClick={claim}
                 className={cn(
-                  'grow',
+                  'grow grid place-content-center',
                   'bg-[#f716a2] text-secondary-foreground',
                   'hover:bg-[#3a0c2a] transition-none'
                 )}
               >
-                Approve
+                <>
+                  {loading && <Spinner />} 
+                  {!loading && 'Approve'}
+                </>
               </Button>
 
               <Button onClick={cancel} className="grow">

@@ -10,6 +10,12 @@ type CreateClaimPayload = CreateClaimDto & {
   senderAddress: string;
 };
 
+export const getPeriod = async () => {
+  return fetch(`${API_URL}/claim/period`)
+    .then(res => res.json())
+    .then(res => res as { start: string; end: string; })
+}
+
 export const getClaimedAmount = async (wallet: string) => {
   return fetch(`${API_URL}/claim/amount?walletAddress=${wallet}`)
     .then(res => res.json())
