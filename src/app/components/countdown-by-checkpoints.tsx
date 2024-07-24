@@ -45,6 +45,7 @@ export const CountdownByCheckpoint = (
     const [isInClaimRound, setInClaimRound] = useState<boolean>(false);
     const [isInWaitingRound, setInWaitingRound] = useState<boolean>(false);
 
+
     const createCheckpointsForWaitTime = (
       timeStart: number,
       timeEnd: number,
@@ -241,7 +242,7 @@ export const CountdownByCheckpoint = (
         return (
           <div className='flex flex-col gap-1 w-full text-end mb-4'>
             <span className='text-xl'>{inClaim ? "Claim your tokens" : "Next available claim"}</span>
-            <span className={className}>{d > 0 ? `${d} Days` : ''} {h}:{m}:{s}</span>
+            <span className={className}>{d > 1 ? `${d} Days` : d == 1 ? `${d} Day` : ''} {h}:{m}:{s}</span>
           </div>
         );
       }

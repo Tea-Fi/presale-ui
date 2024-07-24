@@ -165,7 +165,7 @@ export const Referrals = () => {
               </div>
 
               <DashboardClaimButton
-                disabled={isClaimActive}
+                disabled={!isClaimActive}
                 tree={referralTree}
                 address={address}
                 stats={referralStats}
