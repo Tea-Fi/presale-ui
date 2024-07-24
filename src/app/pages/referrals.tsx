@@ -32,8 +32,8 @@ export const Referrals = () => {
   const [isClaimActive, setClaimActive] = useState<boolean>(false);
   const [isClaimRoundFinished, setClaimRoundFinished] = useState<boolean>(false);
 
-  const ONE_DAY_IN_MS = 86_400_000;
-  const ROUND_CLAIM_DURATION = ONE_DAY_IN_MS * 3;
+  // const ONE_DAY_IN_MS = 86_400_000;
+  // const ROUND_CLAIM_DURATION = ONE_DAY_IN_MS * 3;
   // const ROUND_DURATION = ONE_DAY_IN_MS * 14 - ROUND_CLAIM_DURATION;
 
 
