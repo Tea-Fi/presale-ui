@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from "react";
 import ReactFlow, { Edge, Node, useNodesState, useEdgesState, Background } from "reactflow";
 
-import { Address } from "viem";
-import { getChainId, readContract } from "@wagmi/core";
+import { getChainId } from "@wagmi/core";
 import { wagmiConfig } from "../../config";
 
-import { PRESALE_ABI } from "../../utils/presale_abi";
-import { PRESALE_CONTRACT_ADDRESS, Referral } from "../../utils/constants";
-import { calculateCommission, ReferralStats, StatsMap } from "./common";
+import { Referral } from "../../utils/constants";
+import { calculateCommission, getReferralAmounts, ReferralStats, StatsMap } from "./common";
 import { ReferralNode } from "./node";
 import { ReferralEdge } from "./edge";
 
@@ -36,10 +34,10 @@ interface ReferralLevelEntry {
 
 interface Props {
   tree: Referral;
+  stats?: StatsMap;
 }
 
 export const ReferralTree: React.FC<Props> = (props) => {
-  const [referralStats, setReferralStats] = useState<StatsMap>();
 
 
   const [treeNode, setTreeNodes] = useState<Node<any, string>[]>([]);
@@ -49,29 +47,11 @@ export const ReferralTree: React.FC<Props> = (props) => {
   const [edges, setEdges] = useEdgesState(treeEdges);
   const chainId = getChainId(wagmiConfig);
 
-  const getReferralAmounts = React.useCallback(async (referralId: any): Promise<ReferralStats> => {
-    const result = await readContract(wagmiConfig, {
-      abi: PRESALE_ABI,
-      address: PRESALE_CONTRACT_ADDRESS[chainId] as Address,
-      args: [referralId],
-      functionName: "referrals",
-    });
-
-    const [ purchases, tokensSold, soldInUsd ]: any = result;
-    
-    return {
-      purchases,
-      soldInUsd: soldInUsd, // / BigInt(10**6),
-      tokensSold: tokensSold, // / BigInt(10**18),
-    };
-  }, [chainId]);
-
-
   const getRefTreeStats = async (refTree?: Referral): Promise<Record<number, ReferralStats>> => {
     let stats = {} as Record<number, ReferralStats>;
 
     if (refTree != undefined) {
-      stats[refTree.id] = await getReferralAmounts(refTree.id);
+      stats[refTree.id] = await getReferralAmounts(refTree.id, chainId);
 
       for (const sublead of Object.values(refTree?.subleads || {})) {
         stats = { ...stats, ...(await getRefTreeStats(sublead)) };
@@ -80,16 +60,6 @@ export const ReferralTree: React.FC<Props> = (props) => {
 
     return stats;
   };
-
-  const processReferralsTreeGains = async (refTree: Referral) => {
-    const stats = await getRefTreeStats(refTree);
-    console.info('REF STATS', stats);
-    setReferralStats(stats);
-  };
-
-  useEffect(() => {
-    processReferralsTreeGains(props.tree)
-  }, [props.tree])
 
   useEffect(() => {
     setNodes([])
@@ -102,7 +72,7 @@ export const ReferralTree: React.FC<Props> = (props) => {
   }, [treeNode, treeEdges])
   
   useEffect(() => {
-    if (!props.tree || !referralStats) return;
+    if (!props.tree || !props.stats) return;
    
     const NODE_WIDTH = 180;
     const NODE_HEIGHT = 100;
@@ -118,7 +88,7 @@ export const ReferralTree: React.FC<Props> = (props) => {
       code: props.tree.referral!,
       walletAddress: props.tree.wallet,
       fee: props.tree.fee,
-      stats: calculateCommission(props.tree, referralStats, memo),
+      stats: calculateCommission(props.tree, props.stats, memo),
       subleads: Object.keys(props.tree.subleads ?? {}).length,
       parent: '',
       level: 0
@@ -147,7 +117,7 @@ export const ReferralTree: React.FC<Props> = (props) => {
         code: current.referral!,
         walletAddress: current.wallet!,
         fee: current.fee,
-        stats: calculateCommission(current, referralStats, memo),
+        stats: calculateCommission(current, props.stats, memo),
         subleads: Object.keys(current.subleads ?? {}).length,
         parent: current.parent,
         level: current.level,
@@ -304,7 +274,7 @@ export const ReferralTree: React.FC<Props> = (props) => {
 
     setTreeNodes(data)
     setTreeEdges(edges)
-  }, [props.tree, referralStats])
+  }, [props.tree, props.stats])
 
   if (!props.tree) {
     return (

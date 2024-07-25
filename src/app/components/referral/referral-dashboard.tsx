@@ -6,7 +6,7 @@ import { getBlock, getLogs } from "viem/actions";
 import { getChainId, getClient } from "@wagmi/core";
 
 import { calculateCommission, StatsMap, usdFormatter } from "./common";
-import { DashboardPeriodSelector } from "./period-selector";
+import { DashboardPeriodSelector, PeriodFilter } from "./period-selector";
 import { DashboardBlock } from "./dashboard-card";
 
 import { wagmiConfig } from "../../config";
@@ -17,6 +17,9 @@ import { PRESALE_CONTRACT_ADDRESS, Referral } from "../../utils/constants";
 interface Props {
   tree: Referral;
   address: string;
+
+  stats?: StatsMap;
+  claimed?: string;
 }
 
 export const ReferralDashboard: React.FC<Props> = (props) => {
@@ -24,6 +27,12 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
 
   const [dateBoundary, setDateBoundary] = React.useState<Date>();
   const [referralStats, setReferralStats] = React.useState<StatsMap>();
+  const [period, setPeriod] = React.useState<PeriodFilter>(PeriodFilter.threeMonths);
+  
+  const periodSelectorOnChange = React.useCallback((period: PeriodFilter, date: Date) => {
+    setDateBoundary(date);
+    setPeriod(period);
+  }, [])
   
   const team = React.useMemo(() => {
     if (!props.tree) {
@@ -49,7 +58,7 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
   }, [props.tree])
   
   const info = React.useMemo(() => {
-    if (!props.tree || !referralStats || !team || !props.address) return;
+    if (!props.tree || !referralStats || !team || !props.address || !props.claimed) return;
 
     const memo = {}
     const subs = team
@@ -68,18 +77,24 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
       ? totalPurchasesUsd / BigInt(purchases)
       : 0;
 
+    const earnings = calculateCommission(props.tree, referralStats, memo)
+    const claimed = BigInt(props.claimed);
+
     return {
       purchases: totalPurchasesUsd,
       teamSize: subs.length,
 
-      earnings: calculateCommission(props.tree, referralStats, memo).soldInUsd,
+      earnings: earnings.soldInUsd,
+      unclaimedEarnings: earnings.soldInUsd > claimed
+        ? earnings.soldInUsd - claimed
+        : 0n,
 
       teamEarnings: averageTeamEarnings,
       teamPurchases: Object.keys(referralStats)
         .filter(key  => Number(key) !== props.tree.id)
         .reduce((acc, e) => acc + referralStats[e].purchases, 0),
     };
-  }, [props.tree, props.address, referralStats, team ])
+  }, [props.tree, props.address, props.claimed, referralStats, team ])
 
   const getFilterLogs = React.useCallback(async (boundary: Date) => {
     const client = getClient(wagmiConfig);
@@ -105,8 +120,6 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
     const targetLogs = relevantLogs
       .filter(x => x.timestamp && new Date(Number(x.timestamp) *1e3) >= boundary);
 
-    console.log(targetLogs);
-
     const stats = {} as StatsMap;
 
     for (const entry of targetLogs) {
@@ -124,23 +137,29 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
       stats[Number(args['referrerId'] as number)] = stat;
     }
 
-    console.log(stats);
-
     setReferralStats(stats);
   }, [team]);
 
   React.useEffect(() => {
-    if (props.tree && dateBoundary) {
+    if (!props.tree) {
+      return;
+    }
+
+    if (period !== PeriodFilter.threeMonths && dateBoundary) {
       getFilterLogs(dateBoundary);
     }
-  }, [props.tree, dateBoundary])
+    
+    if (period === PeriodFilter.threeMonths && props.stats) {
+      setReferralStats(props.stats);
+    }
+  }, [props.tree, props.stats, dateBoundary])
   
   return (
     <article className="dashboard-container">
       <header className='flex flex-row flex-wrap justify-between items-center w-full gap-8'>
         <div>Dashboard</div>
 
-        <DashboardPeriodSelector onChange={setDateBoundary} />
+        <DashboardPeriodSelector onChange={periodSelectorOnChange} />
       </header>
 
       {!info && (<div>Loading</div>)}
@@ -174,6 +193,12 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
           <DashboardBlock
             title="Average Team Earning"
             value={`$${usdFormatter.format(Number(info.teamEarnings) / 100)}`}
+            icon={<BarChart2 />}
+          />
+          
+          <DashboardBlock
+            title="Unclaimed Earning"
+            value={`$${usdFormatter.format(Number(info.unclaimedEarnings / BigInt(1e4)) / 100)}`}
             icon={<BarChart2 />}
           />
         </main>
