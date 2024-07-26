@@ -138,6 +138,7 @@ export const RevokeApprovalDialog = () => {
                 } else if(isApprovePending) {
                     setApprovePending(false);
                     setApproveSuccess(true);
+                    setAllowanceChanged(true);
                 }
             }
         }, 1_000);
