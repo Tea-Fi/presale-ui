@@ -45,7 +45,6 @@ export const RevokeApprovalDialog = () => {
 
     const {
         writeContract,
-        isPending,
         isError
     } = useWriteContract({config: wagmiConfig});
 
