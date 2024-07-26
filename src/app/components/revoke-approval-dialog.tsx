@@ -89,6 +89,10 @@ export const RevokeApprovalDialog = () => {
             return;
         }
 
+        if(isRevokeSuccess) {
+            return;
+        }
+
         setRevokePending(false);
         setRevokeError(false);
         setRevokeSuccess(false);
@@ -101,7 +105,6 @@ export const RevokeApprovalDialog = () => {
     }, [isOpened]);
 
 
-    
 
     useEffect(() => {
         if(isError) {
@@ -124,9 +127,7 @@ export const RevokeApprovalDialog = () => {
             if(txCount === undefined) {
                 return;
             }
-            if(txCount === newTxCount) {
-                return;
-            }
+
 
             if(newTxCount !== txCount) {
                 setIsLoading(false);
@@ -140,12 +141,12 @@ export const RevokeApprovalDialog = () => {
                     setApproveSuccess(true);
                 }
             }
-        }, 3_000);
+        }, 1_000);
 
 
         return () => clearInterval(timerId);
 
-    }, [isPending, isError, isOpened])
+    }, [isApprovePending, isRevokePending, isError, isOpened])
 
 
     return (
@@ -183,6 +184,10 @@ export const RevokeApprovalDialog = () => {
                         disabled={isLoading}
                         type="submit"
                         onClick={() => {
+                            if(isRevokeSuccess && isApproveSuccess) {
+                                setOpened(false);
+                                return;
+                            }
                             handleApproveUSDT(!isRevokeSuccess);
                         }} 
                         className="outline-none w-full bg-[#ff00a6] rounded-lg text-[#330121] hover:bg-[#880357] text-xl font-bold"
