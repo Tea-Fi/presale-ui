@@ -11,8 +11,6 @@ import {
 } from "./ui";
 import {
     getChainId, 
-    // writeContract,
-    // waitForTransactionReceipt,
 } from "@wagmi/core";
 import { wagmiConfig } from "../config";
 import { PRESALE_CONTRACT_ADDRESS, USDT } from "../utils/constants";
@@ -38,7 +36,6 @@ export const RevokeApprovalDialog = () => {
     const [isApproveError, setApproveError] = useState<boolean>(false);
     const [isApproveSuccess, setApproveSuccess] = useState<boolean>(false);
 
-    const [error, setError] = useState<boolean>(false);
 
     const { address } = useAccount();
     const { data: txCount, refetch } = useTransactionCount({
