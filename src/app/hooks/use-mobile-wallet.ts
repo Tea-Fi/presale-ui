@@ -3,7 +3,8 @@ import {isMobile} from 'react-device-detect';
 export const useConnectedWalletMobile = () => {
     
     const open = () => {
-        if(isMobile) {
+        const ethereum = window.ethereum;
+        if(isMobile && !ethereum) {
             return window.open("https://metamask.app.link");
         }
 

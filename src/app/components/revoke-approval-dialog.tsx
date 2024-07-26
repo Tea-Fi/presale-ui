@@ -88,7 +88,7 @@ export const RevokeApprovalDialog = () => {
             return;
         }
 
-        if(isRevokeSuccess) {
+        if(isRevokeSuccess && !isApproveSuccess) {
             return;
         }
 
