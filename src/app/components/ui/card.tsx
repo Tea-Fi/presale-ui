@@ -1,23 +1,33 @@
+import React, { useState } from "react";
 import { cn } from "../../utils/cn";
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
 import { useCountdownStore } from "../../hooks";
+import { track } from "../../utils/analytics";
+
+type Item = {
+  title: string;
+  description: string;
+  link: string;
+  value?: number,
+  max?: number,
+}
 
 export const CardHoverEffect = ({
   items,
   className,
 }: {
-  items: {
-    title: string;
-    description: string;
-    link: string;
-    value?: number,
-    max?: number,
-  }[];
+  items: Item[];
   className?: string;
 }) => {
   let [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const { isFinished } = useCountdownStore();
+
+  const onOptionClick = React.useCallback((item: Item) => {
+    track({
+      eventName: 'select_option',
+      parameters: { option: item.title }
+    });
+  }, [])
 
   return (
     <div
@@ -33,6 +43,7 @@ export const CardHoverEffect = ({
           className={cn("relative group block p-2 h-full w-full", isFinished ? 'cursor-not-allowed' : '')}
           onMouseEnter={() => setHoveredIndex(idx)}
           onMouseLeave={() => setHoveredIndex(null)}
+          onClick={() => onOptionClick(item)}
         >
           <AnimatePresence>
             {hoveredIndex === idx && (
