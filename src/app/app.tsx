@@ -8,9 +8,24 @@ import { useWalletContext } from "./providers/wallet.context";
 import { WrongNetwork } from "./components/wrong-network";
 import { Referrals } from "./pages/referrals";
 import { Options } from "./pages/options";
+import { useAccountEffect } from "wagmi";
+import { track } from "./utils/analytics";
 
 export function App() {
   const { chainId, unsupportedChain } = useWalletContext();
+
+  useAccountEffect({
+    onConnect(data) {
+      track({
+        eventName: 'wallet_connect',
+        parameters: {
+          chainId: data.chainId,
+          chain: data.chain?.name,
+          address: data.address,
+        }
+      })
+    }
+  })
 
   if (chainId && unsupportedChain) {
     return <WrongNetwork />;

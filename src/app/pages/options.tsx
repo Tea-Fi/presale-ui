@@ -1,3 +1,4 @@
+import React from "react";
 import { useEffect, useState } from "react";
 import { ZeroAddress } from "ethers/constants";
 // import { CardHoverEffect, Collapsible, CollapsibleContent, CollapsibleTrigger, Progress } from "../components/ui";
@@ -12,6 +13,7 @@ import { investmentInfo } from "../utils/constants";
 import Spinner from "../components/spinner";
 import { MdKeyboardArrowDown } from "react-icons/md";
 import { TeaCup } from "../../assets/icons";
+import { track } from "../utils/analytics";
 
 export const Options = () => {
   const [dropdownOpened, setDropdownOpened] = useState<boolean>(false);
@@ -25,6 +27,12 @@ export const Options = () => {
       value: null,
     }))
   );
+
+  const toggleDropdown = React.useCallback(() => {
+    setDropdownOpened(state => !state)
+
+    track({ eventName: 'click_allocation_status' })
+  }, [setDropdownOpened])
 
   useEffect(() => {
     const handleOptionsInfo = async () => {
@@ -90,7 +98,7 @@ export const Options = () => {
             <img src={TeaCup} className="w-64 lg:w-80 lg:mr-14"/>
           </div>
           <Collapsible className="flex flex-col text-zinc-400 gap-5">
-              <CollapsibleTrigger onClick={() => setDropdownOpened(!dropdownOpened)}>
+              <CollapsibleTrigger onClick={toggleDropdown}>
                 <div className="inline-flex items-center justify-between py-3 px-2 min-w-72 border rounded-2xl border-white/20">
                   <div className="grow">
                     Allocation Status

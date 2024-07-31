@@ -39,6 +39,7 @@ import { toast as soonerToast } from "sonner";
 import * as rdd from 'react-device-detect';
 import { useCountdownStore, useRevokeApprovalDialog, useConnectedWalletMobile } from "../hooks";
 import { useModal } from "connectkit";
+import { track } from "../utils/analytics";
 
 
 export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
@@ -239,6 +240,16 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
         toast.success(
           "Congratulations! Your tokens have been successfully purchased."
         );
+
+        track({
+          eventName: 'purchase',
+          parameters: {
+            currency: selectedToken.symbol,
+            value: tokenSellValue,
+            transaction_id: hash,
+            items: [{ item_name: '$TEA', quantity: value }]
+          }
+        })
       } else if (txReceipt?.status == "reverted") {
         toast.error("Failed to buy. Please try again");
       }
