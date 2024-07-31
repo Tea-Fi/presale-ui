@@ -11,21 +11,20 @@ import {
 } from "./ui";
 import {
     getChainId, 
-    writeContract,
-    waitForTransactionReceipt,
 } from "@wagmi/core";
 import { wagmiConfig } from "../config";
 import { PRESALE_CONTRACT_ADDRESS, USDT } from "../utils/constants";
 import { SAFE_ERC20_ABI } from "../utils/safe-erc20-abi";
 import { useEffect, useState } from "react";
-import {  useRevokeApprovalDialog } from "../hooks";
+import {  useConnectedWalletMobile, useRevokeApprovalDialog } from "../hooks";
 import Spinner from "./spinner";
+import { useAccount, useTransactionCount, useWriteContract } from "wagmi";
 
 
 export const RevokeApprovalDialog = () => {
     const chainId = getChainId(wagmiConfig);
     const { isOpened, setOpened, setAllowanceChanged } = useRevokeApprovalDialog();
-    // const { open } = useConnectedWalletMobile();
+    const { open } = useConnectedWalletMobile();
 
     const [isLoading, setIsLoading] = useState<boolean>();
 
@@ -38,14 +37,21 @@ export const RevokeApprovalDialog = () => {
     const [isApproveSuccess, setApproveSuccess] = useState<boolean>(false);
 
 
-    const handleApproveUSDT = async (isRevoke: boolean = true) => {
+    const { address } = useAccount();
+    const { data: txCount, refetch } = useTransactionCount({
+        address: address,
+    });
+
+
+    const {
+        writeContract,
+        isError
+    } = useWriteContract({config: wagmiConfig});
+
+
+    const handleApproveUSDT = (isRevoke: boolean = true) => {
         try {
             setIsLoading(true);
-            if(isRevoke && isRevokeSuccess) {
-                await handleApproveUSDT(false);
-                setOpened(false);
-                return;
-            }
 
             if(isRevoke) {
                 setRevokePending(true);
@@ -53,10 +59,7 @@ export const RevokeApprovalDialog = () => {
                 setApprovePending(true);
             }
 
-            // // open wallet on mobile
-            // open();
-
-            const hash = await writeContract(wagmiConfig, {
+            writeContract({
                 address: USDT[chainId],
                 abi: SAFE_ERC20_ABI,
                 functionName: "approve",
@@ -65,39 +68,27 @@ export const RevokeApprovalDialog = () => {
                     isRevoke ? 0 : maxUint256,
                 ],
             });
+            
 
+            // opens mobile metamask automaticly
+            // NOTE: works only on mobile
+            open();
 
-        
-            const transactionReceipt = await waitForTransactionReceipt(wagmiConfig, {
-                hash,
-            });
-        
-            if (transactionReceipt.status == "success") {
-                if(isRevoke) {
-                    setRevokePending(false);
-                    setRevokeSuccess(true);
-                    await handleApproveUSDT(false);
-                } else {
-                    setApprovePending(false);
-                    setApproveSuccess(true);
-                    setAllowanceChanged(true);
-                }
-            }
         } catch (error) {
             if(isRevoke) {
                 setRevokeError(true);
             } else {
                 setApproveError(true);
             }
-        } finally {
-            setRevokePending(false);
-            setApprovePending(false);
-            setIsLoading(false);
         }
     };
 
     useEffect(() => {
         if(isRevokePending || isApprovePending) {
+            return;
+        }
+
+        if(isRevokeSuccess && !isApproveSuccess) {
             return;
         }
 
@@ -111,6 +102,51 @@ export const RevokeApprovalDialog = () => {
 
         setAllowanceChanged(false);
     }, [isOpened]);
+
+
+
+    useEffect(() => {
+        if(isError) {
+            setIsLoading(false);
+
+            if(isRevokePending) {
+                setRevokePending(false);
+                setRevokeError(true);
+            } else if(isApprovePending) {
+                setApprovePending(false);
+                setApproveError(true);
+            }
+        }
+    }, [isError])
+
+    useEffect(() => {
+        const timerId = setInterval(async () => {
+            const {data: newTxCount} = await refetch();
+
+            if(txCount === undefined) {
+                return;
+            }
+
+
+            if(newTxCount !== txCount) {
+                setIsLoading(false);
+                clearInterval(timerId);
+
+                if(isRevokePending) {
+                    setRevokePending(false);
+                    setRevokeSuccess(true);
+                } else if(isApprovePending) {
+                    setApprovePending(false);
+                    setApproveSuccess(true);
+                    setAllowanceChanged(true);
+                }
+            }
+        }, 1_000);
+
+
+        return () => clearInterval(timerId);
+
+    }, [isApprovePending, isRevokePending, isError, isOpened])
 
 
     return (
@@ -147,16 +183,16 @@ export const RevokeApprovalDialog = () => {
                     <Button
                         disabled={isLoading}
                         type="submit"
-                        onClick={async () => {
+                        onClick={() => {
                             if(isRevokeSuccess && isApproveSuccess) {
                                 setOpened(false);
                                 return;
                             }
-                            await handleApproveUSDT(true);
+                            handleApproveUSDT(!isRevokeSuccess);
                         }} 
                         className="outline-none w-full bg-[#ff00a6] rounded-lg text-[#330121] hover:bg-[#880357] text-xl font-bold"
                     >
-                        {isLoading ? <Spinner /> : isRevokeSuccess && isApproveSuccess ? "Close" : "Revoke"}
+                        {isLoading ? <Spinner /> : isRevokeSuccess && !isApproveSuccess ? "Approve" : isApproveSuccess ? "Close" : "Revoke"}
                     </Button>
                 </DialogFooter>
             </DialogContent>
