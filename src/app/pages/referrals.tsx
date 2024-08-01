@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import { getChainId, } from "@wagmi/core";
+import { getClient } from "@wagmi/core";
 
 import "reactflow/dist/style.css";
 
-import { useAccount, useAccountEffect } from 'wagmi';
+import { useAccount, useAccountEffect, useChainId } from 'wagmi';
 import { getReferralTreeByWallet, Referral } from '../utils/referrals';
 import { wagmiConfig } from "../config";
 
@@ -11,9 +11,15 @@ import { ReferralForm } from "../components/referral/referral-form";
 import { ReferralTree } from "../components/referral/referral-tree";
 import { ReferralDashboard } from "../components/referral/referral-dashboard";
 import { DashboardClaimButton } from "../components/referral/dashboard-claim-button";
-import { getReferralAmounts, ReferralStats, StatsMap } from "../components/referral/common";
-import { getClaimedAmount, getPeriod } from "../utils/claim";
+import { EventLog } from "../components/referral/common";
+import { ClaimAmount, getClaimedAmount, getPeriod } from "../utils/claim";
 import { CountdownByCheckpoint } from "../components/countdown-by-checkpoints";
+import { useLocation } from "react-router-dom";
+import Spinner from "../components/spinner";
+import { AbiEvent, getAbiItem } from "viem";
+import { getLogs } from "viem/actions";
+import { PRESALE_CONTRACT_ADDRESS } from "../utils/constants";
+import { PRESALE_ABI } from "../utils/presale_abi";
 
 interface SectionProps {
   title?: string;
@@ -29,8 +35,12 @@ const ReferralSection: React.FC<SectionProps & React.PropsWithChildren> = (props
 };
 
 export const Referrals = () => {
+  const chainId = useChainId(); 
+
   const [isClaimActive, setClaimActive] = useState<boolean>(false);
   const [isClaimRoundFinished, setClaimRoundFinished] = useState<boolean>(false);
+ 
+  const location = useLocation();
 
   const [claimPeriod, setClaimPeriod] = useState<{ start: string, end: string }>();
 
@@ -40,71 +50,52 @@ export const Referrals = () => {
 
 
   const { address, isConnected } = useAccount();
-
-  const [referralCode, setReferralCode] = useState('');
+  
+  const [logs, setLogs] = useState<EventLog[]>();
+  const [claimed, setClaimed] = useState<ClaimAmount[]>();
   const [referralTree, setReferralTree] = useState<Referral>();
-  const [referralStats, setReferralStats] = useState<StatsMap>();
-  const [claimed, setClaimed] = useState<string>();
 
   const fetchClaimed = useCallback(async () => {
     if (!address) {
       return;
     }
+    const claimed = await getClaimedAmount(address, chainId)
+    setClaimed(claimed);
+  }, [address, chainId]);
 
-    const claimed = await getClaimedAmount(address)
-    
-    setClaimed(claimed.amount);
-  }, [address]);
-
-  const chainId = getChainId(wagmiConfig);
-
-  const getReferralTree = useCallback(() => {
-    const search = window.location.search;
+  const getReferralTree = useCallback(async () => {
+    const search = location.search;
     const urlParams = new URLSearchParams(search);
     const refAddress = urlParams.get("address") || address;
 
-    if (refAddress) {
-      getReferralTreeByWallet(refAddress, chainId).then(refTree => {
-        if (refTree !== undefined) {
-          setReferralTree(refTree);
-          setReferralCode(refTree?.referral as string);
-        }
-      });
+    if (!refAddress) {
+      return;
     }
-  }, [address, chainId])
-  
-  const getRefTreeStats = useCallback(async (refTree?: Referral): Promise<Record<number, ReferralStats>> => {
-    let stats = {} as Record<number, ReferralStats>;
-
-    if (refTree != undefined) {
-      stats[refTree.id] = await getReferralAmounts(refTree.id, chainId);
-
-      for (const sublead of Object.values(refTree?.subleads || {})) {
-        stats = { ...stats, ...(await getRefTreeStats(sublead)) };
-      }
+    
+    const refTree = await getReferralTreeByWallet(refAddress, chainId);
+      
+    if (!refTree) {
+      return;
     }
-
-    return stats;
-  }, []);
-  
-
-  const processReferralsTreeGains = async (refTree: Referral) => {
-    const stats = await getRefTreeStats(refTree);
-    console.info('REF STATS', stats);
-    setReferralStats(stats);
-  };
+    
+    const claimed = await getClaimedAmount(refAddress, chainId)
+    
+    const client = getClient(wagmiConfig);
+    const abi = getAbiItem({ abi: PRESALE_ABI, name: 'BuyTokens' }) as AbiEvent;
+    const logs = await getLogs(client!, {
+      address: PRESALE_CONTRACT_ADDRESS[chainId] as `0x${string}`,
+      fromBlock: 0n,
+      event: abi
+    });
+    
+    setLogs(logs);
+    setClaimed(claimed);
+    setReferralTree(refTree);
+  }, [address, chainId, location])
 
   useEffect(() => {
     getPeriod().then(setClaimPeriod)
   }, [])
-
-  useEffect(() => {
-    if (!referralTree) {
-      return;
-    }
-
-    processReferralsTreeGains(referralTree)
-  }, [referralTree])
   
   const refertchReferralTree = useCallback(() => {
     getReferralTree()
@@ -113,7 +104,6 @@ export const Referrals = () => {
   useEffect(() => {
     if (address && isConnected) {
       getReferralTree();
-      fetchClaimed();
     }
   }, [address, isConnected]);
 
@@ -122,11 +112,13 @@ export const Referrals = () => {
       getReferralTree();
     },
     onDisconnect() {
-      setReferralCode('');
       setReferralTree(undefined);
     },
   })
 
+  if (!referralTree || !claimed || !address || !logs) {
+    return <Spinner />
+  }
 
   return (
     <div className="referrals page">
@@ -136,7 +128,7 @@ export const Referrals = () => {
             <ReferralDashboard
               address={address}
               tree={referralTree}
-              stats={referralStats}
+              logs={logs}
               claimed={claimed}
             />
           </ReferralSection>
@@ -163,8 +155,8 @@ export const Referrals = () => {
               <DashboardClaimButton
                 disabled={!isClaimActive}
                 tree={referralTree}
+                logs={logs}
                 address={address}
-                stats={referralStats}
                 claimed={claimed}
                 onClaim={fetchClaimed}
               />
@@ -176,7 +168,7 @@ export const Referrals = () => {
               <div className="text-start">
                 <div className="title">Referrals</div>
                 <div className="subtitle">
-                  Code "<b>{referralCode.toUpperCase()}</b>" with {(referralTree?.fee || 0) / 100}% Fee
+                  Code "<b>{referralTree.referral!.toUpperCase()}</b>" with {(referralTree?.fee || 0) / 100}% Fee
                 </div>
               </div>
 
@@ -186,7 +178,7 @@ export const Referrals = () => {
               />
             </div>
 
-            <ReferralTree tree={referralTree} stats={referralStats} />
+            <ReferralTree tree={referralTree} logs={logs} />
           </ReferralSection>
         </div>
       )}

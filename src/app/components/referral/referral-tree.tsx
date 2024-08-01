@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from "react";
 import ReactFlow, { Edge, Node, useNodesState, useEdgesState, Background } from "reactflow";
 
-import { getChainId } from "@wagmi/core";
-import { wagmiConfig } from "../../config";
-
 import { Referral } from "../../utils/constants";
-import { calculateCommission, getReferralAmounts, ReferralStats, StatsMap } from "./common";
+import { calculateCommission, calculateStats, EventLog, ReferralStats } from "./common";
 import { ReferralNode } from "./node";
 import { ReferralEdge } from "./edge";
 
@@ -34,32 +31,15 @@ interface ReferralLevelEntry {
 
 interface Props {
   tree: Referral;
-  stats?: StatsMap;
+  logs: EventLog[];
 }
 
 export const ReferralTree: React.FC<Props> = (props) => {
-
-
   const [treeNode, setTreeNodes] = useState<Node<any, string>[]>([]);
   const [treeEdges, setTreeEdges] = useState<Edge<any>[]>([]);
 
   const [nodes, setNodes] = useNodesState(treeNode);
   const [edges, setEdges] = useEdgesState(treeEdges);
-  const chainId = getChainId(wagmiConfig);
-
-  const getRefTreeStats = async (refTree?: Referral): Promise<Record<number, ReferralStats>> => {
-    let stats = {} as Record<number, ReferralStats>;
-
-    if (refTree != undefined) {
-      stats[refTree.id] = await getReferralAmounts(refTree.id, chainId);
-
-      for (const sublead of Object.values(refTree?.subleads || {})) {
-        stats = { ...stats, ...(await getRefTreeStats(sublead)) };
-      }
-    }
-
-    return stats;
-  };
 
   useEffect(() => {
     setNodes([])
@@ -72,7 +52,7 @@ export const ReferralTree: React.FC<Props> = (props) => {
   }, [treeNode, treeEdges])
   
   useEffect(() => {
-    if (!props.tree || !props.stats) return;
+    if (!props.tree || !props.logs) return;
    
     const NODE_WIDTH = 180;
     const NODE_HEIGHT = 100;
@@ -83,12 +63,13 @@ export const ReferralTree: React.FC<Props> = (props) => {
     const edges = [] as Edge<any>[];
    
     const memo = {} as Record<number, ReferralStats>;
+    const stats = calculateStats(props.logs)
 
     const root = {
       code: props.tree.referral!,
       walletAddress: props.tree.wallet,
       fee: props.tree.fee,
-      stats: calculateCommission(props.tree, props.stats, memo),
+      stats: calculateCommission(props.tree, stats, memo),
       subleads: Object.keys(props.tree.subleads ?? {}).length,
       parent: '',
       level: 0
@@ -117,7 +98,7 @@ export const ReferralTree: React.FC<Props> = (props) => {
         code: current.referral!,
         walletAddress: current.wallet!,
         fee: current.fee,
-        stats: calculateCommission(current, props.stats, memo),
+        stats: calculateCommission(current, stats, memo),
         subleads: Object.keys(current.subleads ?? {}).length,
         parent: current.parent,
         level: current.level,
@@ -274,7 +255,7 @@ export const ReferralTree: React.FC<Props> = (props) => {
 
     setTreeNodes(data)
     setTreeEdges(edges)
-  }, [props.tree, props.stats])
+  }, [props.tree, props.logs])
 
   if (!props.tree) {
     return (

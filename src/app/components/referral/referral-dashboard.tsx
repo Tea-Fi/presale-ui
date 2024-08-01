@@ -1,39 +1,37 @@
 import React from "react";
 import { ShoppingCart, ShoppingBag, PersonStanding, Download, BarChart2 } from "lucide-react";
 
-import { AbiEvent, getAbiItem } from "viem";
-import { getBlock, getLogs } from "viem/actions";
-import { getChainId, getClient } from "@wagmi/core";
+import { getBlock } from "viem/actions";
+import { getClient } from "@wagmi/core";
 
-import { calculateCommission, StatsMap, usdFormatter } from "./common";
+import { calculateCommission, calculateStats, EventLog, usdFormatter } from "./common";
 import { DashboardPeriodSelector, PeriodFilter } from "./period-selector";
 import { DashboardBlock } from "./dashboard-card";
 
 import { wagmiConfig } from "../../config";
-import { PRESALE_ABI } from "../../utils/presale_abi";
-import { PRESALE_CONTRACT_ADDRESS, Referral } from "../../utils/constants";
+import { Referral } from "../../utils/constants";
+import { ClaimAmount } from "../../utils/claim";
 
 
 interface Props {
   tree: Referral;
+  logs: EventLog[];
+
   address: string;
 
-  stats?: StatsMap;
-  claimed?: string;
+  claimed: ClaimAmount[];
 }
 
 export const ReferralDashboard: React.FC<Props> = (props) => {
-  const chainId = getChainId(wagmiConfig);
-
+  const [logs, setLogs] = React.useState<EventLog[]>(props.logs);
   const [dateBoundary, setDateBoundary] = React.useState<Date>();
-  const [referralStats, setReferralStats] = React.useState<StatsMap>();
   const [period, setPeriod] = React.useState<PeriodFilter>(PeriodFilter.threeMonths);
   
   const periodSelectorOnChange = React.useCallback((period: PeriodFilter, date: Date) => {
     setDateBoundary(date);
     setPeriod(period);
   }, [])
-  
+ 
   const team = React.useMemo(() => {
     if (!props.tree) {
       return;
@@ -58,12 +56,14 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
   }, [props.tree])
   
   const info = React.useMemo(() => {
-    if (!props.tree || !referralStats || !team || !props.address || !props.claimed) return;
+    if (!props.tree || !team || !props.address || !props.claimed) return;
+
+    const stats = calculateStats(logs);
 
     const memo = {}
     const subs = team
       .filter(x => x.wallet !== props.address)
-      .map(x => referralStats[x.id])
+      .map(x => stats[x.id])
 
     const subStats = subs.filter(x => !!x);
       
@@ -77,8 +77,9 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
       ? totalPurchasesUsd / BigInt(purchases)
       : 0;
 
-    const earnings = calculateCommission(props.tree, referralStats, memo)
-    const claimed = BigInt(props.claimed);
+    const earnings = calculateCommission(props.tree, stats, memo)
+    const claimed = props.claimed
+      .reduce((acc, e) => acc + BigInt(e.amountUsd), 0n);
 
     return {
       purchases: totalPurchasesUsd,
@@ -90,25 +91,18 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
         : 0n,
 
       teamEarnings: averageTeamEarnings,
-      teamPurchases: Object.keys(referralStats)
+      teamPurchases: Object.keys(stats)
         .filter(key  => Number(key) !== props.tree.id)
-        .reduce((acc, e) => acc + referralStats[e].purchases, 0),
+        .reduce((acc, e) => acc + stats[e].purchases, 0),
     };
-  }, [props.tree, props.address, props.claimed, referralStats, team ])
+  }, [props.tree, props.address, props.claimed, logs, team ])
 
   const getFilterLogs = React.useCallback(async (boundary: Date) => {
     const client = getClient(wagmiConfig);
 
-    const abi = getAbiItem({ abi: PRESALE_ABI, name: 'BuyTokens' }) as AbiEvent;
-    const logs = await getLogs(client!, {
-      address: PRESALE_CONTRACT_ADDRESS[chainId] as `0x${string}`,
-      fromBlock: 0n,
-      event: abi
-    });
-
     const ids = new Set(team?.map(x => x.id) ?? []);
     const relevantLogs = await Promise.all(
-      logs
+      props.logs
         .filter(x => ids.has((x.args as any)['referrerId'] as number))
         .map(async x => ({ 
           ...x,
@@ -119,26 +113,9 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
    
     const targetLogs = relevantLogs
       .filter(x => x.timestamp && new Date(Number(x.timestamp) *1e3) >= boundary);
-
-    const stats = {} as StatsMap;
-
-    for (const entry of targetLogs) {
-      const args = (entry.args as any)
-      const stat = stats[Number(args['referrerId'] as number)] ?? {
-        purchases: 0,
-        soldInUsd: 0n,
-        tokensSold: 0n
-      };
-
-      stat.purchases += 1;
-      stat.soldInUsd += BigInt(args['tokensSoldAmountInUsd']);
-      stat.tokensSold += BigInt(args['tokenSoldAmount']);
-
-      stats[Number(args['referrerId'] as number)] = stat;
-    }
-
-    setReferralStats(stats);
-  }, [team]);
+      
+    setLogs(targetLogs);
+  }, [team, props.logs]);
 
   React.useEffect(() => {
     if (!props.tree) {
@@ -149,10 +126,10 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
       getFilterLogs(dateBoundary);
     }
     
-    if (period === PeriodFilter.threeMonths && props.stats) {
-      setReferralStats(props.stats);
+    if (period === PeriodFilter.threeMonths) {
+      setLogs(props.logs)
     }
-  }, [props.tree, props.stats, dateBoundary])
+  }, [props.tree, props.logs, dateBoundary])
   
   return (
     <article className="dashboard-container">
