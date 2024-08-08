@@ -179,9 +179,9 @@ export const ReferralForm: React.FC<Props> = (props) => {
           'px-8 py-8',
           'text-xl ',
           'hover:bg-[#3a0c2a] transition-none',
-          isDisabled 
+          !isDisabled 
             ? 'bg-[#f716a2] text-secondary-foreground'
-            : 'bg'
+            : ''
         )}>
         Create Referral
       </Button>
