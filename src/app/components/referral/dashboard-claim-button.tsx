@@ -191,6 +191,7 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
         );
 
         props.onClaim();
+        setCanClaim(false)
       } 
     } catch (err) {
       toast.error(`Error occured, try again later`, {
@@ -199,8 +200,6 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
     } finally {
       setLoading(false);
       setConfirm(false);
-
-      getProofAndCheck();
     }
 
   }, [props.address, proof, getProofAndCheck])
