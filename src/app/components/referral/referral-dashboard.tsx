@@ -11,6 +11,7 @@ import { DashboardBlock } from "./dashboard-card";
 import { wagmiConfig } from "../../config";
 import { Referral } from "../../utils/constants";
 import { ClaimAmount } from "../../utils/claim";
+import { parseHumanReadable } from "../../utils";
 
 
 interface Props {
@@ -71,13 +72,13 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
       .reduce((acc, e) => acc + e.purchases, 0);
      
     const totalPurchasesUsd = subStats
-      .reduce((acc, e) => acc + e.soldInUsd, 0n) / BigInt(1e4);
+      .reduce((acc, e) => acc + e.soldInUsd, 0n);
 
     const averageTeamEarnings = purchases > 0
       ? totalPurchasesUsd / BigInt(purchases)
-      : 0;
+      : 0n;
 
-    const earnings = calculateCommission(props.tree, stats, memo)
+    const earnings = calculateCommission(props.tree, stats, memo, { leavePrecision: true })
     const claimed = props.claimed
       .reduce((acc, e) => acc + BigInt(e.amountUsd), 0n);
 
@@ -163,19 +164,19 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
           
           <DashboardBlock
             title="My Earning"
-            value={`$${usdFormatter.format(Number(info.earnings / BigInt(1e4)) / 100)}`}
+            value={`$${usdFormatter.format(parseHumanReadable(info.earnings, 10, 2))}`}
             icon={<Download />}
           />
           
           <DashboardBlock
             title="Average Team Earning"
-            value={`$${usdFormatter.format(Number(info.teamEarnings) / 100)}`}
+            value={`$${usdFormatter.format(parseHumanReadable(info.teamEarnings, 6, 2))}`}
             icon={<BarChart2 />}
           />
           
           <DashboardBlock
             title="Unclaimed Earning"
-            value={`$${usdFormatter.format(Number(info.unclaimedEarnings / BigInt(1e4)) / 100)}`}
+            value={`$${usdFormatter.format(parseHumanReadable(info.unclaimedEarnings, 10, 2))}`}
             icon={<BarChart2 />}
           />
         </main>

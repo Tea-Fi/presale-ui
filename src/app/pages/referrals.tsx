@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { getClient } from "@wagmi/core";
 
-import "reactflow/dist/style.css";
+import "@xyflow/react/dist/style.css";
 
 import { useAccount, useAccountEffect, useChainId } from 'wagmi';
 import { getReferralTreeByWallet, Referral } from '../utils/referrals';
@@ -20,6 +20,7 @@ import { AbiEvent, getAbiItem } from "viem";
 import { getLogs } from "viem/actions";
 import { PRESALE_CONTRACT_ADDRESS } from "../utils/constants";
 import { PRESALE_ABI } from "../utils/presale_abi";
+import { ReactFlowProvider } from "@xyflow/react";
 
 interface SectionProps {
   title?: string;
@@ -101,7 +102,7 @@ export const Referrals = () => {
   const refertchReferralTree = useCallback(() => {
     getReferralTree()
   }, [getReferralTree])
-  
+
   useEffect(() => {
     if (address && isConnected) {
       getReferralTree();
@@ -179,7 +180,9 @@ export const Referrals = () => {
               />
             </div>
 
-            <ReferralTree tree={referralTree} logs={logs} />
+            <ReactFlowProvider>
+              <ReferralTree tree={referralTree} logs={logs} />
+            </ReactFlowProvider>
           </ReferralSection>
         </div>
       )}

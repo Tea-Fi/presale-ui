@@ -131,10 +131,6 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
     );
   }, [isDisabled, props.claimed])
 
-  // const approveDisabled = React.useMemo(() => {
-  //   return loading || amount.every(x => x.amount.tokensSold <= 0n);
-  // }, [loading, amount])
-  
   const cancel = React.useCallback(() => {
     setConfirm(false)
   }, [])
@@ -145,6 +141,8 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
     }
 
     try {
+      setLoading(true)
+
       const hash = await writeContract(wagmiConfig, {
         abi: PRESALE_CLAIM_EARNING_FEES_ABI,
         address: PRESALE_CLAIM_CONTRACT_ADDRESS[chainId] as `0x${string}`,
@@ -191,48 +189,9 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
         toast.success(
           "Congratulations! Your earnings have been successfully claimed."
         );
+
+        props.onClaim();
       } 
-
-    //   setLoading(true);
-
-    //   const values = {
-    //     walletAddress: props.address,
-    //     chainId: chainId.toString(),
-
-    //     claims: amount.map(entry => {
-    //       const token = tokenList[entry.address.toLowerCase()]!;
-
-    //       return {
-    //         token: token.symbol,
-    //         tokenAddress: entry.address,
-
-    //         amount: entry.amount.tokensSold.toString(),
-    //         amountUsd: entry.amount.soldInUsd.toString(),
-    //       };
-    //     }),
-    //   } as CreateClaimDto;
-      
-    //   const signPayload = await generateSignature(props.address!, values);
-
-    //   const signedMessage = await signMessageAsync({
-    //     message: `0x${signPayload}`,
-    //   });
-
-    //   const payload = {
-    //     ...values,
-    //     signature: signedMessage,
-    //     senderAddress: props.address!,
-    //   };
-
-    //   await createClaim(payload);
-
-    //   props.onClaim()
-    //   setConfirm(false)
-
-    //   toast.success('Successfully claimed', {
-    //     description: 'We will send your commission to your wallet soon!'
-    //   });
-
     } catch (err) {
       toast.error(`Error occured, try again later`, {
         description: `${err}`
@@ -240,9 +199,11 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
     } finally {
       setLoading(false);
       setConfirm(false);
+
+      getProofAndCheck();
     }
 
-  }, [props.address, proof])
+  }, [props.address, proof, getProofAndCheck])
 
 
   return (
@@ -295,6 +256,7 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
 
             <footer className="flex flex-row gap-2 bg-">
               <Button
+                disabled={loading}
                 onClick={claim}
                 className={cn(
                   'grow grid place-content-center',

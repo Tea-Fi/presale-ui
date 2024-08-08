@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import ReactFlow, { Edge, Node, useNodesState, useEdgesState, Background, ControlButton, Controls } from "reactflow";
+import { ReactFlow, Edge, Node, useNodesState, useEdgesState, Background, ControlButton, Controls } from "@xyflow/react";
 
 import { ZoomIn } from "lucide-react";
 
@@ -49,6 +49,16 @@ export const ReferralTree: React.FC<Props> = (props) => {
   const toggleFullscreen = React.useCallback(() => {
     setIsFullscreen(state => !state)
   }, [])
+
+  const closeFullscreen = React.useCallback((event: React.KeyboardEvent) => {
+    if (!isFullscreen) {
+      return;
+    }
+
+    if (event.key === 'Escape') {
+      toggleFullscreen();
+    }
+  }, [isFullscreen, toggleFullscreen])
 
 
   useEffect(() => {
@@ -274,15 +284,21 @@ export const ReferralTree: React.FC<Props> = (props) => {
   }
 
   return (
-    <div className={
-      isFullscreen 
-        ? 'fixed top-0 left-0 h-screen w-screen z-20 bg-[#282828]' 
-        : 'h-[650px] w-full' 
-    }>
+    <div 
+      tabIndex={isFullscreen ? 0 : undefined}
+      onKeyDown={closeFullscreen}
+      className={
+        isFullscreen 
+          ? 'fixed top-0 left-0 h-screen w-screen z-20 bg-[#282828]' 
+          : 'h-[650px] w-full mt-4' 
+      }
+    >
       <ReactFlow
+        className="rounded-lg"
         nodes={nodes}
         edges={edges}
         edgeTypes={edgeTypes}
+        colorMode="dark"
         fitView
         onNodeClick={(_) => { /* Pass noop to trigger real event */ }}
         zoomOnScroll={false}

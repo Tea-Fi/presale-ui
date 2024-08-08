@@ -79,9 +79,13 @@ export const generateSignature = async (address: string, payload: CreateClaimDto
 }
 
 export const getClaimActivePeriod = async (chainId: string) => {
-  return fetch(`${API_URL}/claim/period/active?chainId=${chainId}`)
-    .then(res => res.json())
-    .then(res => res as ClaimPeriod | undefined);
+  try {
+    return await fetch(`${API_URL}/claim/period/active?chainId=${chainId}`)
+      .then(res => res.json())
+      .then(res => res as ClaimPeriod | undefined);
+  } catch (err) {
+    return
+  }
 }
 
 export const getClaimForPeriod = async (chainId: string, periodId: number, address: string) => {
