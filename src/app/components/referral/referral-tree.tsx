@@ -276,7 +276,7 @@ export const ReferralTree: React.FC<Props> = (props) => {
   return (
     <div className={
       isFullscreen 
-        ? 'fixed top-0 left-0 h-screen w-screen z-20 bg-bar' 
+        ? 'fixed top-0 left-0 h-screen w-screen z-20 bg-[#282828]' 
         : 'h-[650px] w-full' 
     }>
       <ReactFlow
