@@ -37,6 +37,7 @@ const ReferralSection: React.FC<SectionProps & React.PropsWithChildren> = (props
 export const Referrals = () => {
   const chainId = useChainId(); 
 
+  // const [period, setPeriod] = useState<ClaimPeriod>();
   const [isClaimActive, setClaimActive] = useState<boolean>(false);
   const [isClaimRoundFinished, setClaimRoundFinished] = useState<boolean>(false);
  

@@ -74,6 +74,11 @@ export const ReferralForm: React.FC<Props> = (props) => {
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<string | undefined>();
 
+  const isDisabled = React.useMemo(
+    () => (props.referralTree.fee ?? 0) <= 10,
+    [props.referralTree.fee]
+  )
+
   const validationSchema = React.useMemo(
     () =>
       ReferralValidationSchema.extend({
@@ -168,11 +173,15 @@ export const ReferralForm: React.FC<Props> = (props) => {
   return (
     <>
       <Button 
+        disabled={isDisabled}
         onClick={toggleForm}
         className={cn(
           'px-8 py-8',
-          'text-xl bg-[#f716a2] text-secondary-foreground',
-          'hover:bg-[#3a0c2a] transition-none'
+          'text-xl ',
+          'hover:bg-[#3a0c2a] transition-none',
+          isDisabled 
+            ? 'bg-[#f716a2] text-secondary-foreground'
+            : 'bg'
         )}>
         Create Referral
       </Button>

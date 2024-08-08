@@ -186,7 +186,7 @@ export function calculateEarningByToken(tree: Referral, logs: EventLog[]) {
   return commission;
 }
 
-export function calculateStats(logs: EventLog[]) {
+export function calculateStats(logs: EventLog[], tokenKey = 'tokenSoldAmount') {
   const stats = {} as StatsMap;
 
   for (const entry of logs) {
@@ -199,7 +199,7 @@ export function calculateStats(logs: EventLog[]) {
 
     stat.purchases += 1;
     stat.soldInUsd += BigInt(args['tokensSoldAmountInUsd']);
-    stat.tokensSold += BigInt(args['tokenSoldAmount']);
+    stat.tokensSold += BigInt(args[tokenKey]);
 
     stats[Number(args['referrerId'] as number)] = stat;
   }

@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
-import ReactFlow, { Edge, Node, useNodesState, useEdgesState, Background } from "reactflow";
+import ReactFlow, { Edge, Node, useNodesState, useEdgesState, Background, ControlButton, Controls } from "reactflow";
 
-import { Referral } from "../../utils/constants";
+import { ZoomIn } from "lucide-react";
+
 import { calculateCommission, calculateStats, EventLog, ReferralStats } from "./common";
 import { ReferralNode } from "./node";
 import { ReferralEdge } from "./edge";
+
+import { Referral } from "../../utils/constants";
 
 
 const edgeStyles = {
@@ -41,6 +44,13 @@ export const ReferralTree: React.FC<Props> = (props) => {
   const [nodes, setNodes] = useNodesState(treeNode);
   const [edges, setEdges] = useEdgesState(treeEdges);
 
+  const [isFullscreen, setIsFullscreen] = useState(false)
+
+  const toggleFullscreen = React.useCallback(() => {
+    setIsFullscreen(state => !state)
+  }, [])
+
+
   useEffect(() => {
     setNodes([])
     setEdges([])
@@ -63,7 +73,7 @@ export const ReferralTree: React.FC<Props> = (props) => {
     const edges = [] as Edge<any>[];
    
     const memo = {} as Record<number, ReferralStats>;
-    const stats = calculateStats(props.logs)
+    const stats = calculateStats(props.logs, 'tokenReceivedAmount')
 
     const root = {
       code: props.tree.referral!,
@@ -264,7 +274,11 @@ export const ReferralTree: React.FC<Props> = (props) => {
   }
 
   return (
-    <div className="referral-container">
+    <div className={
+      isFullscreen 
+        ? 'fixed top-0 left-0 h-screen w-screen z-20 bg-bar' 
+        : 'h-[650px] w-full' 
+    }>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -275,6 +289,11 @@ export const ReferralTree: React.FC<Props> = (props) => {
         preventScrolling={false}
       >
         <Background />
+        <Controls showZoom={false} showInteractive={false} showFitView={false}>
+          <ControlButton onClick={toggleFullscreen} className="">
+            <ZoomIn /> 
+          </ControlButton>
+        </Controls>
       </ReactFlow>
     </div>
   );
