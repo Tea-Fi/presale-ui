@@ -1,10 +1,15 @@
-import { Address } from "viem";
+import { AbiEvent, Address, Log } from "viem";
 import { readContract } from "@wagmi/core";
 
 import { wagmiConfig } from "../../config";
 import { Referral } from "../../utils/referrals";
 import { PRESALE_ABI } from "../../utils/presale_abi";
 import { PRESALE_CONTRACT_ADDRESS } from "../../utils/constants";
+
+export type EventLog = Log<bigint, number, false, AbiEvent, undefined, [AbiEvent], string>;
+
+export const getArg = <T,>(log: EventLog, key: string) =>
+  (log.args as Record<string, unknown>)[key] as T;
 
 export interface ReferralStats {
   purchases: number;
@@ -15,7 +20,7 @@ export interface ReferralStats {
 
 export type StatsMap = Record<string, ReferralStats>;
 
-export const emptyStat = () =>   ({ purchases: 0, soldInUsd: 0n, tokensSold: 0n } as ReferralStats);
+export const emptyStat = () => ({ purchases: 0, soldInUsd: 0n, tokensSold: 0n } as ReferralStats);
 export const usdFormatter = Intl.NumberFormat('en-US', { currency: 'usd', maximumFractionDigits: 2 })
 
 
@@ -24,8 +29,8 @@ export function getFeeFactor(node?: Referral) {
 }
 
 export function addStats(a: ReferralStats, b: ReferralStats): ReferralStats {
-  if (!b) return a; 
-  if (!a) return b; 
+  if (!b) return a;
+  if (!a) return b;
 
   return {
     purchases: a.purchases + b.purchases,
@@ -34,11 +39,13 @@ export function addStats(a: ReferralStats, b: ReferralStats): ReferralStats {
   };
 }
 
-export function factorStats(a: ReferralStats, factor: bigint): ReferralStats {
+export function factorStats(a: ReferralStats, factor: bigint, factorTokens?: boolean): ReferralStats {
   return {
     purchases: a.purchases,
     soldInUsd: a.soldInUsd * factor,
-    tokensSold: a.tokensSold,
+    tokensSold: factorTokens
+      ? a.tokensSold * factor
+      : a.tokensSold,
   }
 }
 
@@ -46,9 +53,9 @@ export function subtreeSum(stats: StatsMap, node?: Referral, memo?: Record<numbe
   if (!node) {
     return emptyStat();
   }
- 
+
   if (memo?.[node.id]) return memo[node.id];
- 
+
   const stat = stats[node.id] ?? emptyStat();
 
   if (!node.subleads || Object.keys(node.subleads ?? {}).length === 0) {
@@ -59,13 +66,13 @@ export function subtreeSum(stats: StatsMap, node?: Referral, memo?: Record<numbe
     .map(key => subtreeSum(stats, node.subleads?.[key]))
     .filter(x => !!x)
     .reduce((acc, e) => addStats(acc, e), emptyStat());
-   
+
   const sum = addStats(subleadSum, stat)
-   
+
   if (memo) {
     memo[node.id] = sum;
   }
- 
+
   if (!sum) {
     return emptyStat();
   }
@@ -81,8 +88,8 @@ export async function getReferralAmounts(referralId: number, chainId: number): P
     functionName: "referrals",
   });
 
-  const [ purchases, tokensSold, soldInUsd ]: any = result;
-  
+  const [purchases, tokensSold, soldInUsd]: any = result;
+
   return {
     purchases,
     soldInUsd: soldInUsd, // / BigInt(10**6),
@@ -90,23 +97,112 @@ export async function getReferralAmounts(referralId: number, chainId: number): P
   };
 }
 
-export function calculateCommission(node: Referral, stats: StatsMap, memo?: Record<number, ReferralStats>): ReferralStats {
+type Memo = Record<number, ReferralStats>;
+
+interface CommissionOptions {
+  factorTokens?: boolean;
+  leavePrecision?: boolean;
+}
+
+export function calculateCommission(node: Referral, stats: StatsMap, memo?: Memo, options?: CommissionOptions): ReferralStats {
   const fee = getFeeFactor(node);
   const stat = stats[node.id] ?? emptyStat();
 
-  const current = factorStats(stat, fee);
+  const current = factorStats(stat, fee, options?.factorTokens);
 
   const subtreeList = Object.keys(node.subleads ?? {})
     .map(key => node.subleads?.[key])
-    .map(x => factorStats(subtreeSum(stats, x, memo), (fee - getFeeFactor(x))))
-     
+    .map(x => factorStats(subtreeSum(stats, x, memo), (fee - getFeeFactor(x)), options?.factorTokens))
+
   const subtree = subtreeList
     .reduce((acc, e) => addStats(acc, e), emptyStat())
 
   const result = addStats(current, subtree);
 
-  result.soldInUsd /= BigInt(1e4);
-  result.tokensSold /= BigInt(1e18);
+  if (!options?.leavePrecision) {
+    result.soldInUsd /= BigInt(1e4);
+    result.tokensSold /= BigInt(1e18);
+  }
 
-  return result; 
+  return result;
+}
+
+export function calculateEarningByToken(tree: Referral, logs: EventLog[]) {
+  const nodes = [] as Referral[];
+  const queue = [tree];
+
+  while (queue.length > 0) {
+    const current = queue.pop()!;
+
+    nodes.push(current);
+
+    queue.push(
+      ...Object
+        .keys(current.subleads ?? {})
+        .map(x => current.subleads?.[x]!)
+    );
+  }
+
+  const ids = new Set(nodes.map(x => x.id) ?? []);
+  const relevantLogs = logs
+    .filter(x => ids.has((x.args as any)['referrerId'] as number));
+
+  if (!relevantLogs.length) {
+    return {};
+  }
+
+  const tokens = [...new Set(relevantLogs.map(x => (x.args as any)['tokenSold']))];
+  const commission: Record<string, ReferralStats> = {};
+
+  console.log('Logs for referral: ', relevantLogs);
+  console.log('Tokens: ', tokens);
+
+  for (const token of tokens) {
+    const stats = {} as StatsMap;
+
+    for (const entry of relevantLogs) {
+      const args = (entry.args as any)
+
+      if (args['tokenSold'] !== token) {
+        continue;
+      }
+
+      const stat = stats[Number(args['referrerId'] as number)] ?? {
+        purchases: 0,
+        soldInUsd: 0n,
+        tokensSold: 0n
+      };
+
+      stat.purchases += 1;
+      stat.soldInUsd += BigInt(args['tokensSoldAmountInUsd']);
+      stat.tokensSold += BigInt(args['tokenSoldAmount']);
+
+      stats[Number(args['referrerId'] as number)] = stat;
+    }
+
+    commission[token] = calculateCommission(tree, stats, {}, { factorTokens: true, leavePrecision: true });
+  }
+
+  return commission;
+}
+
+export function calculateStats(logs: EventLog[], tokenKey = 'tokenSoldAmount') {
+  const stats = {} as StatsMap;
+
+  for (const entry of logs) {
+    const args = (entry.args as any)
+    const stat = stats[Number(args['referrerId'] as number)] ?? {
+      purchases: 0,
+      soldInUsd: 0n,
+      tokensSold: 0n
+    };
+
+    stat.purchases += 1;
+    stat.soldInUsd += BigInt(args['tokensSoldAmountInUsd']);
+    stat.tokensSold += BigInt(args[tokenKey]);
+
+    stats[Number(args['referrerId'] as number)] = stat;
+  }
+
+  return stats;
 }

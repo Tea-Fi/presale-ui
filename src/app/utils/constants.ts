@@ -33,6 +33,12 @@ export const PRESALE_CONTRACT_ADDRESS = {
   11155111: "0x388C8acA8F2C0a206edF9855D1C993E13Dd492ce",
 } as ChainAddress;
 
+export const PRESALE_CLAIM_CONTRACT_ADDRESS = {
+  // 1: "0x75A3605F0Fc6aa02ef6c63E0cC8d9c31278DbF43",
+  11155111: "0x9ae49dd651e2ae88b8d4bd06cf3861dd39ee67c5",
+} as ChainAddress
+
+
 export interface Referral {
   id: number;
   fee?: number;
