@@ -100,7 +100,7 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
 
     setTimeout(() => {
       getProofAndCheck()
-    }, period.endDate.getTime() - Date.now())
+    }, new Date(period.endDate).getTime() - Date.now())
 
     setClaimProof(currentProof);
   }, [account.address, chainId])
