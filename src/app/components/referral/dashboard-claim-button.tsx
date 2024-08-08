@@ -98,6 +98,10 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
       return;
     }
 
+    setTimeout(() => {
+      getProofAndCheck()
+    }, period.endDate.getTime() - Date.now())
+
     setClaimProof(currentProof);
   }, [account.address, chainId])
 
@@ -110,7 +114,7 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
   }, [chainId, account.address])
 
   const isDisabled = React.useMemo(() => {
-    return props.disabled || !props.address || !canClaim;
+    return !canClaim && (props.disabled || !props.address);
   }, [proof, props.disabled, props.address])
   
   const buttonStyles = React.useMemo(() => {
