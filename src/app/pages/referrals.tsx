@@ -4,7 +4,7 @@ import { getClient } from "@wagmi/core";
 import "@xyflow/react/dist/style.css";
 
 import { useAccount, useAccountEffect, useChainId } from 'wagmi';
-import { getReferralTreeByWallet, Referral } from '../utils/referrals';
+import { getReferralTreeByCode, getReferralTreeByWallet, Referral } from '../utils/referrals';
 import { wagmiConfig } from "../config";
 
 import { ReferralForm } from "../components/referral/referral-form";
@@ -14,7 +14,7 @@ import { DashboardClaimButton } from "../components/referral/dashboard-claim-but
 import { EventLog } from "../components/referral/common";
 import { ClaimAmount, getClaimedAmount, getPeriod } from "../utils/claim";
 import { CountdownByCheckpoint } from "../components/countdown-by-checkpoints";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import Spinner from "../components/spinner";
 import { AbiEvent, getAbiItem } from "viem";
 import { getLogs } from "viem/actions";
@@ -38,9 +38,12 @@ const ReferralSection: React.FC<SectionProps & React.PropsWithChildren> = (props
 export const Referrals = () => {
   const chainId = useChainId(); 
 
+  const { code } = useParams();
+
   // const [period, setPeriod] = useState<ClaimPeriod>();
   const [isClaimActive, setClaimActive] = useState<boolean>(false);
   const [isClaimRoundFinished, setClaimRoundFinished] = useState<boolean>(false);
+  const [isMatchingReferral, setIsMatchingReferral] = useState<boolean>(false)
  
   const location = useLocation();
 
@@ -56,6 +59,7 @@ export const Referrals = () => {
   const [logs, setLogs] = useState<EventLog[]>();
   const [claimed, setClaimed] = useState<ClaimAmount[]>();
   const [referralTree, setReferralTree] = useState<Referral>();
+  const [pageReferralTree, setPageReferralTree] = useState<Referral>();
 
   const fetchClaimed = useCallback(async () => {
     if (!address) {
@@ -75,12 +79,18 @@ export const Referrals = () => {
     }
     
     const refTree = await getReferralTreeByWallet(refAddress, chainId);
+    const pageRefTree = !!code 
+      ? await getReferralTreeByCode(code, chainId)
+      : undefined;
       
-    if (!refTree) {
+    if (!pageRefTree) {
       return;
     }
-    
-    const claimed = await getClaimedAmount(refAddress, chainId)
+   
+    setPageReferralTree(pageRefTree) 
+    setIsMatchingReferral(refTree?.referral === code);
+
+    const claimed = await getClaimedAmount(pageRefTree.wallet, chainId)
     
     const client = getClient(wagmiConfig);
     const abi = getAbiItem({ abi: PRESALE_ABI, name: 'BuyTokens' }) as AbiEvent;
@@ -92,8 +102,8 @@ export const Referrals = () => {
     
     setLogs(logs);
     setClaimed(claimed);
-    setReferralTree(refTree);
-  }, [address, chainId, location])
+    setReferralTree(pageRefTree);
+  }, [address, chainId, location, code])
 
   useEffect(() => {
     getPeriod().then(setClaimPeriod)
@@ -118,70 +128,74 @@ export const Referrals = () => {
     },
   })
 
-  if (!referralTree || !claimed || !address || !logs) {
+  if (!pageReferralTree || !address || !claimed || !logs) {
     return <Spinner />
   }
 
   return (
     <div className="referrals page">
-      {referralTree && address && (
+      {pageReferralTree && address && (
         <div className="flex flex-col gap-8">
           <ReferralSection>
             <ReferralDashboard
               address={address}
-              tree={referralTree}
+              tree={pageReferralTree}
               logs={logs}
               claimed={claimed}
             />
           </ReferralSection>
 
-          <ReferralSection>
-            {claimPeriod && (
-              <CountdownByCheckpoint 
-                waitingClaimDuration={ROUND_DURATION}//ROUND_DURATION
-                pickClaimDuration={ROUND_CLAIM_DURATION}//ROUND_CLAIM_DURATION
-                startDate={new Date(claimPeriod.start)}
-                finishDate={new Date(claimPeriod.end)}
-                onChange={(inClaim) => setClaimActive(inClaim)}
-                onFinish={() => setClaimRoundFinished(true)}
-              />
-            )} 
-            <div className="referral-title-row">
-              <div className="text-start">
-                <div className="title">Claim</div>
-                <div className="subtitle pr-2">
-                  {isClaimRoundFinished ? "Claiming has been finished" : "You will be able to claim your commission every 2 weeks."}
+          {isMatchingReferral && (
+            <ReferralSection>
+              {claimPeriod && (
+                <CountdownByCheckpoint 
+                  waitingClaimDuration={ROUND_DURATION}//ROUND_DURATION
+                  pickClaimDuration={ROUND_CLAIM_DURATION}//ROUND_CLAIM_DURATION
+                  startDate={new Date(claimPeriod.start)}
+                  finishDate={new Date(claimPeriod.end)}
+                  onChange={(inClaim) => setClaimActive(inClaim)}
+                  onFinish={() => setClaimRoundFinished(true)}
+                />
+              )} 
+              <div className="referral-title-row">
+                <div className="text-start">
+                  <div className="title">Claim</div>
+                  <div className="subtitle pr-2">
+                    {isClaimRoundFinished ? "Claiming has been finished" : "You will be able to claim your commission every 2 weeks."}
+                  </div>
                 </div>
-              </div>
 
-              <DashboardClaimButton
-                disabled={!isClaimActive}
-                tree={referralTree}
-                logs={logs}
-                address={address}
-                claimed={claimed}
-                onClaim={fetchClaimed}
-              />
-            </div>
-          </ReferralSection>
+                <DashboardClaimButton
+                  disabled={!isClaimActive}
+                  tree={referralTree!}
+                  logs={logs}
+                  address={address}
+                  claimed={claimed}
+                  onClaim={fetchClaimed}
+                />
+              </div>
+            </ReferralSection>
+          )}
 
           <ReferralSection>
             <div className="referral-title-row">
               <div className="text-start">
                 <div className="title">Referrals</div>
                 <div className="subtitle">
-                  Code "<b>{referralTree.referral!.toUpperCase()}</b>" with {(referralTree?.fee || 0) / 100}% Fee
+                  Code "<b>{pageReferralTree.referral!.toUpperCase()}</b>" with {(pageReferralTree?.fee || 0) / 100}% Fee
                 </div>
               </div>
 
-              <ReferralForm 
-                referralTree={referralTree}
-                onSubmit={refertchReferralTree}
-              />
+              {isMatchingReferral && (
+                <ReferralForm 
+                  referralTree={referralTree!}
+                  onSubmit={refertchReferralTree}
+                />
+              )}
             </div>
 
             <ReactFlowProvider>
-              <ReferralTree tree={referralTree} logs={logs} />
+              <ReferralTree tree={pageReferralTree} logs={logs} />
             </ReactFlowProvider>
           </ReferralSection>
         </div>

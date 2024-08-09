@@ -33,6 +33,8 @@ export const TopBar = ({
 
   const { address, isConnected } = useAccount();
   const chainId = getChainId(wagmiConfig);
+
+  const code = window.localStorage.getItem('referral-code');
   
   useAccountEffect({
     onConnect({ address, chainId }) {
@@ -89,7 +91,7 @@ export const TopBar = ({
 
         <div className="items-center gap-2 min-w-[100px] h-16 w-fit bg-black text-white rounded-full p-3 border dark:border-white/[0.2] hidden lg:inline-flex">
           <NavLink 
-            to="/options"
+            to={`/${code}/options`}
             className={cn(
               "rounded-full h-full min-w-16 items-center inline-flex justify-center",
               isBuyPageActive ? 'border border-white/[0.2]' : ''
@@ -98,7 +100,7 @@ export const TopBar = ({
             Buy
           </NavLink>
           <NavLink
-            to="/claim"
+            to={`/${code}/claim`}
             className={cn(
               "rounded-full h-full min-w-16 items-center inline-flex justify-center",
               isClaimPageActive ? 'border border-white/[0.2]' : ''
@@ -110,7 +112,7 @@ export const TopBar = ({
         {referralTree && (
           <>
             <NavLink 
-              to="/dashboard"
+              to={`/${code}/dashboard`}
               className={cn(
                 "rounded-full h-full min-w-16 items-center hidden lg:inline-flex justify-center", 
                 isReferralTreePageActive ? 'border border-white/[0.2]' : '', 

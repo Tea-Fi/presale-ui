@@ -193,9 +193,7 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
         props.onClaim();
       } 
     } catch (err) {
-      toast.error(`Error occured, try again later`, {
-        description: `${err}`
-      });
+      console.error(err);
     } finally {
       setLoading(false);
       setConfirm(false);
