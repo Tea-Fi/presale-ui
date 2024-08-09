@@ -49,7 +49,7 @@ export const TopBar = ({
       <div 
         className={cn(
           'flex flex-row gap-4',
-          'p-2 py-4 text-center'
+          'p-2 py-4 text-center rounded-lg'
         )}
         onClick={() => toast.dismiss(t)}
       >

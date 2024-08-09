@@ -62,10 +62,7 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
     const stats = calculateStats(logs);
 
     const memo = {}
-    const subs = team
-      .filter(x => x.wallet !== props.address)
-      .map(x => stats[x.id])
-
+    const subs = team.map(x => stats[x.id])
     const subStats = subs.filter(x => !!x);
       
     const purchases = subStats
@@ -84,7 +81,7 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
 
     return {
       purchases: totalPurchasesUsd,
-      teamSize: subs.length,
+      teamSize: subs.length - 1,
 
       earnings: earnings.soldInUsd,
       unclaimedEarnings: earnings.soldInUsd > claimed
@@ -94,7 +91,6 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
       teamEarnings: averageTeamEarnings,
       teamPurchases: Object.keys(stats)
         .filter(key => team.some(x => x.id === Number(key)))
-        .filter(key  => Number(key) !== props.tree.id)
         .reduce((acc, e) => acc + stats[e].purchases, 0),
     };
   }, [props.tree, props.address, props.claimed, logs, team ])
