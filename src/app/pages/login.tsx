@@ -37,7 +37,7 @@ export const Login = () => {
     switch (status) {
       case LoginStatus.LOGGED_IN:
         setDialogOpen(false);
-        setTimeout(() => navigate('/options', { replace: true }), 250);
+        setTimeout(() => navigate(`/${code}/options`, { replace: true }), 250);
         break;
 
       case LoginStatus.LOGGED_OUT:

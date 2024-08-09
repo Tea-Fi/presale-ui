@@ -38,6 +38,7 @@ export const UserContextProvider: FunctionComponent<{ children: ReactNode }> = (
         setTimeout(() => setStatus(LoginStatus.LOGGED_OUT), 3000);
       } else {
         window.localStorage.setItem('referral', String(referralTree.id));
+        window.localStorage.setItem('referral-code', String(referralTree.referral));
         
         if (window.localStorage.getItem('agreedToTerms') === 'true') {
           setStatus(LoginStatus.LOGGED_IN);

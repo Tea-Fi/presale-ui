@@ -5,15 +5,22 @@ import { LoginStatus, useUserContext } from '../providers/user.context';
 import { BackgroundBeams } from './ui';
 import { MobileDrawerMenu } from './mobile-drawer-menu';
 import { RevokeApprovalDialog } from './revoke-approval-dialog';
+import { getReferralTreeById } from '../utils/referrals';
 
 export const Layout = () => {
   const navigate = useNavigate();
+
   const { pathname } = useLocation();
   const { status } = useUserContext();
 
   useLayoutEffect(() => {
     if (status === LoginStatus.LOGGED_OUT) {
       navigate('/');
+    }
+
+    if (status === LoginStatus.LOGGED_IN && !localStorage.getItem('referral-code')) {
+      getReferralTreeById(Number(localStorage.getItem('referral')))
+        .then(res => localStorage.setItem('referral-code', res?.referral ?? ''))
     }
   }, [navigate, status]);
 
