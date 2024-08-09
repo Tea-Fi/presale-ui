@@ -17,6 +17,9 @@ import { GiHamburgerMenu } from "react-icons/gi";
 import { IoIosArrowBack } from "react-icons/io";
 import { useMobileMenuDrawer } from "../hooks";
 import { isMobile } from 'react-device-detect';
+import { Check, Copy } from "lucide-react";
+import { toast } from "sonner";
+import React from "react";
 
 export const TopBar = ({
   isBuyPageActive,
@@ -33,6 +36,28 @@ export const TopBar = ({
 
   const { address, isConnected } = useAccount();
   const chainId = getChainId(wagmiConfig);
+
+  const code = window.localStorage.getItem('referral-code');
+  
+  const copyCode = React.useCallback(() => {
+    if (!code) {
+      return;
+    }
+
+    navigator?.clipboard?.writeText(`${window.location.origin}/#/${code}/dashboard`);
+    toast.custom((t) => (
+      <div 
+        className={cn(
+          'flex flex-row gap-4 items-center',
+          'px-8 py-4 min-h-20 text-center rounded-xl bg-[#282828]'
+        )}
+        onClick={() => toast.dismiss(t)}
+      >
+        <Check className="text-[#f716a2]"/>
+        Copied code to clipboard
+      </div>
+    ))
+  }, []);
   
   useAccountEffect({
     onConnect({ address, chainId }) {
@@ -61,10 +86,10 @@ export const TopBar = ({
 
   return (
     <div>
-      {pathname === '/options'  || !isMobile ?
+      {pathname.includes('/options')  || !isMobile ?
         <></>
         :
-        <Link to="/options" className="inline-flex items-center gap-2 ml-5 mt-3 text-white">
+        <Link to={`/${code}/options`} className="inline-flex items-center gap-2 ml-5 mt-3 text-white">
           <IoIosArrowBack /> Back
         </Link>
       }
@@ -89,7 +114,7 @@ export const TopBar = ({
 
         <div className="items-center gap-2 min-w-[100px] h-16 w-fit bg-black text-white rounded-full p-3 border dark:border-white/[0.2] hidden lg:inline-flex">
           <NavLink 
-            to="/options"
+            to={`/${code}/options`}
             className={cn(
               "rounded-full h-full min-w-16 items-center inline-flex justify-center",
               isBuyPageActive ? 'border border-white/[0.2]' : ''
@@ -98,7 +123,7 @@ export const TopBar = ({
             Buy
           </NavLink>
           <NavLink
-            to="/claim"
+            to={`/${code}/claim`}
             className={cn(
               "rounded-full h-full min-w-16 items-center inline-flex justify-center",
               isClaimPageActive ? 'border border-white/[0.2]' : ''
@@ -110,13 +135,22 @@ export const TopBar = ({
         {referralTree && (
           <>
             <NavLink 
-              to="/dashboard"
+              to={`/${code}/dashboard`}
               className={cn(
                 "rounded-full h-full min-w-16 items-center hidden lg:inline-flex justify-center", 
                 isReferralTreePageActive ? 'border border-white/[0.2]' : '', 
               )}
             >
-              Ambassador Dashboard
+              Dashboard: {code} 
+              <Button 
+                onClick={e => {
+                  e.stopPropagation();
+                  copyCode();
+                }}
+                className="bg-transparent text-[#f716a2] hover:bg-gray-800 mx-2"
+              >
+                <Copy />
+              </Button>
             </NavLink>
           </>
         )} 

@@ -10,6 +10,9 @@ import { Referral } from "../utils/constants";
 import { getReferralTreeByWallet } from "../utils/referrals";
 import { wagmiConfig } from "../config";
 import { getChainId } from '@wagmi/core';
+import { toast } from "sonner";
+import React from "react";
+import { Check, Copy } from "lucide-react";
 
 export const MobileDrawerMenu = () => {
     const { setOpen } = useModal();
@@ -23,6 +26,28 @@ export const MobileDrawerMenu = () => {
     const [referralTree, setReferralTree] = useState<Referral>();
     
     const chainId = getChainId(wagmiConfig);
+    
+    const code = window.localStorage.getItem('referral-code');
+
+    const copyCode = React.useCallback(() => {
+        if (!code) {
+        return;
+        }
+
+        navigator?.clipboard?.writeText(`${window.location.origin}/#/${code}/dashboard`);
+        toast.custom((t) => (
+        <div 
+            className={cn(
+            'flex flex-row gap-4',
+            'p-2 py-4 text-center'
+            )}
+            onClick={() => toast.dismiss(t)}
+        >
+            <Check />
+            Copied code to clipboard
+        </div>
+        ))
+    }, []);
 
     useAccountEffect({
         onConnect({ address, chainId }) {
@@ -71,7 +96,7 @@ export const MobileDrawerMenu = () => {
                         <div className="flex flex-col gap-2 text-white/50 text-xl font-semibold text-center">
                             <NavLink 
                                 onClick={() => setOpened(false)}
-                                to="/options"
+                                to={`/${code}/options`}
                                 className={cn(
                                     "rounded-lg h-full min-w-16 hover:bg-white/20 py-3"
                                 )}
@@ -80,7 +105,7 @@ export const MobileDrawerMenu = () => {
                             </NavLink>
                             <NavLink
                                 onClick={() => setOpened(false)}
-                                to="/claim"
+                                to={`/${code}/claim`}
                                 className={cn(
                                     "rounded-lg h-full min-w-16 hover:bg-white/20 py-3"
                                 )}
@@ -90,13 +115,19 @@ export const MobileDrawerMenu = () => {
                             {referralTree && (
                                 <NavLink
                                     onClick={() => setOpened(false)}
-                                    to="/dashboard"
+                                    to={`/${code}/dashboard`}
                                     className={cn(
                                         "rounded-lg h-full min-w-16 hover:bg-white/20 py-3",
                                         !referralTree ? 'hidden' : ''
                                     )}
                                 >
-                                    Ambassador Dashboard
+                                    Dashboard: {code}
+                                    <Button 
+                                        onClick={copyCode}
+                                        className="bg-transparent text-[#f716a2] hover:bg-gray-800 mx-2"
+                                    >
+                                        <Copy />
+                                    </Button>
                                 </NavLink>
                             )}
                         </div>

@@ -1,4 +1,4 @@
-import { EdgeProps, getBezierPath, BaseEdge, EdgeLabelRenderer } from "reactflow";
+import { EdgeProps, getBezierPath, BaseEdge, EdgeLabelRenderer } from "@xyflow/react";
 
 export const ReferralEdge = (props: EdgeProps) => {
   const [edgePath] = getBezierPath({

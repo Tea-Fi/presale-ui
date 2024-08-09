@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
-import ReactFlow, { Edge, Node, useNodesState, useEdgesState, Background } from "reactflow";
+import { ReactFlow, Edge, Node, useNodesState, useEdgesState, Background, ControlButton, Controls } from "@xyflow/react";
 
-import { getChainId } from "@wagmi/core";
-import { wagmiConfig } from "../../config";
+import { ZoomIn } from "lucide-react";
 
-import { Referral } from "../../utils/constants";
-import { calculateCommission, getReferralAmounts, ReferralStats, StatsMap } from "./common";
+import { calculateCommission, calculateStats, EventLog, ReferralStats } from "./common";
 import { ReferralNode } from "./node";
 import { ReferralEdge } from "./edge";
+
+import { Referral } from "../../utils/constants";
 
 
 const edgeStyles = {
@@ -34,32 +34,32 @@ interface ReferralLevelEntry {
 
 interface Props {
   tree: Referral;
-  stats?: StatsMap;
+  logs: EventLog[];
 }
 
 export const ReferralTree: React.FC<Props> = (props) => {
-
-
   const [treeNode, setTreeNodes] = useState<Node<any, string>[]>([]);
   const [treeEdges, setTreeEdges] = useState<Edge<any>[]>([]);
 
   const [nodes, setNodes] = useNodesState(treeNode);
   const [edges, setEdges] = useEdgesState(treeEdges);
-  const chainId = getChainId(wagmiConfig);
 
-  const getRefTreeStats = async (refTree?: Referral): Promise<Record<number, ReferralStats>> => {
-    let stats = {} as Record<number, ReferralStats>;
+  const [isFullscreen, setIsFullscreen] = useState(false)
 
-    if (refTree != undefined) {
-      stats[refTree.id] = await getReferralAmounts(refTree.id, chainId);
+  const toggleFullscreen = React.useCallback(() => {
+    setIsFullscreen(state => !state)
+  }, [])
 
-      for (const sublead of Object.values(refTree?.subleads || {})) {
-        stats = { ...stats, ...(await getRefTreeStats(sublead)) };
-      }
+  const closeFullscreen = React.useCallback((event: React.KeyboardEvent) => {
+    if (!isFullscreen) {
+      return;
     }
 
-    return stats;
-  };
+    if (event.key === 'Escape') {
+      toggleFullscreen();
+    }
+  }, [isFullscreen, toggleFullscreen])
+
 
   useEffect(() => {
     setNodes([])
@@ -72,7 +72,7 @@ export const ReferralTree: React.FC<Props> = (props) => {
   }, [treeNode, treeEdges])
   
   useEffect(() => {
-    if (!props.tree || !props.stats) return;
+    if (!props.tree || !props.logs) return;
    
     const NODE_WIDTH = 180;
     const NODE_HEIGHT = 100;
@@ -83,12 +83,13 @@ export const ReferralTree: React.FC<Props> = (props) => {
     const edges = [] as Edge<any>[];
    
     const memo = {} as Record<number, ReferralStats>;
+    const stats = calculateStats(props.logs, 'tokenReceivedAmount')
 
     const root = {
       code: props.tree.referral!,
       walletAddress: props.tree.wallet,
       fee: props.tree.fee,
-      stats: calculateCommission(props.tree, props.stats, memo),
+      stats: calculateCommission(props.tree, stats, memo),
       subleads: Object.keys(props.tree.subleads ?? {}).length,
       parent: '',
       level: 0
@@ -117,7 +118,7 @@ export const ReferralTree: React.FC<Props> = (props) => {
         code: current.referral!,
         walletAddress: current.wallet!,
         fee: current.fee,
-        stats: calculateCommission(current, props.stats, memo),
+        stats: calculateCommission(current, stats, memo),
         subleads: Object.keys(current.subleads ?? {}).length,
         parent: current.parent,
         level: current.level,
@@ -274,7 +275,7 @@ export const ReferralTree: React.FC<Props> = (props) => {
 
     setTreeNodes(data)
     setTreeEdges(edges)
-  }, [props.tree, props.stats])
+  }, [props.tree, props.logs])
 
   if (!props.tree) {
     return (
@@ -283,17 +284,32 @@ export const ReferralTree: React.FC<Props> = (props) => {
   }
 
   return (
-    <div className="referral-container">
+    <div 
+      tabIndex={isFullscreen ? 0 : undefined}
+      onKeyDown={closeFullscreen}
+      className={
+        isFullscreen 
+          ? 'fixed top-0 left-0 h-screen w-screen z-20 bg-[#282828]' 
+          : 'h-[650px] w-full mt-4' 
+      }
+    >
       <ReactFlow
+        className="rounded-lg"
         nodes={nodes}
         edges={edges}
         edgeTypes={edgeTypes}
+        colorMode="dark"
         fitView
         onNodeClick={(_) => { /* Pass noop to trigger real event */ }}
         zoomOnScroll={false}
         preventScrolling={false}
       >
         <Background />
+        <Controls showZoom={false} showInteractive={false} showFitView={false}>
+          <ControlButton onClick={toggleFullscreen} className="">
+            <ZoomIn /> 
+          </ControlButton>
+        </Controls>
       </ReactFlow>
     </div>
   );
