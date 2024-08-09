@@ -34,7 +34,7 @@ export const MobileDrawerMenu = () => {
         return;
         }
 
-        navigator?.clipboard?.writeText(`${window.location.origin}/#/${code}/dashboard`);
+        navigator?.clipboard?.writeText(`${window.location.origin}/${code}/dashboard`);
         toast.custom((t) => (
         <div 
             className={cn(

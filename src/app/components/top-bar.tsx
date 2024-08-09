@@ -44,7 +44,7 @@ export const TopBar = ({
       return;
     }
 
-    navigator?.clipboard?.writeText(`${window.location.origin}/#/${code}/dashboard`);
+    navigator?.clipboard?.writeText(`${window.location.origin}/${code}/dashboard`);
     toast.custom((t) => (
       <div 
         className={cn(
@@ -145,6 +145,7 @@ export const TopBar = ({
               <Button 
                 onClick={e => {
                   e.stopPropagation();
+                  e.preventDefault();
                   copyCode();
                 }}
                 className="bg-transparent text-[#f716a2] hover:bg-gray-800 mx-2"

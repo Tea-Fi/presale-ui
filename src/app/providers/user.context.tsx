@@ -21,6 +21,7 @@ interface TermsOfService {
 export interface UserContext {
   status: LoginStatus | null;
   login: (code: string) => Promise<void>;
+  logout: () => void;
   terms: TermsOfService; 
 }
 
@@ -52,6 +53,13 @@ export const UserContextProvider: FunctionComponent<{ children: ReactNode }> = (
     }
   }
 
+  async function logout() {
+    setStatus(LoginStatus.LOGGED_OUT);
+
+    window.localStorage.removeItem('referral');
+    window.localStorage.removeItem('referral-code');
+  }
+
   const validateAgreedToTerms = useCallback(async (agreedToTerms: boolean) => {
     if (agreedToTerms) {
       setStatus(LoginStatus.LOGGED_IN);
@@ -79,6 +87,7 @@ export const UserContextProvider: FunctionComponent<{ children: ReactNode }> = (
       value={{
         status,
         login,
+        logout,
         terms: {
           agree: agreeToTerms,
           disagree: disagreeToTerms
