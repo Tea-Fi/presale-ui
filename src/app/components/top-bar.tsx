@@ -145,6 +145,7 @@ export const TopBar = ({
               <Button 
                 onClick={e => {
                   e.stopPropagation();
+                  e.preventDefault();
                   copyCode();
                 }}
                 className="bg-transparent text-[#f716a2] hover:bg-gray-800 mx-2"

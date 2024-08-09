@@ -1,4 +1,4 @@
-import { HashRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { Layout } from "./components/layout";
 import { Login } from "./pages/login";
 import { Buy } from "./pages/buy";
@@ -32,7 +32,7 @@ export function App() {
   }
 
   return (
-    <Router>
+    <Router basename="/">
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Login />} />
