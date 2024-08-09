@@ -75,10 +75,10 @@ export const TopBar = ({
 
   return (
     <div>
-      {pathname === '/options'  || !isMobile ?
+      {pathname.includes('/options')  || !isMobile ?
         <></>
         :
-        <Link to="/options" className="inline-flex items-center gap-2 ml-5 mt-3 text-white">
+        <Link to={`/${code}/options`} className="inline-flex items-center gap-2 ml-5 mt-3 text-white">
           <IoIosArrowBack /> Back
         </Link>
       }
