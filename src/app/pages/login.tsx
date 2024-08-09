@@ -12,7 +12,7 @@ export const Login = () => {
   const [code, setCode] = useState<string>('');
   const [message, setMessage] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const { login, status, terms } = useUserContext();
+  const { login, logout, status, terms } = useUserContext();
 
   function onLoginSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -36,6 +36,11 @@ export const Login = () => {
   useEffect(() => {
     switch (status) {
       case LoginStatus.LOGGED_IN:
+        if (!code) {
+          logout(); 
+          return;
+        }
+
         setDialogOpen(false);
         setTimeout(() => navigate(`/${code}/options`), 250);
         break;
