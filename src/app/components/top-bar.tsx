@@ -17,6 +17,9 @@ import { GiHamburgerMenu } from "react-icons/gi";
 import { IoIosArrowBack } from "react-icons/io";
 import { useMobileMenuDrawer } from "../hooks";
 import { isMobile } from 'react-device-detect';
+import { Copy } from "lucide-react";
+import { toast } from "sonner";
+import React from "react";
 
 export const TopBar = ({
   isBuyPageActive,
@@ -35,6 +38,15 @@ export const TopBar = ({
   const chainId = getChainId(wagmiConfig);
 
   const code = window.localStorage.getItem('referral-code');
+  
+  const copyCode = React.useCallback(() => {
+    if (!code) {
+      return;
+    }
+
+    navigator?.clipboard?.writeText(code);
+    toast.success("Copied code to clipboard");
+  }, []);
   
   useAccountEffect({
     onConnect({ address, chainId }) {
@@ -118,7 +130,13 @@ export const TopBar = ({
                 isReferralTreePageActive ? 'border border-white/[0.2]' : '', 
               )}
             >
-              Ambassador Dashboard
+              Dashboard: {code} 
+              <Button 
+                onClick={copyCode}
+                className="bg-transparent text-[#f716a2] hover:bg-gray-800 mx-2"
+              >
+                <Copy />
+              </Button>
             </NavLink>
           </>
         )} 
