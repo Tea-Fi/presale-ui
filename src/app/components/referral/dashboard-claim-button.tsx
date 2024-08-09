@@ -50,11 +50,13 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
 
   const getProofAndCheck = React.useCallback(async () => {
     if (!account.address) {
+      setCanClaim(false);
       return;
     }
 
     if (chainId === 1) {
-      toast.error('Claim is not yet available on Mainnet');
+      // toast.error('Claim is not yet available on Mainnet');
+      setCanClaim(false);
       return;
     }
 
@@ -114,7 +116,7 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
   }, [chainId, account.address])
 
   const isDisabled = React.useMemo(() => {
-    return !canClaim && (props.disabled || !props.address);
+    return !canClaim ;
   }, [proof, props.disabled, props.address])
   
   const buttonStyles = React.useMemo(() => {
