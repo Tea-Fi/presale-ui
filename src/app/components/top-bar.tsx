@@ -48,12 +48,12 @@ export const TopBar = ({
     toast.custom((t) => (
       <div 
         className={cn(
-          'flex flex-row gap-4',
-          'p-2 py-4 text-center rounded-lg'
+          'flex flex-row gap-4 items-center',
+          'px-8 py-4 min-h-20 text-center rounded-xl bg-[#282828]'
         )}
         onClick={() => toast.dismiss(t)}
       >
-        <Check />
+        <Check className="text-[#f716a2]"/>
         Copied code to clipboard
       </div>
     ))
