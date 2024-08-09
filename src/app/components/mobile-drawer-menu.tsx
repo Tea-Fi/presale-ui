@@ -12,7 +12,7 @@ import { wagmiConfig } from "../config";
 import { getChainId } from '@wagmi/core';
 import { toast } from "sonner";
 import React from "react";
-import { Copy } from "lucide-react";
+import { Check, Copy } from "lucide-react";
 
 export const MobileDrawerMenu = () => {
     const { setOpen } = useModal();
@@ -34,8 +34,19 @@ export const MobileDrawerMenu = () => {
         return;
         }
 
-        navigator?.clipboard?.writeText(code);
-        toast.success("Copied code to clipboard");
+        navigator?.clipboard?.writeText(`${window.location.origin}/#/${code}/dashboard`);
+        toast.custom((t) => (
+        <div 
+            className={cn(
+            'flex flex-row gap-4',
+            'p-2 py-4 text-center'
+            )}
+            onClick={() => toast.dismiss(t)}
+        >
+            <Check />
+            Copied code to clipboard
+        </div>
+        ))
     }, []);
 
     useAccountEffect({

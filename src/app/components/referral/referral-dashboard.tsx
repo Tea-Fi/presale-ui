@@ -93,6 +93,7 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
 
       teamEarnings: averageTeamEarnings,
       teamPurchases: Object.keys(stats)
+        .filter(key => team.some(x => x.id === Number(key)))
         .filter(key  => Number(key) !== props.tree.id)
         .reduce((acc, e) => acc + stats[e].purchases, 0),
     };
@@ -146,7 +147,7 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
         <main>
           <DashboardBlock
             title="Total Purchases"
-            value={`$${usdFormatter.format(Number(info.purchases) / 100)}`}
+            value={`$${usdFormatter.format(parseHumanReadable(info.purchases, 6, 2))}`}
             icon={<ShoppingCart />}
           />
           
