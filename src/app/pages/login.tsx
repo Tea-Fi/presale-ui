@@ -36,6 +36,7 @@ export const Login = () => {
   useEffect(() => {
     switch (status) {
       case LoginStatus.LOGGED_IN:
+        const code = localStorage.getItem('referral-code');
         if (!code) {
           logout(); 
           return;
