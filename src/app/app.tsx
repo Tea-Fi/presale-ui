@@ -36,7 +36,7 @@ export function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Login />} />
-          <Route path="/buy" element={<Buy />} />
+          <Route path="/:code/buy" element={<Buy />} />
           <Route path="/:code/options" element={<Options />} />
           <Route path="/:code/claim" element={<Claim />} />
           <Route path="/:code/dashboard" element={<Referrals />} />

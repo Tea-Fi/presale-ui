@@ -18,11 +18,13 @@ import { track } from "../utils/analytics";
 export const Options = () => {
   const [dropdownOpened, setDropdownOpened] = useState<boolean>(false);
 
+  const code = localStorage.getItem('referral-code');
+
   const [projectInfos, setProjectInfos] = useState<any>(
     Object.keys(investmentInfo).map((price) => ({
       title: `$${price} / $TEA`,
       description: `${investmentInfo[price].tge} and ${investmentInfo[price].vested}`,
-      link: `/?opt=${price}#/buy`,
+      link: `/${code}/buy?opt=${price}`,
       max: null,
       value: null,
     }))
@@ -68,7 +70,7 @@ export const Options = () => {
           optionsInfoObj.push({
             title: `$${price} / $TEA`,
             description: `${investmentInfo[price].tge} and ${investmentInfo[price].vested}`,
-            link: `/?opt=${price}#/buy`,
+            link: `/${code}/buy?opt=${price}`,
             max: maxPerOption,
             value: sold,
           });
