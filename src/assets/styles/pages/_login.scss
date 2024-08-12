@@ -5,7 +5,6 @@
   flex-direction: column;
   justify-content: center;
 
-
   .submit {
     margin-top: -20px;
     max-width: 400px;
@@ -28,7 +27,6 @@
       }
     }
   }
-
 
   form {
     margin-top: -100px;
@@ -106,4 +104,35 @@
       }
     }
   }
+}
+.corner-blur {
+  position: fixed;
+  border-radius: 934px;
+  background: rgba(244, 0, 128, 0.22);
+  filter: blur(325px);
+  width: 504px;
+  height: 934px;
+  flex-shrink: 0;
+}
+.corner-top-right {
+  top: 0px;
+  right: 0px;
+  transform: translate(30%, -50%) rotate(-38.927deg);
+}
+
+.corner-left-bottom {
+  left: 0px;
+  bottom: 0px;
+  transform: translate(-30%, 50%) rotate(-38.927deg);
+}
+
+.corner-left-top {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+}
+.corner-right-bottom {
+  position: fixed;
+  right: 0px;
+  bottom: 0px;
 }
