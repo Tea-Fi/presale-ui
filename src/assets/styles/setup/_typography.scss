@@ -1,7 +1,7 @@
-@mixin font-face($src, $weight, $format, $name: "Inter") {
+@mixin font-face($src, $weight, $format) {
   @font-face {
     src: url($src) format("truetype");
-    font-family: $name;
+    font-family: "Inter";
     font-style: normal;
     font-weight: $weight;
   }
@@ -52,9 +52,8 @@
   900,
   truetype
 );
-@include font-face(
-  "src/assets/fonts/Dina_TalBal.otf",
-  400,
-  truetype,
-  "Dina_TalBal"
-);
+
+@font-face {
+  font-family: "Dina_TalBal";
+  src: url("src/assets/fonts/Dina_TalBal.otf");
+}
