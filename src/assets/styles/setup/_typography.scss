@@ -1,6 +1,6 @@
 @mixin font-face($src, $weight, $format) {
   @font-face {
-    src: url($src) format("truetype");
+    src: url($src);
     font-family: "Inter";
     font-style: normal;
     font-weight: $weight;
