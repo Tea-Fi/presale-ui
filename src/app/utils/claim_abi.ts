@@ -397,6 +397,25 @@ export const PRESALE_CLAIM_EARNING_FEES_ABI = [
   {
     inputs: [
       {
+        internalType: 'address',
+        name: 'accounts',
+        type: 'address[]',
+      },
+    ],
+    name: 'batchCheckPausedAccounts',
+    outputs: [
+      {
+        internalType: 'bool[]',
+        name: 'isPaused',
+        type: 'bool[]',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
         internalType: 'uint256',
         name: 'nonce',
         type: 'uint256',

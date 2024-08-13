@@ -81,6 +81,18 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
       return;
     }
     
+    const isBanned = await readContract(wagmiConfig, {
+      abi: PRESALE_CLAIM_EARNING_FEES_ABI,
+      address: PRESALE_CLAIM_CONTRACT_ADDRESS[chainId] as `0x${string}`,
+      functionName: 'batchCheckPausedAccounts',
+      args: [[account.address]]
+    }) as boolean[];
+
+    if (isBanned.some(x => !!x)) {
+      setCanClaim(false);
+      return;
+    }
+    
     const canClaimFromContract = await readContract(wagmiConfig, {
       abi: PRESALE_CLAIM_EARNING_FEES_ABI,
       address: PRESALE_CLAIM_CONTRACT_ADDRESS[chainId] as `0x${string}`,
@@ -114,24 +126,6 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
   const toggleShowConfirm = React.useCallback(async () => {
     setConfirm(state => !state);
   }, [chainId, account.address])
-
-  const isDisabled = React.useMemo(() => {
-    return !canClaim ;
-  }, [proof, props.disabled, props.address])
-  
-  const buttonStyles = React.useMemo(() => {
-    if (isDisabled || !props.claimed) {
-      return cn(
-        'px-16 py-8 text-xl'
-      );
-    }
-
-    return cn(
-      'px-16 py-8 text-xl',
-      'text-xl bg-[#f716a2] text-secondary-foreground',
-      'hover:bg-[#3a0c2a] transition-none'
-    );
-  }, [isDisabled, props.claimed])
 
   const cancel = React.useCallback(() => {
     setConfirm(false)
