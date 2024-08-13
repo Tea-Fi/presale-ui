@@ -105,7 +105,7 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
     }, new Date(period.endDate).getTime() - Date.now())
 
     setClaimProof(currentProof);
-  }, [account.address, chainId])
+  }, [account.address, chainId, setCanClaim, setClaimProof])
 
   useEffect(() => {
     getProofAndCheck();
@@ -138,13 +138,13 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
   }, [])
 
   const claim = React.useCallback(async () => {
-    if (!proof) {
+    if (!proof || !canClaim) {
       return;
     }
 
     try {
       setLoading(true)
-
+     
       const hash = await writeContract(wagmiConfig, {
         abi: PRESALE_CLAIM_EARNING_FEES_ABI,
         address: PRESALE_CLAIM_CONTRACT_ADDRESS[chainId] as `0x${string}`,
@@ -200,16 +200,28 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
     } finally {
       setLoading(false);
       setConfirm(false);
+
+      await getProofAndCheck(); 
     }
 
-  }, [props.address, proof, getProofAndCheck])
+  }, [props.address, proof, canClaim, getProofAndCheck])
 
 
   return (
     <>
       <Button 
-        disabled={isDisabled}
-        className={buttonStyles}
+        disabled={!canClaim}
+        className={cn(
+          'px-16 py-8 text-xl',
+
+          ...(canClaim 
+            ? [
+                'text-xl bg-[#f716a2] text-secondary-foreground',
+                'hover:bg-[#3a0c2a] transition-none'
+              ]
+            : [])
+          
+        )}
         onClick={toggleShowConfirm}
       >
         Claim

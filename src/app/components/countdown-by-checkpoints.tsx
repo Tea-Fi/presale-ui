@@ -1,5 +1,6 @@
 import Countdown from 'react-countdown';
 import { useEffect, useState } from 'react';
+import { useClaimPeriod } from '../hooks/useClaimPeriod';
 
 
 type Time = string | number | Date | undefined;
@@ -28,6 +29,8 @@ export const CountdownByCheckpoint = (
     onChange?: (claimAvailable: boolean) => void,
     onFinish?: () => void,
   }) => {
+    const activePeriod = useClaimPeriod();
+
     const startDateNormal = startDate ? (new Date(startDate)).getTime() : Date.now();
     const finishDateNormal = finishDate ? (new Date(finishDate)).getTime() : startDateNormal + 60_000;
     
@@ -207,13 +210,21 @@ export const CountdownByCheckpoint = (
         const inClaim = isInClaim();
         const isRoundStarted = now >= startDateNormal;
 
-        const elapsed = 
+        let elapsed = 
           !isRoundStarted ? 
           getElapsedDateByTimestamp(now, claimRoundStart) :
           inClaim ? 
           getElapsedDateByTimestamp(now, claimRoundFinish) :
           getElapsedDateByTimestamp(now, waitingRoundFinish)
         ;
+
+        const claimIsActive = !activePeriod.loading
+          && activePeriod.period 
+          && new Date(activePeriod.period.endDate).getTime() >= now;
+
+        if (claimIsActive) {
+          elapsed = getElapsedDateByTimestamp(now, new Date(activePeriod.period!.endDate).getTime());
+        }
 
         if(inClaim && !isInClaimRound) {
           setInWaitingRound(false);
@@ -238,6 +249,19 @@ export const CountdownByCheckpoint = (
         const h = hours < 10 ? `0${hours}` : hours;
         const m = minutes < 10 ? `0${minutes}` : minutes;
         const s = seconds < 10 ? `0${seconds}` : seconds;
+
+        if (claimIsActive) {
+          return (
+            <div className='flex flex-col gap-1 w-full text-end mb-4'>
+              <span className='text-xl'>Claim your tokens</span>
+              <span className={className}>{d > 1 ? `${d} Days` : d == 1 ? `${d} Day` : ''} {h}:{m}:{s}</span>
+            </div>
+          );
+        }
+
+        if (inClaim) {
+          return;
+        }
 
         return (
           <div className='flex flex-col gap-1 w-full text-end mb-4'>

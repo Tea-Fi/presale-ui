@@ -21,7 +21,7 @@ const root = createRoot(document.getElementById("root") as HTMLElement);
 root.render(
   <Provider>
     <App />
-    <Toaster duration={10000} position="top-center"/>
+    <Toaster duration={10000} position="top-center" closeButton={true} />
     <ToastContainer />
   </Provider>
 );
