@@ -18,6 +18,7 @@ export const CountdownByCheckpoint = (
     waitingClaimDuration,
     pickClaimDuration,
     className,
+    canClaim,
     onChange,
     onFinish,
   }:{
@@ -26,6 +27,7 @@ export const CountdownByCheckpoint = (
     waitingClaimDuration?: number,
     pickClaimDuration?: number,
     className?: string,
+    canClaim: boolean,
     onChange?: (claimAvailable: boolean) => void,
     onFinish?: () => void,
   }) => {
@@ -220,7 +222,8 @@ export const CountdownByCheckpoint = (
 
         const claimIsActive = !activePeriod.loading
           && activePeriod.period 
-          && new Date(activePeriod.period.endDate).getTime() >= now;
+          && new Date(activePeriod.period.endDate).getTime() >= now
+          && canClaim;
 
         if (claimIsActive) {
           elapsed = getElapsedDateByTimestamp(now, new Date(activePeriod.period!.endDate).getTime());
