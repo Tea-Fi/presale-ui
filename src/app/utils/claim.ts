@@ -27,6 +27,22 @@ export type CreateClaimPayload = CreateClaimDto & {
   senderAddress: string;
 };
 
+export interface ClaimRecord {
+  chainId: string;
+  walletAddress: string;
+  tokenAddress: string;
+
+  amount: string;
+  amountUsd: string;
+
+  period: {
+    startDate: string;
+    endDate: string;
+  }
+
+  createdAt: string;
+}
+
 export const getPeriod = async () => {
   return fetch(`${API_URL}/claim/period`)
     .then(res => res.json())
@@ -37,6 +53,12 @@ export const getClaimedAmount = async (wallet: string, chainId: number) => {
   return fetch(`${API_URL}/claim/amount?walletAddress=${wallet}&chainId=${chainId}`)
     .then(res => res.json())
     .then(res => res as ClaimAmount[])
+};
+
+export const getLastClaim = async (wallet: string, chainId: number) => {
+  return fetch(`${API_URL}/claim/last?walletAddress=${wallet}&chainId=${chainId}`)
+    .then(res => res.json())
+    .then(res => res as ClaimRecord | undefined)
 };
 
 export const createClaim = async (payload: CreateClaimDto) => {

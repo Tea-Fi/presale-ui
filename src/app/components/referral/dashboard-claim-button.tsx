@@ -9,10 +9,13 @@ import { cn, parseHumanReadable } from "../../utils";
 import { DAI, ETH, PRESALE_CLAIM_CONTRACT_ADDRESS, Referral, USDC, USDT, WBTC, WETH } from "../../utils/constants";
 import { ClaimAmount, createClaim, CreateClaimDto, getClaimActivePeriod, getClaimForPeriod, getClaimProof } from "../../utils/claim";
 import { useAccount, useChainId } from "wagmi";
+import { getClient } from "@wagmi/core";
 import { toast } from "sonner";
 import { wagmiConfig } from "../../config";
 import { readContract, writeContract, waitForTransactionReceipt } from "@wagmi/core";
 import { PRESALE_CLAIM_EARNING_FEES_ABI } from "../../utils/claim_abi";
+import { estimateContractGas, getGasPrice } from "viem/actions";
+import { formatEther } from "viem";
 
 interface Props {
   tree: Referral;
@@ -35,9 +38,7 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
  
   const [canClaim, setCanClaim] = React.useState<boolean>(false);
   const [proof, setClaimProof] = React.useState<Awaited<ReturnType<typeof getClaimProof>>>()
-
-  React.useEffect(() => {
-  }, [])
+  const [gas, setGas] = React.useState<bigint>()
 
   const tokenList = React.useMemo(() => ({
     [ETH[chainId].toLowerCase()]: { decimals: 18, symbol: "ETH" },
@@ -124,8 +125,29 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
   }, [getProofAndCheck])
   
   const toggleShowConfirm = React.useCallback(async () => {
+    if (!proof) {
+      return;
+    } 
+    
+   
+    const client = getClient(wagmiConfig)!;
+    const gasPrice = await getGasPrice(client);
+    const gas = await estimateContractGas(client, {
+      abi: PRESALE_CLAIM_EARNING_FEES_ABI,
+      address: PRESALE_CLAIM_CONTRACT_ADDRESS[chainId] as `0x${string}`,
+      functionName: 'claim',
+      account: account.address,
+      args: [
+        BigInt(proof.nonce),
+        proof.tokens,
+        proof.amounts.map(x => BigInt(x)),
+        proof.proof
+      ]
+    })
+   
+    setGas(gas * gasPrice)
     setConfirm(state => !state);
-  }, [chainId, account.address])
+  }, [chainId, account.address, proof])
 
   const cancel = React.useCallback(() => {
     setConfirm(false)
@@ -256,6 +278,15 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
                     </React.Fragment>
                   )
                 })}
+              </div>
+              
+              <div className="text-center mt-8">
+                {gas !== undefined && (
+                  <div>
+                    Estimated Gas: <br/> 
+                    ~ETH {formatEther(gas, "wei")}
+                  </div>
+                )}
               </div>
             </main>
 

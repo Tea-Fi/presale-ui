@@ -12,7 +12,7 @@ import { ReferralTree } from "../components/referral/referral-tree";
 import { ReferralDashboard } from "../components/referral/referral-dashboard";
 import { DashboardClaimButton } from "../components/referral/dashboard-claim-button";
 import { EventLog } from "../components/referral/common";
-import { ClaimAmount, getClaimActivePeriod, getClaimedAmount, getClaimForPeriod, getClaimProof, getPeriod } from "../utils/claim";
+import { ClaimAmount, ClaimRecord, getClaimActivePeriod, getClaimedAmount, getClaimForPeriod, getClaimProof, getLastClaim, getPeriod } from "../utils/claim";
 import { CountdownByCheckpoint } from "../components/countdown-by-checkpoints";
 import { useLocation, useParams } from "react-router-dom";
 import Spinner from "../components/spinner";
@@ -60,6 +60,7 @@ export const Referrals = () => {
   
   const [logs, setLogs] = useState<EventLog[]>();
   const [claimed, setClaimed] = useState<ClaimAmount[]>();
+  const [lastClaim, setLastClaim] = useState<ClaimRecord>();
   const [referralTree, setReferralTree] = useState<Referral>();
   const [pageReferralTree, setPageReferralTree] = useState<Referral>();
 
@@ -163,7 +164,8 @@ export const Referrals = () => {
     setPageReferralTree(pageRefTree) 
     setIsMatchingReferral(refTree?.referral === code);
 
-    const claimed = await getClaimedAmount(pageRefTree.wallet, chainId)
+    const climedAmount = await getClaimedAmount(pageRefTree.wallet, chainId);
+    const lastClaim = await getLastClaim(pageRefTree.wallet, chainId);
     
     const client = getClient(wagmiConfig);
     const abi = getAbiItem({ abi: PRESALE_ABI, name: 'BuyTokens' }) as AbiEvent;
@@ -174,7 +176,8 @@ export const Referrals = () => {
     });
     
     setLogs(logs);
-    setClaimed(claimed);
+    setLastClaim(lastClaim);
+    setClaimed(climedAmount);
     setReferralTree(pageRefTree);
   }, [address, chainId, location, code])
 
@@ -220,6 +223,7 @@ export const Referrals = () => {
               tree={pageReferralTree}
               logs={logs}
               claimed={claimed}
+              lastClaim={lastClaim}
             />
           </ReferralSection>
 
