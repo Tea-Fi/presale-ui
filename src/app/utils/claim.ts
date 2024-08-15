@@ -35,7 +35,7 @@ export interface ClaimRecord {
   amount: string;
   amountUsd: string;
 
-  period: {
+  period?: {
     startDate: string;
     endDate: string;
   }
