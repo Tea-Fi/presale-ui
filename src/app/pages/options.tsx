@@ -14,6 +14,7 @@ import Spinner from "../components/spinner";
 import { MdKeyboardArrowDown } from "react-icons/md";
 import { TeaCup } from "../../assets/icons";
 import { track } from "../utils/analytics";
+import PresaleHeadline from "../components/presale-headline";
 
 export const Options = () => {
   const [dropdownOpened, setDropdownOpened] = useState<boolean>(false);
@@ -90,7 +91,8 @@ export const Options = () => {
   if (!projectInfos) return null;
 
   return (
-    <div className="inline-flex justify-center w-full grow">
+    <div className="inline-flex flex-col justify-center w-full">
+      <PresaleHeadline/>
       <div className="flex flex-col-reverse lg-mt-0 lg:flex-row grow justify-center w-full items-center gap-8">
         <div className="w-96">
           <CardHoverEffect items={projectInfos} />
