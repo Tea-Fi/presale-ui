@@ -616,7 +616,7 @@ const SwapInput = ({
             }
           }}
           type="text"
-          inputMode="numeric"
+          inputMode="decimal"
           onChange={onType}
           placeholder="0"
           className="bg-transparent text-3xl px-0 text-zinc-300 placeholder:text-zinc-600 h-full"
