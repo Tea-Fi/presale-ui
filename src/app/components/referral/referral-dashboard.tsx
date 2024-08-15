@@ -158,13 +158,13 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
     if (period !== PeriodFilter.threeMonths && dateBoundary) {
       getFilterLogs({
         boundary: dateBoundary,
-        lastClaimDate: props.lastClaim?.period.startDate
+        lastClaimDate: props.lastClaim?.period?.startDate
       });
     }
 
     if (period === PeriodFilter.threeMonths) {
       getFilterLogs({
-        lastClaimDate: props.lastClaim?.period.startDate
+        lastClaimDate: props.lastClaim?.period?.startDate
       });
     }
   }, [props.tree, props.logs, dateBoundary])
