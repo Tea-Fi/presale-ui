@@ -15,11 +15,13 @@ import { MdKeyboardArrowDown } from "react-icons/md";
 import { TeaCup } from "../../assets/icons";
 import { track } from "../utils/analytics";
 import PresaleHeadline from "../components/presale-headline";
+import {useParams} from "react-router-dom";
 
 export const Options = () => {
   const [dropdownOpened, setDropdownOpened] = useState<boolean>(false);
 
-  const code = localStorage.getItem('referral-code');
+  const { code } = useParams();
+
 
   const [projectInfos, setProjectInfos] = useState<any>(
     Object.keys(investmentInfo).map((price) => ({
