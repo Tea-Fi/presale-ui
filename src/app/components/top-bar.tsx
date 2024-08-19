@@ -37,7 +37,6 @@ export const TopBar = ({
     const chainId = getChainId(wagmiConfig);
 
     const code = useReferralCode();
-    console.log({code})
     const {referralCode} = useReferralStore();
 
     const copyCode = React.useCallback(() => {
