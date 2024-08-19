@@ -7,9 +7,7 @@ import { PRESALE_ABI } from "../../utils/presale_abi";
 import { PRESALE_CONTRACT_ADDRESS } from "../../utils/constants";
 
 export type EventLog = Log<bigint, number, false, AbiEvent, undefined, [AbiEvent], string>;
-
-export const getArg = <T,>(log: EventLog, key: string) =>
-  (log.args as Record<string, unknown>)[key] as T;
+export type EventLogWithTimestamp = EventLog & { time: Date };
 
 export interface ReferralStats {
   purchases: number;
@@ -22,6 +20,15 @@ export type StatsMap = Record<string, ReferralStats>;
 
 export const emptyStat = () => ({ purchases: 0, soldInUsd: 0n, tokensSold: 0n } as ReferralStats);
 export const usdFormatter = Intl.NumberFormat('en-US', { currency: 'usd', maximumFractionDigits: 2 })
+
+export const getArg = <T,>(log: EventLog, key: string) =>
+  (log.args as Record<string, unknown>)[key] as T;
+
+export const getStat = (log: EventLog): ReferralStats => ({
+  purchases: 1,
+  tokensSold: getArg(log, 'tokenSoldAmount'),
+  soldInUsd: getArg(log, 'tokensSoldAmountInUsd'),
+});
 
 
 export function getFeeFactor(node?: Referral) {
@@ -49,29 +56,48 @@ export function factorStats(a: ReferralStats, factor: bigint, factorTokens?: boo
   }
 }
 
-export function subtreeSum(stats: StatsMap, node?: Referral, memo?: Record<number, ReferralStats>): ReferralStats {
+export function subtreeSum(logs: EventLogWithTimestamp[], node?: Referral, parent?: Referral, factorTokens?: boolean): ReferralStats {
   if (!node) {
     return emptyStat();
   }
+  
+  const nodeLogs = mapLogs(node, logs);
+  const rootLogs = parent && mapLogs(parent, logs)
 
-  if (memo?.[node.id]) return memo[node.id];
+  const stat = nodeLogs
+    .filter(x => getArg<number>(x, 'referrerId') === node.id)
+    .reduce((acc, e) => {
+      const rootLog = rootLogs
+        ?.find(x => x.blockNumber === e.blockNumber);
 
-  const stat = stats[node.id] ?? emptyStat();
+      return addStats(
+        acc,
+        factorStats(
+          getStat(e),
+          BigInt(
+            rootLog 
+              ? rootLog.fee - e.fee
+              : e.fee
+          ),
+          factorTokens
+        )
+      )
+    }, emptyStat())
 
   if (!node.subleads || Object.keys(node.subleads ?? {}).length === 0) {
     return stat;
   }
 
   const subleadSum = Object.keys(node.subleads ?? {})
-    .map(key => subtreeSum(stats, node.subleads?.[key]))
+    .map(key => subtreeSum(logs, node.subleads?.[key], parent))
     .filter(x => !!x)
     .reduce((acc, e) => addStats(acc, e), emptyStat());
 
   const sum = addStats(subleadSum, stat)
 
-  if (memo) {
-    memo[node.id] = sum;
-  }
+  // if (memo) {
+  //   memo[node.id] = sum;
+  // }
 
   if (!sum) {
     return emptyStat();
@@ -97,22 +123,42 @@ export async function getReferralAmounts(referralId: number, chainId: number): P
   };
 }
 
-type Memo = Record<number, ReferralStats>;
-
 interface CommissionOptions {
   factorTokens?: boolean;
   leavePrecision?: boolean;
 }
 
-export function calculateCommission(node: Referral, stats: StatsMap, memo?: Memo, options?: CommissionOptions): ReferralStats {
-  const fee = getFeeFactor(node);
-  const stat = stats[node.id] ?? emptyStat();
+function mapLogs(referral: Referral, logs: EventLogWithTimestamp[]) {
+  const percentages = referral.percentageLogs
+    .map(x => ({ fee: x.fee, date: new Date(x.createdAt) }))
+    .sort((a, b) => a.date > b.date ? 1 : -1);
+   
+  return logs.map(log => {
+    const fee = percentages.find(x => x.date > log.time)?.fee
+      ?? referral.fee
 
-  const current = factorStats(stat, fee, options?.factorTokens);
+    return { ...log, fee }
+  });
+}
+
+export function calculateCommission(node: Referral, logs: EventLogWithTimestamp[], options?: CommissionOptions): ReferralStats {
+  // const fee = getFeeFactor(node);
+  // const stat = stats[node.id] ?? emptyStat();
+
+  const rootLogs = mapLogs(node, logs);
+  const current = rootLogs
+    .filter(x => getArg<number>(x, 'referrerId') === node.id)
+    .reduce((acc, log) => {
+      return addStats(acc, factorStats(getStat(log), BigInt(log.fee), options?.factorTokens))
+    }, emptyStat())
+
+  // const current = factorStats(stat, fee, options?.factorTokens);
 
   const subtreeList = Object.keys(node.subleads ?? {})
     .map(key => node.subleads?.[key])
-    .map(x => factorStats(subtreeSum(stats, x, memo), (fee - getFeeFactor(x)), options?.factorTokens))
+    .map(x => {
+      return subtreeSum(logs, x, node, options?.factorTokens) 
+    })
 
   const subtree = subtreeList
     .reduce((acc, e) => addStats(acc, e), emptyStat())
@@ -127,7 +173,7 @@ export function calculateCommission(node: Referral, stats: StatsMap, memo?: Memo
   return result;
 }
 
-export function calculateEarningByToken(tree: Referral, logs: EventLog[]) {
+export function calculateEarningByToken(tree: Referral, logs: EventLogWithTimestamp[]) {
   const nodes = [] as Referral[];
   const queue = [tree];
 
@@ -154,33 +200,11 @@ export function calculateEarningByToken(tree: Referral, logs: EventLog[]) {
   const tokens = [...new Set(relevantLogs.map(x => (x.args as any)['tokenSold']))];
   const commission: Record<string, ReferralStats> = {};
 
-  console.log('Logs for referral: ', relevantLogs);
-  console.log('Tokens: ', tokens);
-
   for (const token of tokens) {
-    const stats = {} as StatsMap;
+    const tokenLogs = relevantLogs
+      .filter(x => getArg<string>(x, 'tokenSold') === token)
 
-    for (const entry of relevantLogs) {
-      const args = (entry.args as any)
-
-      if (args['tokenSold'] !== token) {
-        continue;
-      }
-
-      const stat = stats[Number(args['referrerId'] as number)] ?? {
-        purchases: 0,
-        soldInUsd: 0n,
-        tokensSold: 0n
-      };
-
-      stat.purchases += 1;
-      stat.soldInUsd += BigInt(args['tokensSoldAmountInUsd']);
-      stat.tokensSold += BigInt(args['tokenSoldAmount']);
-
-      stats[Number(args['referrerId'] as number)] = stat;
-    }
-
-    commission[token] = calculateCommission(tree, stats, {}, { factorTokens: true, leavePrecision: true });
+    commission[token] = calculateCommission(tree, tokenLogs, { factorTokens: true, leavePrecision: true });
   }
 
   return commission;

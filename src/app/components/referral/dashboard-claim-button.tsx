@@ -280,7 +280,7 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
                 })}
               </div>
               
-              <div className="text-center mt-8">
+              <div className="text-center text-sm mt-8">
                 {gas !== undefined && (
                   <div>
                     Estimated Gas: <br/> 
