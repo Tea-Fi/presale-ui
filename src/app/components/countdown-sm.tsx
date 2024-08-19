@@ -1,7 +1,7 @@
 import { buildStyles, CircularProgressbarWithChildren } from "react-circular-progressbar";
 import Countdown from 'react-countdown';
-import { useCountdownStore } from "../hooks";
 import { cn } from "../utils";
+import {useCountdownStore} from "../state/countdown.store.ts";
 
 
 const timepicker = [
