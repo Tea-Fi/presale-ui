@@ -1,13 +1,11 @@
 import React from "react";
 import { ShoppingCart, ShoppingBag, PersonStanding, Download, BarChart2 } from "lucide-react";
 
-import { getClient } from "@wagmi/core";
 
 import { calculateCommission, calculateStats, EventLogWithTimestamp, usdFormatter } from "./common";
 import { DashboardPeriodSelector, PeriodFilter } from "./period-selector";
 import { DashboardBlock } from "./dashboard-card";
 
-import { wagmiConfig } from "../../config";
 import { Referral } from "../../utils/constants";
 import { ClaimAmount, ClaimRecord } from "../../utils/claim";
 import { parseHumanReadable } from "../../utils";
@@ -65,7 +63,6 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
 
     const stats = calculateStats(logs);
 
-    const memo = {}
     const subs = team.map(x => stats[x.id])
     const subStats = subs.filter(x => !!x);
 
@@ -79,11 +76,10 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
       ? totalPurchasesUsd / BigInt(purchases)
       : 0n;
 
-    const earnings = calculateCommission(props.tree, logs, memo, { leavePrecision: true })
+    const earnings = calculateCommission(props.tree, logs, { leavePrecision: true })
     const unclaimedEarnings = calculateCommission(
       props.tree,
       unclaimedLogs,
-      undefined,
       { leavePrecision: true }
     );
 

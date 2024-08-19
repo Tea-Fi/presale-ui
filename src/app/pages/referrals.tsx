@@ -180,25 +180,36 @@ export const Referrals = () => {
     const cache = JSON.parse(localStorage.getItem('logs-timestamps') ?? '{}') as Record<string, string>;
     const targetLogs = [] as EventLogWithTimestamp[];
 
-    for (const log of logs) {
-      let time: Date;
+    const queue = [...logs];
 
-      let cached: string | undefined = cache[log.blockNumber.toString()];
+    while (queue.length > 0) {
+      const batch = queue.slice(0, 5);
 
-      if (Number.isNaN(Number(cached))) {
-        cached = undefined;
-      }
+      const resultLogs = await Promise.all(
+        batch.map(async log => {
+          let time: Date;
 
-      if (cached) {
-        time = new Date(Number(cached));
-      } else {
-        const block = await getBlock(client!, { blockNumber: log.blockNumber });
-        time = new Date(Number(block.timestamp) * 1e3);
-      }
+          let cached: string | undefined = cache[log.blockNumber.toString()];
 
-      targetLogs.push({ ...log, time });
+          if (Number.isNaN(Number(cached))) {
+            cached = undefined;
+          }
 
-      cache[log.blockNumber.toString()] = time.getTime().toString();
+          if (cached) {
+            time = new Date(Number(cached));
+          } else {
+            const block = await getBlock(client!, { blockNumber: log.blockNumber });
+            time = new Date(Number(block.timestamp) * 1e3);
+          }
+
+          cache[log.blockNumber.toString()] = time.getTime().toString();
+
+          return {...log, time };
+        })
+      );
+      
+      targetLogs.push(...resultLogs);
+      queue.splice(0, 5);
     }
 
     localStorage.setItem('logs-timestamps', JSON.stringify(cache));

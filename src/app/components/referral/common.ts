@@ -56,25 +56,29 @@ export function factorStats(a: ReferralStats, factor: bigint, factorTokens?: boo
   }
 }
 
-export function subtreeSum(logs: EventLogWithTimestamp[], node?: Referral, feeDifference?: number, factorTokens?: boolean): ReferralStats {
+export function subtreeSum(logs: EventLogWithTimestamp[], node?: Referral, parent?: Referral, factorTokens?: boolean): ReferralStats {
   if (!node) {
     return emptyStat();
   }
-
-
-  // if (memo?.[node.id]) return memo[node.id];
-
-  // const stat = stats[node.id] ?? emptyStat();
   
-  const rootLogs = mapLogs(node, logs);
-  const stat = rootLogs
+  const nodeLogs = mapLogs(node, logs);
+  const rootLogs = parent && mapLogs(parent, logs)
+
+  const stat = nodeLogs
     .filter(x => getArg<number>(x, 'referrerId') === node.id)
     .reduce((acc, e) => {
+      const rootLog = rootLogs
+        ?.find(x => x.blockNumber === e.blockNumber);
+
       return addStats(
         acc,
         factorStats(
           getStat(e),
-          BigInt(feeDifference ?? e.fee),
+          BigInt(
+            rootLog 
+              ? rootLog.fee - e.fee
+              : e.fee
+          ),
           factorTokens
         )
       )
@@ -85,7 +89,7 @@ export function subtreeSum(logs: EventLogWithTimestamp[], node?: Referral, feeDi
   }
 
   const subleadSum = Object.keys(node.subleads ?? {})
-    .map(key => subtreeSum(logs, node.subleads?.[key], feeDifference))
+    .map(key => subtreeSum(logs, node.subleads?.[key], parent))
     .filter(x => !!x)
     .reduce((acc, e) => addStats(acc, e), emptyStat());
 
@@ -119,57 +123,33 @@ export async function getReferralAmounts(referralId: number, chainId: number): P
   };
 }
 
-type Memo = Record<number, ReferralStats>;
-
 interface CommissionOptions {
   factorTokens?: boolean;
   leavePrecision?: boolean;
 }
 
 function mapLogs(referral: Referral, logs: EventLogWithTimestamp[]) {
-  // const nodes = [] as Referral[];
-  // const queue = [node];
-
-  // while (queue.length > 0) {
-  //   const current = queue.pop()!;
-
-  //   nodes.push(current);
-
-  //   queue.push(
-  //     ...Object
-  //       .keys(current.subleads ?? {})
-  //       .map(x => current.subleads?.[x]!)
-  //   );
-  // }
-
+  const percentages = referral.percentageLogs
+    .map(x => ({ fee: x.fee, date: new Date(x.createdAt) }))
+    .sort((a, b) => a.date > b.date ? 1 : -1);
+   
   return logs.map(log => {
-    // const referral = nodes.find(x => x.id === getArg(log, 'referrerId'));
-
-    // if (!referral) {
-    //   return
-    // }
-
-    const fee = referral?.percentageLogs.find((x, idx) => {
-      return new Date(x.createdAt) > log.time
-        && referral.percentageLogs[idx + 1]?.createdAt
-        && new Date(referral.percentageLogs[idx + 1].createdAt) < log.time
-    })
-      ?.fee
+    const fee = percentages.find(x => x.date > log.time)?.fee
       ?? referral.fee
 
     return { ...log, fee }
   });
 }
 
-export function calculateCommission(node: Referral, logs: EventLogWithTimestamp[], memo?: Memo, options?: CommissionOptions): ReferralStats {
+export function calculateCommission(node: Referral, logs: EventLogWithTimestamp[], options?: CommissionOptions): ReferralStats {
   // const fee = getFeeFactor(node);
   // const stat = stats[node.id] ?? emptyStat();
 
   const rootLogs = mapLogs(node, logs);
   const current = rootLogs
     .filter(x => getArg<number>(x, 'referrerId') === node.id)
-    .reduce((acc, e) => {
-      return addStats(acc, factorStats(getStat(e), BigInt(e.fee), options?.factorTokens))
+    .reduce((acc, log) => {
+      return addStats(acc, factorStats(getStat(log), BigInt(log.fee), options?.factorTokens))
     }, emptyStat())
 
   // const current = factorStats(stat, fee, options?.factorTokens);
@@ -177,7 +157,7 @@ export function calculateCommission(node: Referral, logs: EventLogWithTimestamp[
   const subtreeList = Object.keys(node.subleads ?? {})
     .map(key => node.subleads?.[key])
     .map(x => {
-      return subtreeSum(logs, x, node.fee - x.fee) 
+      return subtreeSum(logs, x, node, options?.factorTokens) 
     })
 
   const subtree = subtreeList
@@ -224,32 +204,10 @@ export function calculateEarningByToken(tree: Referral, logs: EventLogWithTimest
   console.log('Tokens: ', tokens);
 
   for (const token of tokens) {
-    const stats = {} as StatsMap;
-
-    for (const entry of relevantLogs) {
-      const args = (entry.args as any)
-
-      if (args['tokenSold'] !== token) {
-        continue;
-      }
-
-      const stat = stats[Number(args['referrerId'] as number)] ?? {
-        purchases: 0,
-        soldInUsd: 0n,
-        tokensSold: 0n
-      };
-
-      stat.purchases += 1;
-      stat.soldInUsd += BigInt(args['tokensSoldAmountInUsd']);
-      stat.tokensSold += BigInt(args['tokenSoldAmount']);
-
-      stats[Number(args['referrerId'] as number)] = stat;
-    }
-
     const tokenLogs = relevantLogs
       .filter(x => getArg<string>(x, 'tokenSold') === token)
 
-    commission[token] = calculateCommission(tree, tokenLogs, {}, { factorTokens: true, leavePrecision: true });
+    commission[token] = calculateCommission(tree, tokenLogs, { factorTokens: true, leavePrecision: true });
   }
 
   return commission;
