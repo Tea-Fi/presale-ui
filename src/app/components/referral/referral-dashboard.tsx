@@ -1,10 +1,9 @@
 import React from "react";
 import { ShoppingCart, ShoppingBag, PersonStanding, Download, BarChart2 } from "lucide-react";
 
-import { getBlock } from "viem/actions";
 import { getClient } from "@wagmi/core";
 
-import { calculateCommission, calculateStats, EventLog, getArg, usdFormatter } from "./common";
+import { calculateCommission, calculateStats, EventLogWithTimestamp, usdFormatter } from "./common";
 import { DashboardPeriodSelector, PeriodFilter } from "./period-selector";
 import { DashboardBlock } from "./dashboard-card";
 
@@ -16,7 +15,7 @@ import { parseHumanReadable } from "../../utils";
 
 interface Props {
   tree: Referral;
-  logs: EventLog[];
+  logs: EventLogWithTimestamp[];
 
   address: string;
 
@@ -25,8 +24,10 @@ interface Props {
 }
 
 export const ReferralDashboard: React.FC<Props> = (props) => {
-  const [logs, setLogs] = React.useState<EventLog[]>(props.logs);
-  const [unclaimedLogs, setUnclaimedLogs] = React.useState<EventLog[]>(props.logs);
+  const [loading, setLoading] = React.useState(false);
+
+  const [logs, setLogs] = React.useState<EventLogWithTimestamp[]>([]);
+  const [unclaimedLogs, setUnclaimedLogs] = React.useState<EventLogWithTimestamp[]>([]);
 
   const [dateBoundary, setDateBoundary] = React.useState<Date>();
   const [period, setPeriod] = React.useState<PeriodFilter>(PeriodFilter.threeMonths);
@@ -78,10 +79,10 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
       ? totalPurchasesUsd / BigInt(purchases)
       : 0n;
 
-    const earnings = calculateCommission(props.tree, stats, memo, { leavePrecision: true })
+    const earnings = calculateCommission(props.tree, logs, memo, { leavePrecision: true })
     const unclaimedEarnings = calculateCommission(
       props.tree,
-      calculateStats(unclaimedLogs),
+      unclaimedLogs,
       undefined,
       { leavePrecision: true }
     );
@@ -101,53 +102,34 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
   }, [props.tree, props.address, props.claimed, logs, team])
 
   const getFilterLogs = React.useCallback(async (filters: { boundary?: Date, lastClaimDate?: string }) => {
-    const client = getClient(wagmiConfig);
+    setLoading(true) 
 
     const ids = new Set(team?.map(x => x.id) ?? []);
     const relevantLogs = props.logs
       .filter(x => ids.has((x.args as any)['referrerId'] as number))
       .reverse();
 
-    const targetLogs = [] as EventLog[];
-    const unclaimedLogs = [] as EventLog[];
-
-    if (!filters.boundary && !filters.lastClaimDate) {
-      setLogs(props.logs)
-      setUnclaimedLogs(props.logs)
-
-      return;
-    }
-   
-    if (!filters.boundary) {
-      targetLogs.push(...props.logs);
-    }
+    const targetLogs = [] as EventLogWithTimestamp[];
+    const unclaimedLogs = [] as EventLogWithTimestamp[];
 
     const claimDate = filters.lastClaimDate && new Date(filters.lastClaimDate);
 
     for (const log of relevantLogs) {
-      const block = await getBlock(client!, { blockNumber: log.blockNumber });
-      const time = new Date(Number(block.timestamp) * 1e3);
-
-      if (filters.boundary && time < filters.boundary) {
+      if (filters.boundary && log.time < filters.boundary) {
         break;
       }
 
-      if (!claimDate || time >= claimDate) {
-        console.log({ usd: getArg(log, 'tokensSoldAmountInUsd'), time })
+      if (!claimDate || log.time >= claimDate) {
         unclaimedLogs.push(log);
       }
 
-      if (!filters.boundary && claimDate && time < claimDate) {
-        break;
-      }
-
-      if (filters.boundary) {
-        targetLogs.push(log);
-      }
+      targetLogs.push(log);
     }
 
     setLogs(targetLogs.reverse())
     setUnclaimedLogs(unclaimedLogs.reverse())
+
+    setLoading(false);
   }, [team, props.logs]);
 
   React.useEffect(() => {
@@ -177,43 +159,43 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
         <DashboardPeriodSelector onChange={periodSelectorOnChange} />
       </header>
 
-      {!info && (<div>Loading</div>)}
+      {loading && (<div>Loading</div>)}
 
-      {info && (
+      {!loading && (
         <main>
           <DashboardBlock
             title="Total Purchases"
-            value={`$${usdFormatter.format(parseHumanReadable(info.purchases, 6, 2))}`}
+            value={`$${usdFormatter.format(parseHumanReadable(info!.purchases, 6, 2))}`}
             icon={<ShoppingCart />}
           />
 
           <DashboardBlock
             title="NO. of Purchases"
-            value={info.teamPurchases.toString()}
+            value={info!.teamPurchases.toString()}
             icon={<ShoppingBag />}
           />
 
           <DashboardBlock
             title="My Team"
-            value={info.teamSize.toString()}
+            value={info!.teamSize.toString()}
             icon={<PersonStanding />}
           />
 
           <DashboardBlock
             title="My Earning"
-            value={`$${usdFormatter.format(parseHumanReadable(info.earnings, 10, 2))}`}
+            value={`$${usdFormatter.format(parseHumanReadable(info!.earnings, 10, 2))}`}
             icon={<Download />}
           />
 
           <DashboardBlock
             title="Average Team Earning"
-            value={`$${usdFormatter.format(parseHumanReadable(info.teamEarnings, 6, 2))}`}
+            value={`$${usdFormatter.format(parseHumanReadable(info!.teamEarnings, 6, 2))}`}
             icon={<BarChart2 />}
           />
 
           <DashboardBlock
             title="Unclaimed Earning"
-            value={`$${usdFormatter.format(parseHumanReadable(info.unclaimedEarnings, 10, 2))}`}
+            value={`$${usdFormatter.format(parseHumanReadable(info!.unclaimedEarnings, 10, 2))}`}
             icon={<BarChart2 />}
           />
         </main>

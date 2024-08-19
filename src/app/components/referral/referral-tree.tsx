@@ -3,7 +3,7 @@ import { ReactFlow, Edge, Node, useNodesState, useEdgesState, Background, Contro
 
 import { ZoomIn } from "lucide-react";
 
-import { calculateCommission, calculateStats, EventLog, ReferralStats } from "./common";
+import { calculateCommission, calculateStats, EventLogWithTimestamp, ReferralStats } from "./common";
 import { ReferralNode } from "./node";
 import { ReferralEdge } from "./edge";
 
@@ -34,7 +34,7 @@ interface ReferralLevelEntry {
 
 interface Props {
   tree: Referral;
-  logs: EventLog[];
+  logs: EventLogWithTimestamp[];
 }
 
 export const ReferralTree: React.FC<Props> = (props) => {
@@ -89,7 +89,7 @@ export const ReferralTree: React.FC<Props> = (props) => {
       code: props.tree.referral!,
       walletAddress: props.tree.wallet,
       fee: props.tree.fee,
-      stats: calculateCommission(props.tree, stats, memo),
+      stats: calculateCommission(props.tree, props.logs, memo),
       subleads: Object.keys(props.tree.subleads ?? {}).length,
       parent: '',
       level: 0
@@ -118,7 +118,7 @@ export const ReferralTree: React.FC<Props> = (props) => {
         code: current.referral!,
         walletAddress: current.wallet!,
         fee: current.fee,
-        stats: calculateCommission(current, stats, memo),
+        stats: calculateCommission(current, props.logs, memo),
         subleads: Object.keys(current.subleads ?? {}).length,
         parent: current.parent,
         level: current.level,

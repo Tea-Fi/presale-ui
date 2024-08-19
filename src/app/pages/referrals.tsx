@@ -11,13 +11,15 @@ import { ReferralForm } from "../components/referral/referral-form";
 import { ReferralTree } from "../components/referral/referral-tree";
 import { ReferralDashboard } from "../components/referral/referral-dashboard";
 import { DashboardClaimButton } from "../components/referral/dashboard-claim-button";
-import { EventLog } from "../components/referral/common";
+import { EventLogWithTimestamp } from "../components/referral/common";
 import { ClaimAmount, ClaimRecord, getClaimActivePeriod, getClaimedAmount, getClaimForPeriod, getClaimProof, getLastClaim, getPeriod } from "../utils/claim";
 import { CountdownByCheckpoint } from "../components/countdown-by-checkpoints";
 import { useLocation, useParams } from "react-router-dom";
+
 import Spinner from "../components/spinner";
+
 import { AbiEvent, getAbiItem } from "viem";
-import { getLogs,  } from "viem/actions";
+import { getLogs, getBlock } from "viem/actions";
 import { PRESALE_CLAIM_CONTRACT_ADDRESS, PRESALE_CONTRACT_ADDRESS } from "../utils/constants";
 import { PRESALE_ABI } from "../utils/presale_abi";
 import { ReactFlowProvider } from "@xyflow/react";
@@ -58,7 +60,7 @@ export const Referrals = () => {
 
   const { address, isConnected } = useAccount();
   
-  const [logs, setLogs] = useState<EventLog[]>();
+  const [logs, setLogs] = useState<EventLogWithTimestamp[]>();
   const [claimed, setClaimed] = useState<ClaimAmount[]>();
   const [lastClaim, setLastClaim] = useState<ClaimRecord>();
   const [referralTree, setReferralTree] = useState<Referral>();
@@ -174,8 +176,34 @@ export const Referrals = () => {
       fromBlock: 0n,
       event: abi
     });
+
+    const cache = JSON.parse(localStorage.getItem('logs-timestamps') ?? '{}') as Record<string, string>;
+    const targetLogs = [] as EventLogWithTimestamp[];
+
+    for (const log of logs) {
+      let time: Date;
+
+      let cached: string | undefined = cache[log.blockNumber.toString()];
+
+      if (Number.isNaN(Number(cached))) {
+        cached = undefined;
+      }
+
+      if (cached) {
+        time = new Date(Number(cached));
+      } else {
+        const block = await getBlock(client!, { blockNumber: log.blockNumber });
+        time = new Date(Number(block.timestamp) * 1e3);
+      }
+
+      targetLogs.push({ ...log, time });
+
+      cache[log.blockNumber.toString()] = time.getTime().toString();
+    }
+
+    localStorage.setItem('logs-timestamps', JSON.stringify(cache));
     
-    setLogs(logs);
+    setLogs(targetLogs);
     setLastClaim(lastClaim);
     setClaimed(climedAmount);
     setReferralTree(pageRefTree);
@@ -210,7 +238,11 @@ export const Referrals = () => {
   })
 
   if (!pageReferralTree || !address || !claimed || !logs) {
-    return <Spinner />
+    return (
+      <div className="grid place-content-center">
+        <Spinner />
+      </div>
+    ) 
   }
 
   return (

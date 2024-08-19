@@ -41,10 +41,11 @@ export const PRESALE_CLAIM_CONTRACT_ADDRESS = {
 
 export interface Referral {
   id: number;
-  fee?: number;
+  fee: number;
   wallet: string;
-  referral?: string;
-  subleads?: { [key: string]: Referral };
+  referral: string;
+  subleads: { [key: string]: Referral };
+  percentageLogs: { createdAt: string, fee: number }[];
 }
 
 export const investmentInfo = {
