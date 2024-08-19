@@ -41,14 +41,15 @@ import {useRevokeApprovalDialog, useConnectedWalletMobile} from "../hooks";
 import {useModal} from "connectkit";
 import {track} from "../utils/analytics";
 import {useCountdownStore} from "../state/countdown.store.ts";
-import {useReferralStore} from "../state/referal.store.ts";
+import {useGetReferral} from "../hooks/useGetReferral.ts";
+import {useParams} from "react-router-dom";
 
 export const SwapContainer = ({tokenList}: { tokenList: Token[] }) => {
     const search = window.location.search;
     const urlParams = new URLSearchParams(search);
     const investment = urlParams.get("opt") || Object.keys(investmentInfo)[0];
-    const {referralId} = useReferralStore();
-
+    const {code} = useParams();
+    const {data} = useGetReferral(code);
 
     const {open} = useConnectedWalletMobile();
     const {setOpened, isAllowanceChanged} = useRevokeApprovalDialog();
@@ -187,11 +188,11 @@ export const SwapContainer = ({tokenList}: { tokenList: Token[] }) => {
     const handleBuy = async (token: Address, value: string) => {
         try {
             console.info("optionId", investmentInfo[investment].id);
-            console.info("referralId", referralId);
+            console.info("referralId", data?.id);
             console.info("tokenSell", token);
             console.info("buyAmountHuman", value);
 
-            if (referralId && referralId <= 0) {
+            if (data?.id && data?.id <= 0) {
                 return toast.error(
                     "Unable to use Referral ID, please clear browser cache and reload the page to re-enter the referral code again.",
                     {}
@@ -215,7 +216,7 @@ export const SwapContainer = ({tokenList}: { tokenList: Token[] }) => {
                 hash = await writeContract(wagmiConfig, {
                     abi: PRESALE_ABI,
                     address: PRESALE_CONTRACT_ADDRESS[chainId] as Address,
-                    args: [investmentInfo[investment].id, referralId, buyAmount],
+                    args: [investmentInfo[investment].id, data?.id, buyAmount],
                     value: amountInETH as bigint,
                     functionName: "buyExactPresaleTokensETH",
                 });
@@ -223,7 +224,7 @@ export const SwapContainer = ({tokenList}: { tokenList: Token[] }) => {
                 hash = await writeContract(wagmiConfig, {
                     abi: PRESALE_ABI,
                     address: PRESALE_CONTRACT_ADDRESS[chainId] as Address,
-                    args: [investmentInfo[investment].id, referralId, token, buyAmount],
+                    args: [investmentInfo[investment].id, data?.id, token, buyAmount],
                     functionName: "buyExactPresaleTokens",
                 });
             }

@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import {Link, NavLink, useLocation, useParams} from "react-router-dom";
+import {Link, NavLink, useLocation} from "react-router-dom";
 
 import {Wallet} from "./wallet";
 import {useAccount, useAccountEffect} from 'wagmi';
@@ -17,6 +17,7 @@ import {isMobile} from 'react-device-detect';
 import {Check, Copy} from "lucide-react";
 import {toast} from "sonner";
 import React from "react";
+import {useReferralCode} from "../hooks/useReferralCode.ts";
 import {useReferralStore} from "../state/referal.store.ts";
 
 export const TopBar = ({
@@ -35,7 +36,8 @@ export const TopBar = ({
     const {address, isConnected} = useAccount();
     const chainId = getChainId(wagmiConfig);
 
-    const {code} = useParams();
+    const code = useReferralCode();
+    console.log({code})
     const {referralCode} = useReferralStore();
 
     const copyCode = React.useCallback(() => {
@@ -43,7 +45,8 @@ export const TopBar = ({
             return;
         }
 
-        navigator?.clipboard?.writeText(`${window.location.origin}/${code}/dashboard`);
+        navigator?.clipboard?.writeText(`${window.location.origin}?r=${referralCode}`);
+
         toast.custom((t) => (
             <div
                 className={cn(
