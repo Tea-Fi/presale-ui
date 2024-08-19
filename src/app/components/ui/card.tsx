@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { cn } from "../../utils/cn";
 import { AnimatePresence, motion } from "framer-motion";
-import { useCountdownStore } from "../../hooks";
+
 import { track } from "../../utils/analytics";
+import {useCountdownStore} from "../../state/countdown.store.ts";
 
 type Item = {
   title: string;

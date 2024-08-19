@@ -200,9 +200,6 @@ export function calculateEarningByToken(tree: Referral, logs: EventLogWithTimest
   const tokens = [...new Set(relevantLogs.map(x => (x.args as any)['tokenSold']))];
   const commission: Record<string, ReferralStats> = {};
 
-  console.log('Logs for referral: ', relevantLogs);
-  console.log('Tokens: ', tokens);
-
   for (const token of tokens) {
     const tokenLogs = relevantLogs
       .filter(x => getArg<string>(x, 'tokenSold') === token)
