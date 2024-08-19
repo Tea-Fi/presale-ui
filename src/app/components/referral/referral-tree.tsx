@@ -3,7 +3,7 @@ import { ReactFlow, Edge, Node, useNodesState, useEdgesState, Background, Contro
 
 import { ZoomIn } from "lucide-react";
 
-import { calculateCommission, calculateStats, EventLogWithTimestamp, ReferralStats } from "./common";
+import { calculateCommission, EventLogWithTimestamp, ReferralStats } from "./common";
 import { ReferralNode } from "./node";
 import { ReferralEdge } from "./edge";
 
@@ -83,7 +83,6 @@ export const ReferralTree: React.FC<Props> = (props) => {
     const edges = [] as Edge<any>[];
    
     const memo = {} as Record<number, ReferralStats>;
-    const stats = calculateStats(props.logs, 'tokenReceivedAmount')
 
     const root = {
       code: props.tree.referral!,
