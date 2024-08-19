@@ -13,8 +13,10 @@ import {toast} from "sonner";
 import React from "react";
 import {Check, Copy} from "lucide-react";
 import {useReferralStore} from "../state/referal.store.ts";
+import {useReferralCode} from "../hooks/useReferralCode.ts";
 
 export const MobileDrawerMenu = () => {
+    const code = useReferralCode();
     const {referralCode} = useReferralStore();
 
     const {setOpen} = useModal();
@@ -31,11 +33,8 @@ export const MobileDrawerMenu = () => {
 
 
     const copyCode = React.useCallback(() => {
-        if (!referralCode) {
-            return;
-        }
 
-        navigator?.clipboard?.writeText(`${window.location.origin}/${referralCode}/dashboard`);
+        navigator?.clipboard?.writeText(`${window.location.origin}?r=${referralCode}`);
         toast.custom((t) => (
             <div
                 className={cn(
@@ -98,7 +97,7 @@ export const MobileDrawerMenu = () => {
                         <div className="flex flex-col gap-2 text-white/50 text-xl font-semibold text-center">
                             <NavLink
                                 onClick={() => setOpened(false)}
-                                to={`/${referralCode}/options`}
+                                to={`/${code}/options`}
                                 className={cn(
                                     "rounded-lg h-full min-w-16 hover:bg-white/20 py-3"
                                 )}
@@ -107,7 +106,7 @@ export const MobileDrawerMenu = () => {
                             </NavLink>
                             <NavLink
                                 onClick={() => setOpened(false)}
-                                to={`/${referralCode}/claim`}
+                                to={`/${code}/claim`}
                                 className={cn(
                                     "rounded-lg h-full min-w-16 hover:bg-white/20 py-3"
                                 )}
@@ -117,7 +116,7 @@ export const MobileDrawerMenu = () => {
                             {referralTree && (
                                 <NavLink
                                     onClick={() => setOpened(false)}
-                                    to={`/${referralCode}/dashboard`}
+                                    to={`/${code}/dashboard`}
                                     className={cn(
                                         "rounded-lg h-full min-w-16 hover:bg-white/20 py-3",
                                         !referralTree ? 'hidden' : ''
