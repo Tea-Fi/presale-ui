@@ -1,43 +1,41 @@
-import {useEffect, useState} from "react";
-import {Link, NavLink, useLocation} from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 
-import {Wallet} from "./wallet";
-import {useAccount, useAccountEffect} from 'wagmi';
-import {getReferralTreeByWallet, Referral} from '../utils/referrals';
-import {TeaSwapLogoAsset} from "../../assets/icons";
-import {cn} from "../utils";
-import {getChainId} from '@wagmi/core';
-import {wagmiConfig, ChainId} from "../config";
-import {Button} from "./ui";
+import { Wallet } from "./wallet";
+import { TeaSwapLogoAsset } from "../../assets/icons";
+import { cn } from "../utils";
+import { getChainId } from '@wagmi/core';
+import { wagmiConfig, ChainId } from "../config";
+import { Button } from "./ui";
 import 'react-circular-progressbar/dist/styles.css';
-import {GiHamburgerMenu} from "react-icons/gi";
-import {IoIosArrowBack} from "react-icons/io";
-import {useMobileMenuDrawer} from "../hooks";
-import {isMobile} from 'react-device-detect';
-import {Check, Copy} from "lucide-react";
-import {toast} from "sonner";
+import { GiHamburgerMenu } from "react-icons/gi";
+import { IoIosArrowBack } from "react-icons/io";
+import { useMobileMenuDrawer } from "../hooks";
+import { isMobile } from 'react-device-detect';
+import { Check, Copy } from "lucide-react";
+import { toast } from "sonner";
 import React from "react";
-import {useReferralCode} from "../hooks/useReferralCode.ts";
-import {useReferralStore} from "../state/referal.store.ts";
+import { useReferralCode } from "../hooks/useReferralCode.ts";
+import { useReferralStore } from "../state/referal.store.ts";
+import { useAccountStore } from "../state/user.store.ts";
 
 export const TopBar = ({
-                           isBuyPageActive,
-                           isClaimPageActive,
-                           isReferralTreePageActive,
-                       }: {
+    isBuyPageActive,
+    isClaimPageActive,
+    isReferralTreePageActive,
+}: {
     isBuyPageActive?: boolean,
     isClaimPageActive?: boolean,
     isReferralTreePageActive?: boolean
 }) => {
-    const {pathname} = useLocation();
-    const [referralTree, setReferralTree] = useState<Referral>();
-    const {setOpened} = useMobileMenuDrawer();
+    const { pathname } = useLocation();
+    const { setOpened } = useMobileMenuDrawer();
+    const { isAmbassador } = useAccountStore();
 
-    const {address, isConnected} = useAccount();
     const chainId = getChainId(wagmiConfig);
 
+
     const code = useReferralCode();
-    const {referralCode} = useReferralStore();
+    const { referralCode } = useReferralStore();
 
     const copyCode = React.useCallback(() => {
         if (!code) {
@@ -54,36 +52,11 @@ export const TopBar = ({
                 )}
                 onClick={() => toast.dismiss(t)}
             >
-                <Check className="text-[#f716a2]"/>
+                <Check className="text-[#f716a2]" />
                 Copied code to clipboard
             </div>
         ))
     }, []);
-
-    useAccountEffect({
-        onConnect({address, chainId}) {
-            getReferralTreeByWallet(address, chainId)
-                .then(referralTree => {
-                    if (referralTree !== undefined) {
-                        setReferralTree(referralTree);
-                    }
-                })
-        },
-        onDisconnect() {
-            setReferralTree(undefined);
-        },
-    });
-
-    useEffect(() => {
-        if (address && isConnected) {
-            getReferralTreeByWallet(address, chainId)
-                .then(referralTree => {
-                    if (referralTree !== undefined) {
-                        setReferralTree(referralTree);
-                    }
-                })
-        }
-    }, [address, isConnected])
 
     return (
         <div>
@@ -91,14 +64,14 @@ export const TopBar = ({
                 <></>
                 :
                 <Link to={`/${code}/options`} className="inline-flex items-center gap-2 ml-5 mt-3 text-white">
-                    <IoIosArrowBack/> Back
+                    <IoIosArrowBack /> Back
                 </Link>
             }
 
             <div className="w-full max-h-24 inline-flex justify-between items-center px-5 py-3">
                 <div className="inline-flex items-center gap-20 lg:w-[228px]">
                     <Link to="https://tea-fi.com/">
-                        <TeaSwapLogoAsset className="w-25 h-auto "/>
+                        <TeaSwapLogoAsset className="w-25 h-auto " />
                     </Link>
 
                     {/* Maybe will be uncommented later */}
@@ -134,7 +107,7 @@ export const TopBar = ({
                         Claim
                     </NavLink>
 
-                    {referralTree && (
+                    {isAmbassador && (
                         <>
                             <NavLink
                                 to={`/${code}/dashboard`}
@@ -152,7 +125,7 @@ export const TopBar = ({
                                     }}
                                     className="bg-transparent text-[#f716a2] hover:bg-gray-800 mx-2"
                                 >
-                                    <Copy/>
+                                    <Copy />
                                 </Button>
                             </NavLink>
                         </>
@@ -161,10 +134,10 @@ export const TopBar = ({
                 </div>
 
                 <span className={"w-[228px] items-center hidden lg:inline-flex"}>
-          <span className="text-white">{chainId == ChainId.MAINNET ? 'Mainnet' : 'Sepolia'}</span>
+                    <span className="text-white">{chainId == ChainId.MAINNET ? 'Mainnet' : 'Sepolia'}</span>
                     &nbsp;
-                    <Wallet/>
-        </span>
+                    <Wallet />
+                </span>
 
 
                 {/* Burger menu for small sizes */}
@@ -178,7 +151,7 @@ export const TopBar = ({
                     <Button
                         className="text-[#ff00a4] text-[3rem] bg-transparent p-0 hover:bg-transparent hover:text-zinc-400"
                         onClick={() => setOpened(true)}>
-                        <GiHamburgerMenu/>
+                        <GiHamburgerMenu />
                     </Button>
                 </div>
             </div>

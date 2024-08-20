@@ -1,36 +1,28 @@
-import {useModal} from "connectkit";
-import {Button, Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle} from "./ui";
-import {useCallback, useEffect, useState} from "react";
-import {useAccount, useAccountEffect} from "wagmi";
-import {useMobileMenuDrawer} from "../hooks";
-import {NavLink} from "react-router-dom";
-import {cn} from "../utils";
-import {Referral} from "../utils/constants";
-import {getReferralTreeByWallet} from "../utils/referrals";
-import {wagmiConfig} from "../config";
-import {getChainId} from '@wagmi/core';
-import {toast} from "sonner";
+import { useModal } from "connectkit";
+import { Button, Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle } from "./ui";
+import { useCallback } from "react";
+import { useMobileMenuDrawer } from "../hooks";
+import { NavLink } from "react-router-dom";
+import { cn } from "../utils";
+import { toast } from "sonner";
 import React from "react";
-import {Check, Copy} from "lucide-react";
-import {useReferralStore} from "../state/referal.store.ts";
-import {useReferralCode} from "../hooks/useReferralCode.ts";
+import { Check, Copy } from "lucide-react";
+import { useReferralStore } from "../state/referal.store.ts";
+import { useReferralCode } from "../hooks/useReferralCode.ts";
+import { useAccountStore } from "../state/user.store.ts";
 
 export const MobileDrawerMenu = () => {
     const code = useReferralCode();
-    const {referralCode} = useReferralStore();
+    const { referralCode } = useReferralStore();
 
-    const {setOpen} = useModal();
-    const account = useAccount();
+    const { setOpen } = useModal();
+    const { account } = useAccountStore();
     const getShortAccount = useCallback(
         (account = "") => `${account.slice(0, 6)}...${account.slice(-4)}`,
         []
     );
-    const {isOpened, setOpened} = useMobileMenuDrawer();
-
-    const [referralTree, setReferralTree] = useState<Referral>();
-
-    const chainId = getChainId(wagmiConfig);
-
+    const { isAmbassador } = useAccountStore();
+    const { isOpened, setOpened } = useMobileMenuDrawer();
 
     const copyCode = React.useCallback(() => {
 
@@ -43,36 +35,12 @@ export const MobileDrawerMenu = () => {
                 )}
                 onClick={() => toast.dismiss(t)}
             >
-                <Check/>
+                <Check />
                 Copied code to clipboard
             </div>
         ))
     }, []);
 
-    useAccountEffect({
-        onConnect({address, chainId}) {
-            getReferralTreeByWallet(address, chainId)
-                .then(referralTree => {
-                    if (referralTree !== undefined) {
-                        setReferralTree(referralTree);
-                    }
-                })
-        },
-        onDisconnect() {
-            setReferralTree(undefined);
-        },
-    });
-
-    useEffect(() => {
-        if (account.address && account.isConnected) {
-            getReferralTreeByWallet(account.address, chainId)
-                .then(referralTree => {
-                    if (referralTree !== undefined) {
-                        setReferralTree(referralTree);
-                    }
-                })
-        }
-    }, [account.address, account.isConnected])
 
     return (
         <Drawer
@@ -113,13 +81,13 @@ export const MobileDrawerMenu = () => {
                             >
                                 Claim
                             </NavLink>
-                            {referralTree && (
+                            {isAmbassador && (
                                 <NavLink
                                     onClick={() => setOpened(false)}
                                     to={`/${code}/dashboard`}
                                     className={cn(
                                         "rounded-lg h-full min-w-16 hover:bg-white/20 py-3",
-                                        !referralTree ? 'hidden' : ''
+                                        !isAmbassador ? 'hidden' : ''
                                     )}
                                 >
                                     Dashboard: {referralCode}
@@ -127,7 +95,7 @@ export const MobileDrawerMenu = () => {
                                         onClick={copyCode}
                                         className="bg-transparent text-[#f716a2] hover:bg-gray-800 mx-2"
                                     >
-                                        <Copy/>
+                                        <Copy />
                                     </Button>
                                 </NavLink>
                             )}
@@ -144,7 +112,7 @@ export const MobileDrawerMenu = () => {
                             }}
                             className="bg-[#ff00a4] hover:bg-[#75014c] rounded-lg text-xl font-semibold"
                         >
-                            {account.isConnected ? getShortAccount(account.address) : 'Connect Wallet'}
+                            {account?.isConnected ? getShortAccount(account.address) : 'Connect Wallet'}
                         </Button>
                         {/* </DrawerClose> */}
 

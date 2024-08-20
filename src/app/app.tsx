@@ -1,20 +1,22 @@
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import { Layout } from "./components/layout";
-import { Login } from "./pages/login";
-import { Buy } from "./pages/buy";
-import { Claim } from "./pages/claim";
-import { NotFound } from "./pages/not-found";
-import { useWalletContext } from "./providers/wallet.context";
-import { WrongNetwork } from "./components/wrong-network";
-import { Referrals } from "./pages/referrals";
-import { Options } from "./pages/options";
-import { useAccountEffect } from "wagmi";
-import { track } from "./utils/analytics";
+import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
+import {Layout} from "./components/layout";
+import {Login} from "./pages/login";
+import {Buy} from "./pages/buy";
+import {Claim} from "./pages/claim";
+import {NotFound} from "./pages/not-found";
+import {useWalletContext} from "./providers/wallet.context";
+import {WrongNetwork} from "./components/wrong-network";
+import {Referrals} from "./pages/referrals";
+import {Options} from "./pages/options";
+import {useAccountEffect} from "wagmi";
+import {track} from "./utils/analytics";
 import {CodeNotFound} from "./pages/code-not-found.tsx";
 import ProtectedRoutes from "./utils/ProtectedRoutes.tsx";
+import AmbassadorProtectedRoutes from "./utils/AmbassadorProtectedRoutes.tsx";
+import {useInitHooks} from "./hooks/useInitHooks.ts";
 
 export function App() {
-  const { chainId, unsupportedChain } = useWalletContext();
+    const {chainId, unsupportedChain} = useWalletContext();
 
   useAccountEffect({
     onConnect(data) {
@@ -33,6 +35,8 @@ export function App() {
     return <WrongNetwork />;
   }
 
+  useInitHooks();
+
   return (
     <Router basename="/">
       <Routes>
@@ -43,6 +47,9 @@ export function App() {
             <Route path="/:code/buy" element={<Buy />} />
             <Route path="/:code/options" element={<Options />} />
             <Route path="/:code/claim" element={<Claim />} />
+          </Route>
+
+          <Route element={<AmbassadorProtectedRoutes/>}>
             <Route path="/:code/dashboard" element={<Referrals />} />
           </Route>
 

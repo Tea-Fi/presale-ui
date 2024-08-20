@@ -2,7 +2,7 @@ import React from "react";
 
 import { z } from "zod";
 import { isAddress } from "ethers";
-import { useAccount, useSignMessage } from "wagmi";
+import { useSignMessage } from "wagmi";
 import { Form, Formik, Field, ErrorMessage } from "formik";
 import { SlIcon } from "@shoelace-style/shoelace/dist/react";
 
@@ -10,6 +10,7 @@ import { Button } from "../ui";
 import { cn } from "../../utils/cn";
 import * as referrals from "../../utils/referrals";
 import type { Referral } from "../../utils/referrals";
+import { useAccountStore } from "../../state/user.store";
 
 const ReferralValidationSchema = z.object({
   walletAddress: z.string().refine((x) => isAddress(x), {
@@ -67,7 +68,7 @@ interface Props {
 }
 
 export const ReferralForm: React.FC<Props> = (props) => {
-  const account = useAccount();
+  const { account } = useAccountStore();
   const { signMessageAsync } = useSignMessage();
 
   const [showForm, setShowform] = React.useState(false);
@@ -134,7 +135,7 @@ export const ReferralForm: React.FC<Props> = (props) => {
     async (values: ReferralPayload) => {
       setError(undefined);
 
-      if (!account.address) {
+      if (!account?.address) {
         setError("Wallet not connected");
         return;
       }
@@ -172,14 +173,14 @@ export const ReferralForm: React.FC<Props> = (props) => {
 
   return (
     <>
-      <Button 
+      <Button
         disabled={isDisabled}
         onClick={toggleForm}
         className={cn(
           'px-8 py-8',
           'text-xl ',
           'hover:bg-[#3a0c2a] transition-none',
-          !isDisabled 
+          !isDisabled
             ? 'bg-[#f716a2] text-secondary-foreground'
             : ''
         )}>

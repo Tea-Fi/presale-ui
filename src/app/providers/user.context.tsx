@@ -1,8 +1,8 @@
-import type {FunctionComponent, ReactNode} from 'react';
-import {createContext, useContext, useState, useCallback, useEffect} from 'react';
-import {getReferralTreeByCode} from '../utils/referrals';
-import {useLocalStorage} from "usehooks-ts";
-import {useReferralStore} from "../state/referal.store.ts";
+import type { FunctionComponent, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { getReferralTreeByCode } from '../utils/referrals';
+import { useLocalStorage } from "usehooks-ts";
+import { useReferralStore } from "../state/referal.store.ts";
 
 export interface LoginResponse {
     status: LoginStatus | null;
@@ -29,9 +29,9 @@ export interface UserContext {
 
 export const UserContext = createContext<UserContext | null>(null);
 
-export const UserContextProvider: FunctionComponent<{ children: ReactNode }> = ({children}) => {
+export const UserContextProvider: FunctionComponent<{ children: ReactNode }> = ({ children }) => {
     const [status, setStatus] = useState<LoginStatus | null>(null);
-    const {setReferralId,setReferralCode} = useReferralStore();
+    const { setReferralId, setReferralCode, reset } = useReferralStore();
 
     const [agreedToTerms, setAgreedToTerms] = useLocalStorage<boolean>('agreedToTerms', false);
 
@@ -62,8 +62,7 @@ export const UserContextProvider: FunctionComponent<{ children: ReactNode }> = (
 
     async function logout() {
         setStatus(LoginStatus.LOGGED_OUT);
-        setReferralId(undefined);
-        setReferralCode(undefined);
+        reset();
     }
 
 

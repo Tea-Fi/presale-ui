@@ -8,7 +8,7 @@ import { EventLog } from "./common";
 import { cn, parseHumanReadable } from "../../utils";
 import { DAI, ETH, PRESALE_CLAIM_CONTRACT_ADDRESS, Referral, USDC, USDT, WBTC, WETH } from "../../utils/constants";
 import { ClaimAmount, createClaim, CreateClaimDto, getClaimActivePeriod, getClaimForPeriod, getClaimProof } from "../../utils/claim";
-import { useAccount, useChainId } from "wagmi";
+import { useChainId } from "wagmi";
 import { getClient } from "@wagmi/core";
 import { toast } from "sonner";
 import { wagmiConfig } from "../../config";
@@ -16,6 +16,7 @@ import { readContract, writeContract, waitForTransactionReceipt } from "@wagmi/c
 import { PRESALE_CLAIM_EARNING_FEES_ABI } from "../../utils/claim_abi";
 import { estimateContractGas, getGasPrice } from "viem/actions";
 import { formatEther } from "viem";
+import { useAccountStore } from "../../state/user.store";
 
 interface Props {
   tree: Referral;
@@ -31,11 +32,11 @@ interface Props {
 
 export const DashboardClaimButton: React.FC<Props> = (props) => {
   const chainId = useChainId();
-  const account = useAccount();
+  const { account } = useAccountStore();
 
   const [showConfirm, setConfirm] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
- 
+
   const [canClaim, setCanClaim] = React.useState<boolean>(false);
   const [proof, setClaimProof] = React.useState<Awaited<ReturnType<typeof getClaimProof>>>()
   const [gas, setGas] = React.useState<bigint>()
@@ -50,7 +51,7 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
   }), [chainId]);
 
   const getProofAndCheck = React.useCallback(async () => {
-    if (!account.address) {
+    if (!account?.address) {
       setCanClaim(false);
       return;
     }
@@ -69,19 +70,19 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
     }
 
     const periodClaimes = await getClaimForPeriod(chainId.toString(), period.id, account.address);
-   
+
     if (periodClaimes.length > 0) {
       setCanClaim(false);
       return;
     }
 
     const currentProof = await getClaimProof(chainId.toString(), account.address);
-    
+
     if (!currentProof) {
       setCanClaim(false);
       return;
     }
-    
+
     const isBanned = await readContract(wagmiConfig, {
       abi: PRESALE_CLAIM_EARNING_FEES_ABI,
       address: PRESALE_CLAIM_CONTRACT_ADDRESS[chainId] as `0x${string}`,
@@ -93,7 +94,7 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
       setCanClaim(false);
       return;
     }
-    
+
     const canClaimFromContract = await readContract(wagmiConfig, {
       abi: PRESALE_CLAIM_EARNING_FEES_ABI,
       address: PRESALE_CLAIM_CONTRACT_ADDRESS[chainId] as `0x${string}`,
@@ -118,25 +119,25 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
     }, new Date(period.endDate).getTime() - Date.now())
 
     setClaimProof(currentProof);
-  }, [account.address, chainId, setCanClaim, setClaimProof])
+  }, [account?.address, chainId, setCanClaim, setClaimProof])
 
   useEffect(() => {
     getProofAndCheck();
   }, [getProofAndCheck])
-  
+
   const toggleShowConfirm = React.useCallback(async () => {
     if (!proof) {
       return;
-    } 
-    
-   
+    }
+
+
     const client = getClient(wagmiConfig)!;
     const gasPrice = await getGasPrice(client);
     const gas = await estimateContractGas(client, {
       abi: PRESALE_CLAIM_EARNING_FEES_ABI,
       address: PRESALE_CLAIM_CONTRACT_ADDRESS[chainId] as `0x${string}`,
       functionName: 'claim',
-      account: account.address,
+      account: account?.address,
       args: [
         BigInt(proof.nonce),
         proof.tokens,
@@ -144,10 +145,10 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
         proof.proof
       ]
     })
-   
+
     setGas(gas * gasPrice)
     setConfirm(state => !state);
-  }, [chainId, account.address, proof])
+  }, [chainId, account?.address, proof])
 
   const cancel = React.useCallback(() => {
     setConfirm(false)
@@ -160,7 +161,7 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
 
     try {
       setLoading(true)
-     
+
       const hash = await writeContract(wagmiConfig, {
         abi: PRESALE_CLAIM_EARNING_FEES_ABI,
         address: PRESALE_CLAIM_CONTRACT_ADDRESS[chainId] as `0x${string}`,
@@ -179,9 +180,9 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
 
       if (receipt?.status == "reverted") {
         toast.error("Failed to claim. Please try again");
-       
+
         return;
-      } 
+      }
 
       const values = {
         walletAddress: props.address,
@@ -199,7 +200,7 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
           };
         }),
       } as CreateClaimDto;
-      
+
 
       if (receipt.status == "success") {
         await createClaim(values);
@@ -210,14 +211,14 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
 
         props.onClaim();
         setCanClaim(false)
-      } 
+      }
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
       setConfirm(false);
 
-      await getProofAndCheck(); 
+      await getProofAndCheck();
     }
 
   }, [props.address, proof, canClaim, getProofAndCheck])
@@ -225,24 +226,24 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
 
   return (
     <>
-      <Button 
+      <Button
         disabled={!canClaim}
         className={cn(
           'px-16 py-8 text-xl',
 
-          ...(canClaim 
+          ...(canClaim
             ? [
-                'text-xl bg-[#f716a2] text-secondary-foreground',
-                'hover:bg-[#3a0c2a] transition-none'
-              ]
+              'text-xl bg-[#f716a2] text-secondary-foreground',
+              'hover:bg-[#3a0c2a] transition-none'
+            ]
             : [])
-          
+
         )}
         onClick={toggleShowConfirm}
       >
         Claim
       </Button>
-      
+
       {showConfirm && (
         <div className="referral-form-backdrop">
           <article className="referral-form">
@@ -265,13 +266,13 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
                   return (
                     <React.Fragment key={`token-${token.symbol}`}>
                       <div className="place-self-end">
-                        {token.symbol} 
+                        {token.symbol}
                       </div>
 
                       <div className="place-self-start">
                         {parseHumanReadable(BigInt(amount), token.decimals, 6)}
                       </div>
-                      
+
                       {/* <div className="place-self-start">
                         ~${parseHumanReadable(entry.amount.soldInUsd, 10, 2)}
                       </div> */}
@@ -279,11 +280,11 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
                   )
                 })}
               </div>
-              
+
               <div className="text-center text-sm mt-8">
                 {gas !== undefined && (
                   <div>
-                    Estimated Gas: <br/> 
+                    Estimated Gas: <br />
                     ~ETH {formatEther(gas, "wei")}
                   </div>
                 )}
@@ -301,7 +302,7 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
                 )}
               >
                 <>
-                  {loading && <Spinner />} 
+                  {loading && <Spinner />}
                   {!loading && 'Approve'}
                 </>
               </Button>
