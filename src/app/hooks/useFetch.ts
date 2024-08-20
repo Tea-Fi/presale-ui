@@ -1,5 +1,5 @@
-import {useState, useEffect} from "react";
-import {api} from "../utils/api.ts";
+import { useState, useEffect } from "react";
+import { api } from "../utils/api.ts";
 
 const useFetch = <T>(url: string) => {
     const [data, setData] = useState<T>();

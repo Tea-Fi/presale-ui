@@ -2,10 +2,11 @@ import {create} from 'zustand';
 import {persist} from 'zustand/middleware';
 
 export type ReferralStore = {
-    referralId: number | undefined;
-    referralCode: string | undefined;
-    setReferralId: (id: number|undefined) => void;
-    setReferralCode: (code: string|undefined) => void;
+    referralId?: number;
+    referralCode?: string;
+    setReferralId: (id?: number) => void;
+    setReferralCode: (code?: string) => void;
+    reset: () => void;
 };
 
 export const useReferralStore = create<ReferralStore>()(
@@ -16,6 +17,10 @@ export const useReferralStore = create<ReferralStore>()(
                 referralCode: undefined,
                 setReferralId: (id) => set({referralId: id}),
                 setReferralCode: (code) => set({referralCode: code}),
+                reset: () => set({
+                    referralId: undefined,
+                    referralCode: undefined
+                })
             }), {
             name: 'referral-storage'
         }

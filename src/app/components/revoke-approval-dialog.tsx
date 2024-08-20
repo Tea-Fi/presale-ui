@@ -10,15 +10,16 @@ import {
     DialogTitle
 } from "./ui";
 import {
-    getChainId, 
+    getChainId,
 } from "@wagmi/core";
 import { wagmiConfig } from "../config";
 import { PRESALE_CONTRACT_ADDRESS, USDT } from "../utils/constants";
 import { SAFE_ERC20_ABI } from "../utils/safe-erc20-abi";
 import { useEffect, useState } from "react";
-import {  useConnectedWalletMobile, useRevokeApprovalDialog } from "../hooks";
+import { useConnectedWalletMobile, useRevokeApprovalDialog } from "../hooks";
 import Spinner from "./spinner";
-import { useAccount, useTransactionCount, useWriteContract } from "wagmi";
+import { useTransactionCount, useWriteContract } from "wagmi";
+import { useAccountStore } from "../state/user.store";
 
 
 export const RevokeApprovalDialog = () => {
@@ -36,24 +37,23 @@ export const RevokeApprovalDialog = () => {
     const [isApproveError, setApproveError] = useState<boolean>(false);
     const [isApproveSuccess, setApproveSuccess] = useState<boolean>(false);
 
-
-    const { address } = useAccount();
+    const { account } = useAccountStore();
     const { data: txCount, refetch } = useTransactionCount({
-        address: address,
+        address: account?.address,
     });
 
 
     const {
         writeContract,
         isError
-    } = useWriteContract({config: wagmiConfig});
+    } = useWriteContract({ config: wagmiConfig });
 
 
     const handleApproveUSDT = (isRevoke: boolean = true) => {
         try {
             setIsLoading(true);
 
-            if(isRevoke) {
+            if (isRevoke) {
                 setRevokePending(true);
             } else {
                 setApprovePending(true);
@@ -68,14 +68,14 @@ export const RevokeApprovalDialog = () => {
                     isRevoke ? 0 : maxUint256,
                 ],
             });
-            
+
 
             // opens mobile metamask automaticly
             // NOTE: works only on mobile
             open();
 
         } catch (error) {
-            if(isRevoke) {
+            if (isRevoke) {
                 setRevokeError(true);
             } else {
                 setApproveError(true);
@@ -84,11 +84,11 @@ export const RevokeApprovalDialog = () => {
     };
 
     useEffect(() => {
-        if(isRevokePending || isApprovePending) {
+        if (isRevokePending || isApprovePending) {
             return;
         }
 
-        if(isRevokeSuccess && !isApproveSuccess) {
+        if (isRevokeSuccess && !isApproveSuccess) {
             return;
         }
 
@@ -106,13 +106,13 @@ export const RevokeApprovalDialog = () => {
 
 
     useEffect(() => {
-        if(isError) {
+        if (isError) {
             setIsLoading(false);
 
-            if(isRevokePending) {
+            if (isRevokePending) {
                 setRevokePending(false);
                 setRevokeError(true);
-            } else if(isApprovePending) {
+            } else if (isApprovePending) {
                 setApprovePending(false);
                 setApproveError(true);
             }
@@ -121,21 +121,21 @@ export const RevokeApprovalDialog = () => {
 
     useEffect(() => {
         const timerId = setInterval(async () => {
-            const {data: newTxCount} = await refetch();
+            const { data: newTxCount } = await refetch();
 
-            if(txCount === undefined) {
+            if (txCount === undefined) {
                 return;
             }
 
 
-            if(newTxCount !== txCount) {
+            if (newTxCount !== txCount) {
                 setIsLoading(false);
                 clearInterval(timerId);
 
-                if(isRevokePending) {
+                if (isRevokePending) {
                     setRevokePending(false);
                     setRevokeSuccess(true);
-                } else if(isApprovePending) {
+                } else if (isApprovePending) {
                     setApprovePending(false);
                     setApproveSuccess(true);
                     setAllowanceChanged(true);
@@ -157,7 +157,7 @@ export const RevokeApprovalDialog = () => {
             <DialogContent className="border-none bg-[rgb(19,19,19)] sm:max-w-[425px]">
                 <DialogHeader className="text-white gap-3">
                     <DialogTitle className="text-center">Revoke & Approve</DialogTitle>
-                    
+
                     <DialogDescription className="bg-amber-700/20 rounded-lg p-3 text-amber-700">
                         The standard of the approval of the USDT token differs from the standard of ERC20 tokens, which is why in order to change the allowance, you need to make a revoke.
                     </DialogDescription>
@@ -184,12 +184,12 @@ export const RevokeApprovalDialog = () => {
                         disabled={isLoading}
                         type="submit"
                         onClick={() => {
-                            if(isRevokeSuccess && isApproveSuccess) {
+                            if (isRevokeSuccess && isApproveSuccess) {
                                 setOpened(false);
                                 return;
                             }
                             handleApproveUSDT(!isRevokeSuccess);
-                        }} 
+                        }}
                         className="outline-none w-full bg-[#ff00a6] rounded-lg text-[#330121] hover:bg-[#880357] text-xl font-bold"
                     >
                         {isLoading ? <Spinner /> : isRevokeSuccess && !isApproveSuccess ? "Approve" : isApproveSuccess ? "Close" : "Revoke"}

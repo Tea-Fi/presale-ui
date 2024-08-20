@@ -3,7 +3,7 @@ import { getClient, readContract } from "@wagmi/core";
 
 import "@xyflow/react/dist/style.css";
 
-import { useAccount, useAccountEffect, useChainId } from 'wagmi';
+import { useAccountEffect, useChainId } from 'wagmi';
 import { getReferralTreeByCode, getReferralTreeByWallet, Referral } from '../utils/referrals';
 import { wagmiConfig } from "../config";
 
@@ -14,7 +14,7 @@ import { DashboardClaimButton } from "../components/referral/dashboard-claim-but
 import { EventLogWithTimestamp } from "../components/referral/common";
 import { ClaimAmount, ClaimRecord, getClaimActivePeriod, getClaimedAmount, getClaimForPeriod, getClaimProof, getLastClaim, getPeriod } from "../utils/claim";
 import { CountdownByCheckpoint } from "../components/countdown-by-checkpoints";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 import Spinner from "../components/spinner";
 
@@ -24,6 +24,8 @@ import { PRESALE_CLAIM_CONTRACT_ADDRESS, PRESALE_CONTRACT_ADDRESS } from "../uti
 import { PRESALE_ABI } from "../utils/presale_abi";
 import { ReactFlowProvider } from "@xyflow/react";
 import { PRESALE_CLAIM_EARNING_FEES_ABI } from "../utils/claim_abi";
+import { useAccountStore } from "../state/user.store";
+import { useReferralStore } from "../state/referal.store";
 
 interface SectionProps {
   title?: string;
@@ -39,17 +41,17 @@ const ReferralSection: React.FC<SectionProps & React.PropsWithChildren> = (props
 };
 
 export const Referrals = () => {
-  const chainId = useChainId(); 
+  const chainId = useChainId();
 
-  const { code } = useParams();
+  const { referralCode } = useReferralStore();
 
   // const [period, setPeriod] = useState<ClaimPeriod>();
   const [isClaimActive, setClaimActive] = useState<boolean>(false);
   const [isClaimRoundFinished, setClaimRoundFinished] = useState<boolean>(false);
   const [isMatchingReferral, setIsMatchingReferral] = useState<boolean>(false)
- 
+
   const location = useLocation();
-  const account = useAccount();
+  const { account } = useAccountStore();
 
   const [claimPeriod, setClaimPeriod] = useState<{ start: string, end: string }>();
 
@@ -58,8 +60,6 @@ export const Referrals = () => {
   const ROUND_DURATION = ONE_DAY_IN_MS * 14 - ROUND_CLAIM_DURATION;
 
 
-  const { address, isConnected } = useAccount();
-  
   const [logs, setLogs] = useState<EventLogWithTimestamp[]>();
   const [claimed, setClaimed] = useState<ClaimAmount[]>();
   const [lastClaim, setLastClaim] = useState<ClaimRecord>();
@@ -69,15 +69,14 @@ export const Referrals = () => {
   const [canClaim, setCanClaim] = useState(false);
 
   const fetchClaimed = useCallback(async () => {
-    if (!address) {
-      return;
-    }
-    const claimed = await getClaimedAmount(address, chainId)
+    if (!account?.address) return;
+
+    const claimed = await getClaimedAmount(account.address, chainId)
     setClaimed(claimed);
-  }, [address, chainId]);
+  }, [account?.address, chainId]);
 
   const getProofAndCheck = useCallback(async () => {
-    if (!account.address) {
+    if (!account?.address) {
       setCanClaim(false);
       return;
     }
@@ -96,19 +95,19 @@ export const Referrals = () => {
     }
 
     const periodClaimes = await getClaimForPeriod(chainId.toString(), period.id, account.address);
-   
+
     if (periodClaimes.length > 0) {
       setCanClaim(false);
       return;
     }
 
     const currentProof = await getClaimProof(chainId.toString(), account.address);
-    
+
     if (!currentProof) {
       setCanClaim(false);
       return;
     }
-    
+
     const isBanned = await readContract(wagmiConfig, {
       abi: PRESALE_CLAIM_EARNING_FEES_ABI,
       address: PRESALE_CLAIM_CONTRACT_ADDRESS[chainId] as `0x${string}`,
@@ -120,7 +119,7 @@ export const Referrals = () => {
       setCanClaim(false);
       return;
     }
-    
+
     const canClaimFromContract = await readContract(wagmiConfig, {
       abi: PRESALE_CLAIM_EARNING_FEES_ABI,
       address: PRESALE_CLAIM_CONTRACT_ADDRESS[chainId] as `0x${string}`,
@@ -143,32 +142,32 @@ export const Referrals = () => {
     setTimeout(() => {
       getProofAndCheck()
     }, new Date(period.endDate).getTime() - Date.now())
-  }, [account.address, chainId, setCanClaim])
+  }, [account?.address, chainId, setCanClaim])
 
   const getReferralTree = useCallback(async () => {
     const search = location.search;
     const urlParams = new URLSearchParams(search);
-    const refAddress = urlParams.get("address") || address;
+    const refAddress = urlParams.get("address") || account?.address;
 
     if (!refAddress) {
       return;
     }
-    
+
     const refTree = await getReferralTreeByWallet(refAddress, chainId);
-    const pageRefTree = !!code 
-      ? await getReferralTreeByCode(code, chainId)
+    const pageRefTree = !!referralCode
+      ? await getReferralTreeByCode(referralCode, chainId)
       : undefined;
-      
+
     if (!pageRefTree) {
       return;
     }
-   
-    setPageReferralTree(pageRefTree) 
-    setIsMatchingReferral(refTree?.referral === code);
+
+    setPageReferralTree(pageRefTree)
+    setIsMatchingReferral(refTree?.referral === referralCode);
 
     const climedAmount = await getClaimedAmount(pageRefTree.wallet, chainId);
     const lastClaim = await getLastClaim(pageRefTree.wallet, chainId);
-    
+
     const client = getClient(wagmiConfig);
     const abi = getAbiItem({ abi: PRESALE_ABI, name: 'BuyTokens' }) as AbiEvent;
     const logs = await getLogs(client!, {
@@ -204,40 +203,40 @@ export const Referrals = () => {
 
           cache[log.blockNumber.toString()] = time.getTime().toString();
 
-          return {...log, time };
+          return { ...log, time };
         })
       );
-      
+
       targetLogs.push(...resultLogs);
       queue.splice(0, 5);
     }
 
     localStorage.setItem('logs-timestamps', JSON.stringify(cache));
-    
+
     setLogs(targetLogs);
     setLastClaim(lastClaim);
     setClaimed(climedAmount);
     setReferralTree(pageRefTree);
-  }, [address, chainId, location, code])
+  }, [account?.address, chainId, location, referralCode])
 
   useEffect(() => {
     getPeriod().then(setClaimPeriod)
   }, [])
-  
+
   const refertchReferralTree = useCallback(() => {
     getReferralTree()
   }, [getReferralTree])
 
-  
+
   useEffect(() => {
     getProofAndCheck();
   }, [getProofAndCheck])
 
   useEffect(() => {
-    if (address && isConnected) {
+    if (account?.address && account.isConnected) {
       getReferralTree();
     }
-  }, [address, isConnected]);
+  }, [account?.address, account?.isConnected]);
 
   useAccountEffect({
     onConnect() {
@@ -248,21 +247,21 @@ export const Referrals = () => {
     },
   })
 
-  if (!pageReferralTree || !address || !claimed || !logs) {
+  if (!pageReferralTree || !account?.address || !claimed || !logs) {
     return (
       <div className="grid place-content-center">
         <Spinner />
       </div>
-    ) 
+    )
   }
 
   return (
     <div className="referrals page">
-      {pageReferralTree && address && (
+      {pageReferralTree && account?.address && (
         <div className="flex flex-col gap-8">
           <ReferralSection>
             <ReferralDashboard
-              address={address}
+              address={account?.address}
               tree={pageReferralTree}
               logs={logs}
               claimed={claimed}
@@ -273,7 +272,7 @@ export const Referrals = () => {
           {isMatchingReferral && (
             <ReferralSection>
               {claimPeriod && (
-                <CountdownByCheckpoint 
+                <CountdownByCheckpoint
                   canClaim={canClaim}
                   waitingClaimDuration={ROUND_DURATION}//ROUND_DURATION
                   pickClaimDuration={ROUND_CLAIM_DURATION}//ROUND_CLAIM_DURATION
@@ -282,7 +281,7 @@ export const Referrals = () => {
                   onChange={(inClaim) => setClaimActive(inClaim)}
                   onFinish={() => setClaimRoundFinished(true)}
                 />
-              )} 
+              )}
               <div className="referral-title-row">
                 <div className="text-start">
                   <div className="title">Claim</div>
@@ -295,7 +294,7 @@ export const Referrals = () => {
                   disabled={!isClaimActive}
                   tree={referralTree!}
                   logs={logs}
-                  address={address}
+                  address={account?.address}
                   claimed={claimed}
                   onClaim={fetchClaimed}
                 />
@@ -313,7 +312,7 @@ export const Referrals = () => {
               </div>
 
               {isMatchingReferral && (
-                <ReferralForm 
+                <ReferralForm
                   referralTree={referralTree!}
                   onSubmit={refertchReferralTree}
                 />

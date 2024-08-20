@@ -8,7 +8,6 @@ import {
 } from "react";
 import type { FunctionComponent, ReactNode } from "react";
 import {
-  useAccount,
   useConnections,
   useConnectorClient,
   useDisconnect,
@@ -19,6 +18,7 @@ import { JsonRpcProvider, ethers } from "ethers";
 import { ERC20_ABI } from "../utils/erc20_abi";
 import { USDT, USDC, WETH, WBTC } from "../utils/constants";
 import { SUPPORTED_NETWORK } from "../config";
+import { useAccountStore } from "../state/user.store";
 
 export enum WalletEvents {
   REQUEST_ACCOUNTS = "eth_requestAccounts",
@@ -74,7 +74,7 @@ export const WalletProvider: FunctionComponent<{ children: ReactNode }> = ({
   const { open, setOpen } = useModal();
   const { data } = useConnectorClient();
   const connections = useConnections();
-  const { isDisconnected } = useAccount();
+  const accountStore = useAccountStore();
   const { disconnect: fullDisconnect } = useDisconnect();
 
   const [values, setValues] = useState<
@@ -89,7 +89,7 @@ export const WalletProvider: FunctionComponent<{ children: ReactNode }> = ({
 
   //need to full disconnect because sometimes we get 2 connections instead of 1
   useEffect(() => {
-    if (isDisconnected && connections?.length) {
+    if (accountStore.account?.isDisconnected && connections?.length) {
       connections.forEach(({ connector }) => {
         fullDisconnect({ connector });
       });
