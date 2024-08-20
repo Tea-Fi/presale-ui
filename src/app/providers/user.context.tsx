@@ -62,8 +62,8 @@ export const UserContextProvider: FunctionComponent<{ children: ReactNode }> = (
 
     async function logout() {
         setStatus(LoginStatus.LOGGED_OUT);
-        setReferralId(null);
-        setReferralCode(null);
+        setReferralId(undefined);
+        setReferralCode(undefined);
     }
 
 
