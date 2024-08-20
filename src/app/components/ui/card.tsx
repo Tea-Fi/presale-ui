@@ -1,28 +1,23 @@
 import React, { useState } from "react";
 import { cn } from "../../utils/cn";
 import { AnimatePresence, motion } from "framer-motion";
-import { useCountdownStore } from "../../hooks";
-import { track } from "../../utils/analytics";
 
-type Item = {
-  title: string;
-  description: string;
-  link: string;
-  value?: number,
-  max?: number,
-}
+import { track } from "../../utils/analytics";
+import {useCountdownStore} from "../../state/countdown.store.ts";
+import {ProjectInfoOption} from "../../../types/options.ts";
+
 
 export const CardHoverEffect = ({
   items,
   className,
 }: {
-  items: Item[];
+  items: ProjectInfoOption[];
   className?: string;
 }) => {
   let [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const { isFinished } = useCountdownStore();
 
-  const onOptionClick = React.useCallback((item: Item) => {
+  const onOptionClick = React.useCallback((item: ProjectInfoOption) => {
     track({
       eventName: 'select_option',
       parameters: { option: item.title }

@@ -1,4 +1,5 @@
 import { zeroAddress, Address } from "viem";
+import {InvestmentInfoOption} from "../../types/options.ts";
 
 type Currency = Record<number, Address>;
 type ChainAddress = Record<number, string>;
@@ -47,7 +48,7 @@ export interface Referral {
   subleads?: { [key: string]: Referral };
 }
 
-export const investmentInfo = {
+export const investmentInfo: Record<string,InvestmentInfoOption>= {
   "0.16": {
     id: 0,
     tge: "10% - released at TGE",
@@ -63,4 +64,4 @@ export const investmentInfo = {
     tge: "50% - released at TGE",
     vested: "50% - vested linearly over 2 months",
   },
-} as Record<string, { id: number; tge: string; vested: string }>;
+};
