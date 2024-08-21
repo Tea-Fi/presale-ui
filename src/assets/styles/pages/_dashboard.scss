@@ -1,109 +1,109 @@
 .dashboard-container {
-    display: flex;
+  display: flex;
 
-    flex-flow: column nowrap;
-    justify-content: center;
-    align-items: center;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: center;
+
+  gap: 1rem;
+
+  header {
+    font-size: 1.5rem;
+    font-weight: 700;
+
+    color: $color-text;
+  }
+
+  main {
+    display: grid;
+
+    grid-template-columns: repeat(auto-fit, 320px);
+    grid-template-rows: repeat(auto-fit, 120px);
+
+    @media screen and (max-width: 720px) {
+      grid-template-columns: 320px;
+    }
 
     gap: 1rem;
 
-    header {
-        font-size: 1.5rem;
-        font-weight: 700;
+    width: 100%;
+    max-width: 1000px;
 
-        color: $color-text;
+    place-content: center;
+  }
+
+  .dashboard-filters div {
+    display: grid;
+    place-content: center;
+
+    background-color: $bg-popup;
+    border-radius: 0.5rem;
+
+    padding: 0.5rem;
+
+    width: 40px;
+    height: 40px;
+
+    font-size: 1rem;
+
+    transition: background-color 300ms ease-in-out;
+
+    &[data-selected="true"] {
+      background-color: $color-brand;
     }
 
-    main {
-        display: grid;
+    &:hover {
+      cursor: pointer;
+    }
+  }
 
-        grid-template-columns: repeat(auto-fit, 320px);
-        grid-template-rows: repeat(auto-fit, 120px);
+  .dashboard-card {
+    display: grid;
 
-        @media screen and (max-width: 720px) {
-            grid-template-columns: 320px;
-        }
+    grid-template-rows: repeat(2, auto);
+    grid-template-columns: 5rem 1fr;
 
-        gap: 1rem;
+    grid-template-areas:
+      "icon title"
+      "icon value";
 
-        width: 100%;
-        max-width: 1000px;
+    place-content: center;
+    place-items: center start;
 
-        place-content: center;
+    border: 1px solid $color-border;
+    border-radius: 1rem;
+
+    background-color: $bg-base;
+
+    padding: 1rem;
+    padding-left: 0;
+
+    &__icon {
+      grid-area: icon;
+
+      place-self: center;
+
+      & > svg {
+        width: 35px;
+        height: 35px;
+
+        color: $color-brand;
+      }
     }
 
-    .dashboard-filters div {
-        display: grid;
-        place-content: center;
+    &__title {
+      font-size: 1.25rem;
+      color: $color-brand;
 
-        background-color: $bg-popup;
-        border-radius: 0.5rem;
-
-        padding: 0.5rem;
-
-        width: 40px;
-        height: 40px;
-
-        font-size: 1rem;
-
-        transition: background-color 300ms ease-in-out;
-
-        &[data-selected=true] {
-            background-color: $color-brand;
-        }
-
-        &:hover {
-            cursor: pointer;
-        }
+      grid-area: title;
     }
 
-    .dashboard-card {
-        display: grid;
+    &__value {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: $color-text-secondary;
 
-        grid-template-rows: repeat(2, auto);
-        grid-template-columns: 5rem 1fr;
-
-        grid-template-areas:
-            'icon title'
-            'icon value';
-
-        place-content: center;
-        place-items: center start;
-
-        border: 1px solid $color-border;
-        border-radius: 1rem;
-
-        background-color: $bg-base;
-
-        padding: 1rem;
-        padding-left: 0; 
-
-        &__icon {
-            grid-area: icon;
-
-            place-self: center;
-
-            & > svg {
-                width: 35px;
-                height: 35px;
-
-                color: $color-brand;
-            }
-        }
-       
-        &__title {
-            font-size: 1.25rem;
-            color: $color-brand;
-
-            grid-area: title;
-        }
-
-        &__value {
-            font-size: 1.5em; 
-            font-weight: bold;
-            color: $color-text-secondary;
-
-            grid-area: value;
-        }
+      grid-area: value;
     }
+  }
 }

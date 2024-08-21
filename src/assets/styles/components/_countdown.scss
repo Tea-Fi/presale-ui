@@ -13,14 +13,16 @@
     border-top-right-radius: 10px;
   }
 
-  &[data-hidden='false'] {
+  &[data-hidden="false"] {
     opacity: 1;
 
     .countdown__inner {
       overflow: hidden;
       max-height: 100px;
       opacity: 1;
-      transition: max-height $duration-max-height ease-in-out, opacity $duration-opacity ease-in-out $delay-opacity;
+      transition:
+        max-height $duration-max-height ease-in-out,
+        opacity $duration-opacity ease-in-out $delay-opacity;
     }
   }
 

@@ -33,6 +33,19 @@
     --ring: 222.2 84% 4.9%;
 
     --radius: 0.5rem;
+
+    --sl-color-primary: #ff00a4;
+    --sl-color-primary-50: #ff00a4;
+    --sl-color-primary-100: #ff0066;
+    --sl-color-primary-200: #e60066;
+    --sl-color-primary-300: #cc0066;
+    --sl-color-primary-400: #b60066;
+    --sl-color-primary-500: #a60066;
+    --sl-color-primary-600: #960066;
+    --sl-color-primary-700: #800066;
+    --sl-color-primary-800: #660066;
+    --sl-color-primary-900: #500066;
+    --sl-color-primary-950: #330066;
   }
 
   .dark {
@@ -70,6 +83,7 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-black text-foreground min-w-full;
   }
@@ -85,26 +99,33 @@
     -moz-appearance: textfield;
   }
 
-
   .bg-loader-child {
     position: relative;
-    background: linear-gradient(90deg, #FF3187 0%, #B22383);
+    background: linear-gradient(90deg, #ff3187 0%, #b22383);
     box-shadow: -5px 0 5px rgb(0, 0, 0, 0.3);
   }
 
   .bg-loader-child::before {
-    content: '';
-        position: absolute;
-        border-radius: 9999px;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, rgba(184, 34, 96, 0.3) 45%, rgba(0, 0, 0, 0.5) 100%);
+    content: "";
+    position: absolute;
+    border-radius: 9999px;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.3) 0%,
+      rgba(184, 34, 96, 0.3) 45%,
+      rgba(0, 0, 0, 0.5) 100%
+    );
   }
 
   .bg-loader-parent {
-    background: linear-gradient(90deg, rgb(158, 157, 157) 0%, rgba(138,138,138, 1) 100%);
+    background: linear-gradient(
+      90deg,
+      rgb(158, 157, 157) 0%,
+      rgba(138, 138, 138, 1) 100%
+    );
   }
-
 }
 
 #__CONNECTKIT__ svg[height="268"] {
