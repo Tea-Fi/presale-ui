@@ -210,7 +210,7 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
           />
 
           <DashboardBlock
-            title="Unclaimed Earning"
+            title="Withdrawable earnings"
             value={`$${usdFormatter.format(parseHumanReadable(info!.unclaimedEarnings, 10, 2))}`}
             icon={<BarChart2 />}
           />

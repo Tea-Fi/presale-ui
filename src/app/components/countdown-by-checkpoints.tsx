@@ -30,7 +30,6 @@ export const CountdownByCheckpoint = ({
   onFinish?: () => void;
 }) => {
   const activePeriod = useClaimPeriod();
-
   const startDateNormal = startDate
     ? new Date(startDate).getTime()
     : Date.now();
@@ -271,7 +270,7 @@ export const CountdownByCheckpoint = ({
       return (
         <div className="flex flex-col gap-1 w-full text-end mb-4">
           <span className="text-xl">
-            {inClaim ? "Claim your tokens" : "Next available claim"}
+            {inClaim ? "Claim your tokens" : "Next withdrawal window opens in"}
           </span>
           <span className={className}>
             {d > 1 ? `${d} Days` : d == 1 ? `${d} Day` : ""} {h}:{m}:{s}
