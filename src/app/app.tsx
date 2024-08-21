@@ -13,6 +13,7 @@ import { track } from "./utils/analytics";
 import { CodeNotFound } from "./pages/code-not-found.tsx";
 import ProtectedRoutes from "./utils/ProtectedRoutes.tsx";
 import AmbassadorProtectedRoutes from "./utils/AmbassadorProtectedRoutes.tsx";
+import ClaimProtectedRoutes from "./utils/ClaimProtectedRoutes.tsx";
 
 export function App() {
   const { chainId, unsupportedChain } = useWalletContext();
@@ -43,15 +44,19 @@ export function App() {
           <Route element={<ProtectedRoutes />}>
             <Route path="/:code/buy" element={<Buy />} />
             <Route path="/:code/options" element={<Options />} />
-            <Route path="/:code/claim" element={<Claim />} />
+
+            <Route element={<ClaimProtectedRoutes />}>
+              <Route path="/:code/claim" element={<Claim />} />
+            </Route>
+
             <Route element={<AmbassadorProtectedRoutes />}>
               <Route path="/:code/dashboard" element={<Referrals />} />
             </Route>
           </Route>
           <Route path="/code-not-found" element={<CodeNotFound />} />
           <Route path="*" element={<NotFound />} />
-        </Route >
-      </Routes >
-    </Router >
+        </Route>
+      </Routes>
+    </Router>
   );
 }

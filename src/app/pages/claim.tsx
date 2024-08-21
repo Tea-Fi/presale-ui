@@ -122,7 +122,9 @@ export const Claim = () => {
                 </span>
                 <span className="mt-2 text-base">
                   Claim at TGE
-                  {projectInfo.tge !== null ? ` (${projectInfo.tge}%)` : ""}:{" "}
+                  {projectInfo.tge !== null
+                    ? ` (${projectInfo.tge}%)`
+                    : ""}:{" "}
                   {projectInfo.tge !== null &&
                   handleCalculateTgeAmount(
                     projectInfo.balance,
