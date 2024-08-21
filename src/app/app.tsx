@@ -50,8 +50,8 @@ export function App() {
           </Route>
           <Route path="/code-not-found" element={<CodeNotFound />} />
           <Route path="*" element={<NotFound />} />
-        </Route >
-      </Routes >
-    </Router >
+        </Route>
+      </Routes>
+    </Router>
   );
 }

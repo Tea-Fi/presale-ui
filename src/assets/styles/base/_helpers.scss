@@ -15,7 +15,6 @@
   }
 }
 
-
 .popup {
   --bg-color: #{$bg-popup};
   --arrow-size: 0.25em;
@@ -25,7 +24,6 @@
     border-top-left-radius: 1px;
   }
 
-
   &::part(popup) {
     box-shadow: $shadow;
     background-color: var(--bg-color);
@@ -33,4 +31,3 @@
     padding: 8px 12px;
   }
 }
-
