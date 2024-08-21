@@ -3,7 +3,7 @@ import { getClient, readContract } from "@wagmi/core";
 
 import "@xyflow/react/dist/style.css";
 
-import { useAccountEffect, useChainId } from "wagmi";
+import { useAccount, useAccountEffect, useChainId } from "wagmi";
 import {
   getReferralTreeByCode,
   getReferralTreeByWallet,
@@ -27,7 +27,7 @@ import {
   getPeriod,
 } from "../utils/claim";
 import { CountdownByCheckpoint } from "../components/countdown-by-checkpoints";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import Spinner from "../components/spinner";
 
@@ -40,9 +40,7 @@ import {
 import { PRESALE_ABI } from "../utils/presale_abi";
 import { ReactFlowProvider } from "@xyflow/react";
 import { PRESALE_CLAIM_EARNING_FEES_ABI } from "../utils/claim_abi";
-import { useAccountStore } from "../state/user.store";
 import { useReferralStore } from "../state/referal.store";
-
 interface SectionProps {
   title?: string;
 }
@@ -60,17 +58,16 @@ const ReferralSection: React.FC<SectionProps & React.PropsWithChildren> = (
 
 export const Referrals = () => {
   const chainId = useChainId();
+  const navigate = useNavigate();
 
   const { referralCode } = useReferralStore();
-
-  // const [period, setPeriod] = useState<ClaimPeriod>();
   const [isClaimActive, setClaimActive] = useState<boolean>(false);
   const [isClaimRoundFinished, setClaimRoundFinished] =
     useState<boolean>(false);
   const [isMatchingReferral, setIsMatchingReferral] = useState<boolean>(false);
 
   const location = useLocation();
-  const { account } = useAccountStore();
+  const account = useAccount();
 
   const [claimPeriod, setClaimPeriod] = useState<{
     start: string;
@@ -278,6 +275,7 @@ export const Referrals = () => {
     },
     onDisconnect() {
       setReferralTree(undefined);
+      navigate("/");
     },
   });
 

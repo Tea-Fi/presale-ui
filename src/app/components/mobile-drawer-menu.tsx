@@ -17,19 +17,20 @@ import React from "react";
 import { Check, Copy } from "lucide-react";
 import { useReferralStore } from "../state/referal.store.ts";
 import { useReferralCode } from "../hooks/useReferralCode.ts";
-import { useAccountStore } from "../state/user.store.ts";
+import { useAccount } from "wagmi";
+import { useIsAmbassador } from "../hooks/useIsAmbassador.ts";
 
 export const MobileDrawerMenu = () => {
   const code = useReferralCode();
   const { referralCode } = useReferralStore();
+  const { isAmbassador } = useIsAmbassador();
 
   const { setOpen } = useModal();
-  const { account } = useAccountStore();
+  const account = useAccount();
   const getShortAccount = useCallback(
     (account = "") => `${account.slice(0, 6)}...${account.slice(-4)}`,
     [],
   );
-  const { isAmbassador } = useAccountStore();
   const { isOpened, setOpened } = useMobileMenuDrawer();
 
   const copyCode = React.useCallback(() => {
