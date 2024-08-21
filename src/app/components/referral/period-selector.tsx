@@ -1,10 +1,10 @@
 import React from "react";
 
 export enum PeriodFilter {
-  day = '1D',
-  week = '1W',
-  month = '1M',
-  threeMonths = '3M'
+  day = "1D",
+  week = "1W",
+  month = "1M",
+  threeMonths = "3M",
 }
 
 interface PeriodSelectorProps {
@@ -12,7 +12,9 @@ interface PeriodSelectorProps {
 }
 
 export const DashboardPeriodSelector = (props: PeriodSelectorProps) => {
-  const [periodFilter, setPeriodFilter] = React.useState<PeriodFilter>(PeriodFilter.threeMonths);
+  const [periodFilter, setPeriodFilter] = React.useState<PeriodFilter>(
+    PeriodFilter.threeMonths,
+  );
 
   React.useEffect(() => {
     const date = new Date();
@@ -36,11 +38,11 @@ export const DashboardPeriodSelector = (props: PeriodSelectorProps) => {
     }
 
     props.onChange(periodFilter, date);
-  }, [periodFilter])
+  }, [periodFilter]);
 
   return (
     <div className="dashboard-filters flex flex-row gap-2">
-      {Object.values(PeriodFilter).map(option => (
+      {Object.values(PeriodFilter).map((option) => (
         <div
           key={option}
           data-selected={periodFilter === option}
@@ -50,5 +52,5 @@ export const DashboardPeriodSelector = (props: PeriodSelectorProps) => {
         </div>
       ))}
     </div>
-  )
-}
+  );
+};

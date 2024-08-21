@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React, { useEffect } from "react";
 
 import { ClaimPeriod, getClaimActivePeriod } from "../utils/claim";
 import { useChainId } from "wagmi";
@@ -6,7 +6,7 @@ import { useChainId } from "wagmi";
 export const useClaimPeriod = () => {
   const chainId = useChainId();
 
-  const [period, setPeriod] = React.useState<ClaimPeriod>()
+  const [period, setPeriod] = React.useState<ClaimPeriod>();
   const [loading, setLoading] = React.useState(false);
 
   const load = React.useCallback(async () => {
@@ -19,15 +19,15 @@ export const useClaimPeriod = () => {
     } finally {
       setLoading(false);
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
     load();
-  }, [load])
+  }, [load]);
 
   return {
     period,
     loading,
-    load
-  }
-}
+    load,
+  };
+};

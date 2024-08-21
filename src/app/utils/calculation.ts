@@ -8,12 +8,12 @@ export const getTimeDiffrenece = (date: number) => {
   const diffrenceInDays = Math.round(timeDiffrence / 86400000);
 
   if (diffrenceInMinutes === 0) {
-    return 'soon';
+    return "soon";
   } else if (diffrenceInMinutes < 60) {
-    return `${diffrenceInMinutes} minute${diffrenceInMinutes === 1 ? '' : 's'}`;
+    return `${diffrenceInMinutes} minute${diffrenceInMinutes === 1 ? "" : "s"}`;
   } else if (diffrenceInHours < 24) {
-    return `${diffrenceInHours} hour${diffrenceInHours === 1 ? '' : 's'}`;
+    return `${diffrenceInHours} hour${diffrenceInHours === 1 ? "" : "s"}`;
   } else {
-    return `${diffrenceInDays} day${diffrenceInDays === 1 ? '' : 's'}`;
+    return `${diffrenceInDays} day${diffrenceInDays === 1 ? "" : "s"}`;
   }
 };
