@@ -16,8 +16,7 @@ import { SAFE_ERC20_ABI } from "../utils/safe-erc20-abi";
 import { useEffect, useState } from "react";
 import { useConnectedWalletMobile, useRevokeApprovalDialog } from "../hooks";
 import Spinner from "./spinner";
-import { useTransactionCount, useWriteContract } from "wagmi";
-import { useAccountStore } from "../state/user.store";
+import { useAccount, useTransactionCount, useWriteContract } from "wagmi";
 
 export const RevokeApprovalDialog = () => {
   const chainId = getChainId(wagmiConfig);
@@ -35,7 +34,7 @@ export const RevokeApprovalDialog = () => {
   const [isApproveError, setApproveError] = useState<boolean>(false);
   const [isApproveSuccess, setApproveSuccess] = useState<boolean>(false);
 
-  const { account } = useAccountStore();
+  const account = useAccount();
   const { data: txCount, refetch } = useTransactionCount({
     address: account?.address,
   });

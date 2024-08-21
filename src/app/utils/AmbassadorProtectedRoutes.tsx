@@ -1,9 +1,11 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { useAccountStore } from "../state/user.store.ts";
+import { useIsAmbassador } from "../hooks/useIsAmbassador";
 
 const AmbassadorProtectedRoutes = () => {
-  const { isAmbassador, isInitiated } = useAccountStore();
-  return isInitiated && isAmbassador ? <Outlet /> : <Navigate to="/" />;
+  const { isAmbassador, hasChecked, isLoading } = useIsAmbassador();
+  if (isLoading || !hasChecked) return;
+
+  return hasChecked && isAmbassador ? <Outlet /> : <Navigate to="/" />;
 };
 
 export default AmbassadorProtectedRoutes;

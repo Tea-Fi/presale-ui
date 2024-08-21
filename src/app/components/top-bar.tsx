@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import React from "react";
 import { useReferralCode } from "../hooks/useReferralCode.ts";
 import { useReferralStore } from "../state/referal.store.ts";
-import { useAccountStore } from "../state/user.store.ts";
+import { useIsAmbassador } from "../hooks/useIsAmbassador.ts";
 
 export const TopBar = ({
   isBuyPageActive,
@@ -29,9 +29,10 @@ export const TopBar = ({
 }) => {
   const { pathname } = useLocation();
   const { setOpened } = useMobileMenuDrawer();
-  const { isAmbassador } = useAccountStore();
 
   const chainId = getChainId(wagmiConfig);
+
+  const { isAmbassador } = useIsAmbassador();
 
   const code = useReferralCode();
   const { referralCode } = useReferralStore();

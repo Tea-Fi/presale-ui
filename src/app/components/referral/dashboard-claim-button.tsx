@@ -24,7 +24,7 @@ import {
   getClaimForPeriod,
   getClaimProof,
 } from "../../utils/claim";
-import { useChainId } from "wagmi";
+import { useAccount, useChainId } from "wagmi";
 import { getClient } from "@wagmi/core";
 import { toast } from "sonner";
 import { wagmiConfig } from "../../config";
@@ -36,7 +36,6 @@ import {
 import { PRESALE_CLAIM_EARNING_FEES_ABI } from "../../utils/claim_abi";
 import { estimateContractGas, getGasPrice } from "viem/actions";
 import { formatEther } from "viem";
-import { useAccountStore } from "../../state/user.store";
 
 interface Props {
   tree: Referral;
@@ -52,7 +51,7 @@ interface Props {
 
 export const DashboardClaimButton: React.FC<Props> = (props) => {
   const chainId = useChainId();
-  const { account } = useAccountStore();
+  const account = useAccount();
 
   const [showConfirm, setConfirm] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
@@ -263,9 +262,9 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
 
           ...(canClaim
             ? [
-                "text-xl bg-[#f716a2] text-secondary-foreground",
-                "hover:bg-[#3a0c2a] transition-none",
-              ]
+              "text-xl bg-[#f716a2] text-secondary-foreground",
+              "hover:bg-[#3a0c2a] transition-none",
+            ]
             : []),
         )}
         onClick={toggleShowConfirm}

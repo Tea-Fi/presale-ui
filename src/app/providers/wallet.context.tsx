@@ -7,14 +7,18 @@ import {
   useState,
 } from "react";
 import type { FunctionComponent, ReactNode } from "react";
-import { useConnections, useConnectorClient, useDisconnect } from "wagmi";
+import {
+  useAccount,
+  useConnections,
+  useConnectorClient,
+  useDisconnect,
+} from "wagmi";
 import { useModal } from "connectkit";
 import { JsonRpcProvider, ethers } from "ethers";
 
 import { ERC20_ABI } from "../utils/erc20_abi";
 import { USDT, USDC, WETH, WBTC } from "../utils/constants";
 import { SUPPORTED_NETWORK } from "../config";
-import { useAccountStore } from "../state/user.store";
 
 export enum WalletEvents {
   REQUEST_ACCOUNTS = "eth_requestAccounts",
@@ -70,7 +74,7 @@ export const WalletProvider: FunctionComponent<{ children: ReactNode }> = ({
   const { open, setOpen } = useModal();
   const { data } = useConnectorClient();
   const connections = useConnections();
-  const accountStore = useAccountStore();
+  const { isDisconnected } = useAccount();
   const { disconnect: fullDisconnect } = useDisconnect();
 
   const [values, setValues] =
@@ -84,7 +88,7 @@ export const WalletProvider: FunctionComponent<{ children: ReactNode }> = ({
 
   //need to full disconnect because sometimes we get 2 connections instead of 1
   useEffect(() => {
-    if (accountStore.account?.isDisconnected && connections?.length) {
+    if (isDisconnected && connections?.length) {
       connections.forEach(({ connector }) => {
         fullDisconnect({ connector });
       });

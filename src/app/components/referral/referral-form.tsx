@@ -2,7 +2,7 @@ import React from "react";
 
 import { z } from "zod";
 import { isAddress } from "ethers";
-import { useSignMessage } from "wagmi";
+import { useAccount, useSignMessage } from "wagmi";
 import { Form, Formik, Field, ErrorMessage } from "formik";
 import { SlIcon } from "@shoelace-style/shoelace/dist/react";
 
@@ -10,7 +10,6 @@ import { Button } from "../ui";
 import { cn } from "../../utils/cn";
 import * as referrals from "../../utils/referrals";
 import type { Referral } from "../../utils/referrals";
-import { useAccountStore } from "../../state/user.store";
 
 const ReferralValidationSchema = z.object({
   walletAddress: z.string().refine((x) => isAddress(x), {
@@ -68,7 +67,8 @@ interface Props {
 }
 
 export const ReferralForm: React.FC<Props> = (props) => {
-  const { account } = useAccountStore();
+  const account = useAccount();
+
   const { signMessageAsync } = useSignMessage();
 
   const [showForm, setShowform] = React.useState(false);
