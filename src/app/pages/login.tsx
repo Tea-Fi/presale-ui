@@ -1,7 +1,4 @@
-import {
-  SlDialog,
-  SlIcon,
-} from "@shoelace-style/shoelace/dist/react";
+import { SlDialog, SlIcon } from "@shoelace-style/shoelace/dist/react";
 import { Button, VanishInput } from "../components/ui";
 import { TypewriterComponent } from "../components/typewriter-components";
 import { TeaSwapLogoAsset } from "../../assets/icons";
