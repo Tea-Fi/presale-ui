@@ -15,15 +15,14 @@ import { cn } from "../utils";
 import { toast } from "sonner";
 import React from "react";
 import { Check, Copy } from "lucide-react";
-import { useReferralStore } from "../state/referal.store.ts";
 import { useReferralCode } from "../hooks/useReferralCode.ts";
 import { useAccount } from "wagmi";
 import { useIsAmbassador } from "../hooks/useIsAmbassador.ts";
 
 export const MobileDrawerMenu = () => {
   const code = useReferralCode();
-  const { referralCode } = useReferralStore();
-  const { isAmbassador } = useIsAmbassador();
+
+  const { isAmbassador, ambassadorCode } = useIsAmbassador();
 
   const { setOpen } = useModal();
   const account = useAccount();
@@ -35,7 +34,7 @@ export const MobileDrawerMenu = () => {
 
   const copyCode = React.useCallback(() => {
     navigator?.clipboard?.writeText(
-      `${window.location.origin}?r=${referralCode}`,
+      `${window.location.origin}?r=${ambassadorCode}`,
     );
     toast.custom((t) => (
       <div
@@ -97,7 +96,7 @@ export const MobileDrawerMenu = () => {
                     !isAmbassador ? "hidden" : "",
                   )}
                 >
-                  Dashboard: {referralCode}
+                  Dashboard: {ambassadorCode}
                   <Button
                     onClick={copyCode}
                     className="bg-transparent text-[#f716a2] hover:bg-gray-800 mx-2"

@@ -30,5 +30,10 @@ export const useIsAmbassador = () => {
     }
   }, [account.isConnected]);
 
-  return { isAmbassador, hasChecked, isLoading };
+  return {
+    isAmbassador,
+    ambassadorCode: data?.referral,
+    hasChecked,
+    isLoading,
+  };
 };
