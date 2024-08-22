@@ -316,11 +316,11 @@ export const Referrals = () => {
               )}
               <div className="referral-title-row">
                 <div className="text-start">
-                  <div className="title">Claim</div>
+                  <div className="title">Earnings withdrawal</div>
                   <div className="subtitle pr-2">
                     {isClaimRoundFinished
                       ? "Claiming has been finished"
-                      : "You will be able to claim your commission every 2 weeks."}
+                      : "You will be able to withdraw all your earnings every 2 weeks"}
                   </div>
                 </div>
 

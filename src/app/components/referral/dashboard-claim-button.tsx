@@ -269,7 +269,7 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
         )}
         onClick={toggleShowConfirm}
       >
-        Claim
+        Withdraw
       </Button>
 
       {showConfirm && (
