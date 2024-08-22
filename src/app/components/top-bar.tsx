@@ -40,10 +40,6 @@ export const TopBar = ({
   const code = useReferralCode();
 
   const copyCode = React.useCallback(() => {
-    if (!ambassadorCode) {
-      return;
-    }
-
     navigator?.clipboard?.writeText(
       `${window.location.origin}?r=${ambassadorCode}`,
     );
@@ -60,7 +56,7 @@ export const TopBar = ({
         Copied code to clipboard
       </div>
     ));
-  }, []);
+  }, [ambassadorCode]);
 
   const handleNavToClaimClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (isConnected) return;
