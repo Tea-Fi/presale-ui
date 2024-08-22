@@ -1,4 +1,4 @@
-import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 
 import { Wallet } from "./wallet";
 import { TeaSwapLogoAsset } from "../../assets/icons";
@@ -13,7 +13,7 @@ import { useMobileMenuDrawer } from "../hooks";
 import { isMobile } from "react-device-detect";
 import { Check, Copy } from "lucide-react";
 import { toast } from "sonner";
-import React, { useCallback } from "react";
+import React from "react";
 import { useReferralCode } from "../hooks/useReferralCode.ts";
 import { useReferralStore } from "../state/referal.store.ts";
 import { useIsAmbassador } from "../hooks/useIsAmbassador.ts";
@@ -37,7 +37,6 @@ export const TopBar = ({
   const { setOpen } = useConnectWalletModal();
   const { isConnected } = useAccount();
   const { isAmbassador } = useIsAmbassador();
-  const navigate = useNavigate();
 
   const code = useReferralCode();
   const { referralCode } = useReferralStore();

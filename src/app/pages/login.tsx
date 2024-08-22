@@ -1,5 +1,4 @@
 import {
-  SlButton,
   SlDialog,
   SlIcon,
 } from "@shoelace-style/shoelace/dist/react";
