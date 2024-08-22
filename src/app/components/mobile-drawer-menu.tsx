@@ -45,7 +45,7 @@ export const MobileDrawerMenu = () => {
         Copied code to clipboard
       </div>
     ));
-  }, []);
+  }, [ambassadorCode]);
 
   return (
     <Drawer
