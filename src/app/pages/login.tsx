@@ -3,7 +3,7 @@ import {
   SlDialog,
   SlIcon,
 } from "@shoelace-style/shoelace/dist/react";
-import { VanishInput } from "../components/ui";
+import { Button, VanishInput } from "../components/ui";
 import { TypewriterComponent } from "../components/typewriter-components";
 import { TeaSwapLogoAsset } from "../../assets/icons";
 import leftTopImg from "../../assets/icons/login/left-top-corner.svg";
@@ -906,15 +906,13 @@ export const Login = () => {
           <p className="text-center">* * * * *</p>
         </section>
         <div slot="footer">
-          <SlButton
-            variant="primary"
-            size="small"
-            className="terms__actions"
+          <Button
             onClick={handleTermsAgree}
+            className="h-8 px-3 text-xs bg-[#f716a2] text-secondary-foreground hover:bg-[#3a0c2a] transition-none"
           >
             <SlIcon name="check2-circle" style={{ marginRight: "0.5em" }} />I
             agree to the terms
-          </SlButton>
+          </Button>
         </div>
       </SlDialog>
 
