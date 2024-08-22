@@ -5,6 +5,10 @@ export const api = new Axios({
 });
 
 export const fetcher = async <T>(url: string): Promise<T> => {
-  const response = await api.get(url);
+  const response = await api.get<T>(url);
+
+  if (response.status !== 200) {
+    throw new Error("Something Went Wrong");
+  }
   return response.data;
 };

@@ -12,6 +12,7 @@ export const useIsAmbassador = () => {
 
   useEffect(() => {
     if (isLoading) return;
+
     if (error) {
       setIsAmbassador(false);
     }
