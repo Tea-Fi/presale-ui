@@ -14,11 +14,10 @@ import { isMobile } from "react-device-detect";
 import { Check, Copy } from "lucide-react";
 import { toast } from "sonner";
 import React from "react";
-import { useReferralCode } from "../hooks/useReferralCode.ts";
-import { useReferralStore } from "../state/referal.store.ts";
 import { useIsAmbassador } from "../hooks/useIsAmbassador.ts";
 import { useModal as useConnectWalletModal } from "connectkit";
 import { useAccount } from "wagmi";
+import { useReferralCode } from "../hooks/useReferralCode.ts";
 
 export const TopBar = ({
   isBuyPageActive,
@@ -36,18 +35,17 @@ export const TopBar = ({
 
   const { setOpen } = useConnectWalletModal();
   const { isConnected } = useAccount();
-  const { isAmbassador } = useIsAmbassador();
+  const { isAmbassador, ambassadorCode } = useIsAmbassador();
 
   const code = useReferralCode();
-  const { referralCode } = useReferralStore();
 
   const copyCode = React.useCallback(() => {
-    if (!code) {
+    if (!ambassadorCode) {
       return;
     }
 
     navigator?.clipboard?.writeText(
-      `${window.location.origin}?r=${referralCode}`,
+      `${window.location.origin}?r=${ambassadorCode}`,
     );
 
     toast.custom((t) => (
@@ -130,7 +128,7 @@ export const TopBar = ({
                   isReferralTreePageActive ? "border border-white/[0.2]" : "",
                 )}
               >
-                Dashboard: {referralCode}
+                Dashboard: {ambassadorCode}
                 <Button
                   onClick={(e) => {
                     e.stopPropagation();

@@ -40,7 +40,7 @@ import {
 import { PRESALE_ABI } from "../utils/presale_abi";
 import { ReactFlowProvider } from "@xyflow/react";
 import { PRESALE_CLAIM_EARNING_FEES_ABI } from "../utils/claim_abi";
-import { useReferralStore } from "../state/referal.store";
+import { useIsAmbassador } from "../hooks/useIsAmbassador";
 interface SectionProps {
   title?: string;
 }
@@ -60,7 +60,7 @@ export const Referrals = () => {
   const chainId = useChainId();
   const navigate = useNavigate();
 
-  const { referralCode } = useReferralStore();
+  const { ambassadorCode } = useIsAmbassador();
   const [isClaimActive, setClaimActive] = useState<boolean>(false);
   const [isClaimRoundFinished, setClaimRoundFinished] =
     useState<boolean>(false);
@@ -182,8 +182,8 @@ export const Referrals = () => {
     }
 
     const refTree = await getReferralTreeByWallet(refAddress, chainId);
-    const pageRefTree = !!referralCode
-      ? await getReferralTreeByCode(referralCode, chainId)
+    const pageRefTree = !!ambassadorCode
+      ? await getReferralTreeByCode(ambassadorCode, chainId)
       : undefined;
 
     if (!pageRefTree) {
@@ -191,7 +191,7 @@ export const Referrals = () => {
     }
 
     setPageReferralTree(pageRefTree);
-    setIsMatchingReferral(refTree?.referral === referralCode);
+    setIsMatchingReferral(refTree?.referral === ambassadorCode);
 
     const climedAmount = await getClaimedAmount(pageRefTree.wallet, chainId);
     const lastClaim = await getLastClaim(pageRefTree.wallet, chainId);
@@ -249,7 +249,7 @@ export const Referrals = () => {
     setLastClaim(lastClaim);
     setClaimed(climedAmount);
     setReferralTree(pageRefTree);
-  }, [account?.address, chainId, location, referralCode]);
+  }, [account?.address, chainId, location, ambassadorCode]);
 
   useEffect(() => {
     getPeriod().then(setClaimPeriod);
