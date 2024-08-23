@@ -1,5 +1,5 @@
-import { SlCard } from '@shoelace-style/shoelace/dist/react';
-import teaToken from '../../assets/icons/tea-logo.svg';
+import { SlCard } from "@shoelace-style/shoelace/dist/react";
+import teaToken from "../../assets/icons/tea-logo.svg";
 
 export const TokenRate = () => {
   return (

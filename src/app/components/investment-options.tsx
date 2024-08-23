@@ -1,4 +1,4 @@
-import { SlOption, SlSelect } from '@shoelace-style/shoelace/dist/react';
+import { SlOption, SlSelect } from "@shoelace-style/shoelace/dist/react";
 
 interface Props {
   investmentOptions: string[];
@@ -6,7 +6,11 @@ interface Props {
   onChange: (value: string) => void;
 }
 
-export const InvestmentOptions = ({ investmentOptions, onChange, value }: Props) => {
+export const InvestmentOptions = ({
+  investmentOptions,
+  onChange,
+  value,
+}: Props) => {
   return (
     <div className="select-investment-container">
       <div className="label">Select Investment option</div>
@@ -19,7 +23,9 @@ export const InvestmentOptions = ({ investmentOptions, onChange, value }: Props)
         className="select-investment"
       >
         {investmentOptions.map((opt: string) => (
-          <SlOption value={opt} key={opt}>{opt}$</SlOption>
+          <SlOption value={opt} key={opt}>
+            {opt}$
+          </SlOption>
         ))}
       </SlSelect>
     </div>

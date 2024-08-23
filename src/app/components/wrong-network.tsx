@@ -11,7 +11,7 @@ export const WrongNetwork = () => {
 
   const supportedNetwork = useMemo(
     () => chains.find((chain) => `${chain.id}` === SUPPORTED_NETWORK),
-    [chains]
+    [chains],
   );
 
   return (

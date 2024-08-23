@@ -16,12 +16,14 @@ const chains = {
 const transports = {
   1: {
     [mainnet.id]: http(
-      `https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_PROVIDER_KEY}`
+      `https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_PROVIDER_KEY}`,
+      { batch: true },
     ),
   },
   11155111: {
     [sepolia.id]: http(
-      `https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_PROVIDER_KEY}`
+      `https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_PROVIDER_KEY}`,
+      { batch: true },
     ),
   },
 } as Record<number, Record<number, HttpTransport>>;
@@ -33,7 +35,8 @@ export const wagmiConfig = createConfig(
 
     transports: transports[+SUPPORTED_NETWORK] || {
       [mainnet.id]: http(
-        `https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_PROVIDER_KEY}`
+        `https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_PROVIDER_KEY}`,
+        { batch: true },
       ),
     },
 
@@ -46,5 +49,5 @@ export const wagmiConfig = createConfig(
     appDescription: "Tea-Fi Presale",
     appUrl: "https://presale.tea-fi.com",
     appIcon: "https://presale.tea-fi.com/favicon.svg",
-  })
+  }),
 );

@@ -1,3 +1,3 @@
-import {PresaleHeadline} from './presale-headline.tsx';
+import { PresaleHeadline } from "./presale-headline.tsx";
 
-export default PresaleHeadline
+export default PresaleHeadline;

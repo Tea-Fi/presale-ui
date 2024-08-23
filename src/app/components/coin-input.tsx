@@ -1,5 +1,5 @@
-import { SlInput } from '@shoelace-style/shoelace/dist/react';
-import { ComponentProps } from 'react';
+import { SlInput } from "@shoelace-style/shoelace/dist/react";
+import { ComponentProps } from "react";
 
 type Props = {
   onChangeValue: (amount: string) => void;
@@ -12,9 +12,9 @@ export const CoinInput = ({ value, onChangeValue, ...props }: Props) => {
       noSpinButtons
       autocomplete="off"
       valueAsNumber={Number(value) ?? undefined}
-      placeholder={'0.00'}
+      placeholder={"0.00"}
       onKeyDown={(e) => {
-        if (e.key === 'Enter') {
+        if (e.key === "Enter") {
           e.currentTarget.blur();
         }
       }}

@@ -3,9 +3,8 @@ import { cn } from "../../utils/cn";
 import { AnimatePresence, motion } from "framer-motion";
 
 import { track } from "../../utils/analytics";
-import {useCountdownStore} from "../../state/countdown.store.ts";
-import {ProjectInfoOption} from "../../../types/options.ts";
-
+import { useCountdownStore } from "../../state/countdown.store.ts";
+import { ProjectInfoOption } from "../../../types/options.ts";
 
 export const CardHoverEffect = ({
   items,
@@ -19,23 +18,21 @@ export const CardHoverEffect = ({
 
   const onOptionClick = React.useCallback((item: ProjectInfoOption) => {
     track({
-      eventName: 'select_option',
-      parameters: { option: item.title }
+      eventName: "select_option",
+      parameters: { option: item.title },
     });
-  }, [])
+  }, []);
 
   return (
-    <div
-      className={cn(
-        "flex flex-wrap py-10",
-        className
-      )}
-    >
+    <div className={cn("flex flex-wrap py-10", className)}>
       {items.map((item, idx) => (
         <a
-          href={isFinished ? '#' : item?.link}
+          href={isFinished ? "#" : item?.link}
           key={idx}
-          className={cn("relative group block p-2 h-full w-full", isFinished ? 'cursor-not-allowed' : '')}
+          className={cn(
+            "relative group block p-2 h-full w-full",
+            isFinished ? "cursor-not-allowed" : "",
+          )}
           onMouseEnter={() => setHoveredIndex(idx)}
           onMouseLeave={() => setHoveredIndex(null)}
           onClick={() => onOptionClick(item)}
@@ -87,7 +84,7 @@ export const Card = ({
     <div
       className={cn(
         "rounded-2xl h-full w-full p-4 overflow-hidden bg-black border border-transparent dark:border-white/[0.2] group-hover:border-slate-700 relative z-20",
-        className
+        className,
       )}
     >
       <div className="relative z-50">
@@ -117,13 +114,13 @@ export const CardDescription = ({
   children: React.ReactNode;
 }) => {
   return (
-        <p
-            className={cn(
-                "mt-8 text-zinc-400 tracking-wide leading-relaxed text-sm",
-                className
-            )}
-        >
-        {children}
-        </p>
-    );
+    <p
+      className={cn(
+        "mt-8 text-zinc-400 tracking-wide leading-relaxed text-sm",
+        className,
+      )}
+    >
+      {children}
+    </p>
+  );
 };

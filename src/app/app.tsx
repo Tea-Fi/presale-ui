@@ -10,8 +10,10 @@ import { Referrals } from "./pages/referrals";
 import { Options } from "./pages/options";
 import { useAccountEffect } from "wagmi";
 import { track } from "./utils/analytics";
-import {CodeNotFound} from "./pages/code-not-found.tsx";
+import { CodeNotFound } from "./pages/code-not-found.tsx";
 import ProtectedRoutes from "./utils/ProtectedRoutes.tsx";
+import AmbassadorProtectedRoutes from "./utils/AmbassadorProtectedRoutes.tsx";
+import ClaimProtectedRoutes from "./utils/ClaimProtectedRoutes.tsx";
 
 export function App() {
   const { chainId, unsupportedChain } = useWalletContext();
@@ -19,15 +21,15 @@ export function App() {
   useAccountEffect({
     onConnect(data) {
       track({
-        eventName: 'wallet_connect',
+        eventName: "wallet_connect",
         parameters: {
           chainId: data.chainId,
           chain: data.chain?.name,
           address: data.address,
-        }
-      })
-    }
-  })
+        },
+      });
+    },
+  });
 
   if (chainId && unsupportedChain) {
     return <WrongNetwork />;
@@ -39,13 +41,18 @@ export function App() {
         <Route element={<Layout />}>
           <Route path="/" element={<Login />} />
 
-          <Route element={<ProtectedRoutes/>}>
+          <Route element={<ProtectedRoutes />}>
             <Route path="/:code/buy" element={<Buy />} />
             <Route path="/:code/options" element={<Options />} />
-            <Route path="/:code/claim" element={<Claim />} />
-            <Route path="/:code/dashboard" element={<Referrals />} />
-          </Route>
 
+            <Route element={<ClaimProtectedRoutes />}>
+              <Route path="/:code/claim" element={<Claim />} />
+            </Route>
+
+            <Route element={<AmbassadorProtectedRoutes />}>
+              <Route path="/:code/dashboard" element={<Referrals />} />
+            </Route>
+          </Route>
           <Route path="/code-not-found" element={<CodeNotFound />} />
           <Route path="*" element={<NotFound />} />
         </Route>
