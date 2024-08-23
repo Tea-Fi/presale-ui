@@ -1,6 +1,11 @@
-import { createContext, useContext, useRef, useState } from 'react';
-import type { Dispatch, FunctionComponent, ReactNode, SetStateAction } from 'react';
-import { EventModal } from '../components/event-modal';
+import { createContext, useContext, useRef, useState } from "react";
+import type {
+  Dispatch,
+  FunctionComponent,
+  ReactNode,
+  SetStateAction,
+} from "react";
+import { EventModal } from "../components/event-modal";
 
 export interface EventContext {
   eventInfo: {
@@ -13,10 +18,12 @@ export interface EventContext {
 }
 export const EventContext = createContext<EventContext | null>(null);
 
-export const EventModalProvider: FunctionComponent<{ children: ReactNode }> = ({ children }) => {
+export const EventModalProvider: FunctionComponent<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [eventInfo, setEventInfo] = useState({
-    title: '',
-    subTitle: '',
+    title: "",
+    subTitle: "",
   });
   const ref = useRef<any>(null);
   const showModal = () => {
@@ -49,7 +56,7 @@ export const EventModalProvider: FunctionComponent<{ children: ReactNode }> = ({
 export const useEventContext = (): EventContext => {
   const contextValue = useContext(EventContext);
   if (!contextValue) {
-    throw new Error('Tried to use template context from outside the provider');
+    throw new Error("Tried to use template context from outside the provider");
   }
   return contextValue;
 };

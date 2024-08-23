@@ -1,123 +1,273 @@
 import { useCallback, useEffect, useState } from "react";
-import { getClient } from "@wagmi/core";
+import { getClient, readContract } from "@wagmi/core";
 
 import "@xyflow/react/dist/style.css";
 
-import { useAccount, useAccountEffect, useChainId } from 'wagmi';
-import { getReferralTreeByCode, getReferralTreeByWallet, Referral } from '../utils/referrals';
+import { useAccount, useAccountEffect, useChainId } from "wagmi";
+import {
+  getReferralTreeByCode,
+  getReferralTreeByWallet,
+  Referral,
+} from "../utils/referrals";
 import { wagmiConfig } from "../config";
 
 import { ReferralForm } from "../components/referral/referral-form";
 import { ReferralTree } from "../components/referral/referral-tree";
 import { ReferralDashboard } from "../components/referral/referral-dashboard";
 import { DashboardClaimButton } from "../components/referral/dashboard-claim-button";
-import { EventLog } from "../components/referral/common";
-import { ClaimAmount, getClaimedAmount, getPeriod } from "../utils/claim";
+import { EventLogWithTimestamp } from "../components/referral/common";
+import {
+  ClaimAmount,
+  ClaimRecord,
+  getClaimActivePeriod,
+  getClaimedAmount,
+  getClaimForPeriod,
+  getClaimProof,
+  getLastClaim,
+  getPeriod,
+} from "../utils/claim";
 import { CountdownByCheckpoint } from "../components/countdown-by-checkpoints";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+
 import Spinner from "../components/spinner";
+
 import { AbiEvent, getAbiItem } from "viem";
-import { getLogs } from "viem/actions";
-import { PRESALE_CONTRACT_ADDRESS } from "../utils/constants";
+import { getLogs, getBlock } from "viem/actions";
+import {
+  PRESALE_CLAIM_CONTRACT_ADDRESS,
+  PRESALE_CONTRACT_ADDRESS,
+} from "../utils/constants";
 import { PRESALE_ABI } from "../utils/presale_abi";
 import { ReactFlowProvider } from "@xyflow/react";
-
+import { PRESALE_CLAIM_EARNING_FEES_ABI } from "../utils/claim_abi";
+import { useIsAmbassador } from "../hooks/useIsAmbassador";
 interface SectionProps {
   title?: string;
 }
 
-const ReferralSection: React.FC<SectionProps & React.PropsWithChildren> = (props) => {
+const ReferralSection: React.FC<SectionProps & React.PropsWithChildren> = (
+  props,
+) => {
   return (
     <div className="referral-section">
       {props.title && <div>{props.title}</div>}
       {props.children}
     </div>
-  )
+  );
 };
 
 export const Referrals = () => {
-  const chainId = useChainId(); 
+  const chainId = useChainId();
+  const navigate = useNavigate();
 
-  const { code } = useParams();
-
-  // const [period, setPeriod] = useState<ClaimPeriod>();
+  const { ambassadorCode } = useIsAmbassador();
   const [isClaimActive, setClaimActive] = useState<boolean>(false);
-  const [isClaimRoundFinished, setClaimRoundFinished] = useState<boolean>(false);
-  const [isMatchingReferral, setIsMatchingReferral] = useState<boolean>(false)
- 
-  const location = useLocation();
+  const [isClaimRoundFinished, setClaimRoundFinished] =
+    useState<boolean>(false);
+  const [isMatchingReferral, setIsMatchingReferral] = useState<boolean>(false);
 
-  const [claimPeriod, setClaimPeriod] = useState<{ start: string, end: string }>();
+  const location = useLocation();
+  const account = useAccount();
+
+  const [claimPeriod, setClaimPeriod] = useState<{
+    start: string;
+    end: string;
+  }>();
 
   const ONE_DAY_IN_MS = 86_400_000;
   const ROUND_CLAIM_DURATION = ONE_DAY_IN_MS * 3;
   const ROUND_DURATION = ONE_DAY_IN_MS * 14 - ROUND_CLAIM_DURATION;
 
-
-  const { address, isConnected } = useAccount();
-  
-  const [logs, setLogs] = useState<EventLog[]>();
+  const [logs, setLogs] = useState<EventLogWithTimestamp[]>();
   const [claimed, setClaimed] = useState<ClaimAmount[]>();
+  const [lastClaim, setLastClaim] = useState<ClaimRecord>();
   const [referralTree, setReferralTree] = useState<Referral>();
   const [pageReferralTree, setPageReferralTree] = useState<Referral>();
 
+  const [canClaim, setCanClaim] = useState(false);
+
   const fetchClaimed = useCallback(async () => {
-    if (!address) {
+    if (!account?.address) return;
+
+    const claimed = await getClaimedAmount(account.address, chainId);
+    setClaimed(claimed);
+  }, [account?.address, chainId]);
+
+  const getProofAndCheck = useCallback(async () => {
+    if (!account?.address) {
+      setCanClaim(false);
       return;
     }
-    const claimed = await getClaimedAmount(address, chainId)
-    setClaimed(claimed);
-  }, [address, chainId]);
+
+    if (chainId === 1) {
+      // toast.error('Claim is not yet available on Mainnet');
+      setCanClaim(false);
+      return;
+    }
+
+    const period = await getClaimActivePeriod(chainId.toString());
+
+    if (!period) {
+      setCanClaim(false);
+      return;
+    }
+
+    const periodClaimes = await getClaimForPeriod(
+      chainId.toString(),
+      period.id,
+      account.address,
+    );
+
+    if (periodClaimes.length > 0) {
+      setCanClaim(false);
+      return;
+    }
+
+    const currentProof = await getClaimProof(
+      chainId.toString(),
+      account.address,
+    );
+
+    if (!currentProof) {
+      setCanClaim(false);
+      return;
+    }
+
+    const isBanned = (await readContract(wagmiConfig, {
+      abi: PRESALE_CLAIM_EARNING_FEES_ABI,
+      address: PRESALE_CLAIM_CONTRACT_ADDRESS[chainId] as `0x${string}`,
+      functionName: "batchCheckPausedAccounts",
+      args: [[account.address]],
+    })) as boolean[];
+
+    if (isBanned.some((x) => !!x)) {
+      setCanClaim(false);
+      return;
+    }
+
+    const canClaimFromContract = (await readContract(wagmiConfig, {
+      abi: PRESALE_CLAIM_EARNING_FEES_ABI,
+      address: PRESALE_CLAIM_CONTRACT_ADDRESS[chainId] as `0x${string}`,
+      args: [
+        account.address,
+        BigInt(currentProof.nonce),
+        currentProof.tokens,
+        currentProof.amounts.map((x) => BigInt(x)),
+        currentProof.proof,
+      ],
+      functionName: "isAccountAbleToClaim",
+    })) as boolean;
+
+    setCanClaim(canClaimFromContract);
+
+    if (!canClaimFromContract) {
+      return;
+    }
+
+    setTimeout(
+      () => {
+        getProofAndCheck();
+      },
+      new Date(period.endDate).getTime() - Date.now(),
+    );
+  }, [account?.address, chainId, setCanClaim]);
 
   const getReferralTree = useCallback(async () => {
     const search = location.search;
     const urlParams = new URLSearchParams(search);
-    const refAddress = urlParams.get("address") || address;
+    const refAddress = urlParams.get("address") || account?.address;
 
     if (!refAddress) {
       return;
     }
-    
+
     const refTree = await getReferralTreeByWallet(refAddress, chainId);
-    const pageRefTree = !!code 
-      ? await getReferralTreeByCode(code, chainId)
+    const pageRefTree = !!ambassadorCode
+      ? await getReferralTreeByCode(ambassadorCode, chainId)
       : undefined;
-      
+
     if (!pageRefTree) {
       return;
     }
-   
-    setPageReferralTree(pageRefTree) 
-    setIsMatchingReferral(refTree?.referral === code);
 
-    const claimed = await getClaimedAmount(pageRefTree.wallet, chainId)
-    
+    setPageReferralTree(pageRefTree);
+    setIsMatchingReferral(refTree?.referral === ambassadorCode);
+
+    const climedAmount = await getClaimedAmount(pageRefTree.wallet, chainId);
+    const lastClaim = await getLastClaim(pageRefTree.wallet, chainId);
+
     const client = getClient(wagmiConfig);
-    const abi = getAbiItem({ abi: PRESALE_ABI, name: 'BuyTokens' }) as AbiEvent;
+    const abi = getAbiItem({ abi: PRESALE_ABI, name: "BuyTokens" }) as AbiEvent;
     const logs = await getLogs(client!, {
       address: PRESALE_CONTRACT_ADDRESS[chainId] as `0x${string}`,
       fromBlock: 0n,
-      event: abi
+      event: abi,
     });
-    
-    setLogs(logs);
-    setClaimed(claimed);
+
+    const cache = JSON.parse(
+      localStorage.getItem("logs-timestamps") ?? "{}",
+    ) as Record<string, string>;
+    const targetLogs = [] as EventLogWithTimestamp[];
+
+    const queue = [...logs];
+
+    while (queue.length > 0) {
+      const batch = queue.slice(0, 5);
+
+      const resultLogs = await Promise.all(
+        batch.map(async (log) => {
+          let time: Date;
+
+          let cached: string | undefined = cache[log.blockNumber.toString()];
+
+          if (Number.isNaN(Number(cached))) {
+            cached = undefined;
+          }
+
+          if (cached) {
+            time = new Date(Number(cached));
+          } else {
+            const block = await getBlock(client!, {
+              blockNumber: log.blockNumber,
+            });
+            time = new Date(Number(block.timestamp) * 1e3);
+          }
+
+          cache[log.blockNumber.toString()] = time.getTime().toString();
+
+          return { ...log, time };
+        }),
+      );
+
+      targetLogs.push(...resultLogs);
+      queue.splice(0, 5);
+    }
+
+    localStorage.setItem("logs-timestamps", JSON.stringify(cache));
+
+    setLogs(targetLogs);
+    setLastClaim(lastClaim);
+    setClaimed(climedAmount);
     setReferralTree(pageRefTree);
-  }, [address, chainId, location, code])
+  }, [account?.address, chainId, location, ambassadorCode]);
 
   useEffect(() => {
-    getPeriod().then(setClaimPeriod)
-  }, [])
-  
+    getPeriod().then(setClaimPeriod);
+  }, []);
+
   const refertchReferralTree = useCallback(() => {
-    getReferralTree()
-  }, [getReferralTree])
+    getReferralTree();
+  }, [getReferralTree]);
 
   useEffect(() => {
-    if (address && isConnected) {
+    getProofAndCheck();
+  }, [getProofAndCheck]);
+
+  useEffect(() => {
+    if (account?.address && account.isConnected) {
       getReferralTree();
     }
-  }, [address, isConnected]);
+  }, [account?.address, account?.isConnected]);
 
   useAccountEffect({
     onConnect() {
@@ -125,43 +275,52 @@ export const Referrals = () => {
     },
     onDisconnect() {
       setReferralTree(undefined);
+      navigate("/");
     },
-  })
+  });
 
-  if (!pageReferralTree || !address || !claimed || !logs) {
-    return <Spinner />
+  if (!pageReferralTree || !account?.address || !claimed || !logs) {
+    return (
+      <div className="grid place-content-center">
+        <Spinner />
+      </div>
+    );
   }
 
   return (
     <div className="referrals page">
-      {pageReferralTree && address && (
+      {pageReferralTree && account?.address && (
         <div className="flex flex-col gap-8">
           <ReferralSection>
             <ReferralDashboard
-              address={address}
+              address={account?.address}
               tree={pageReferralTree}
               logs={logs}
               claimed={claimed}
+              lastClaim={lastClaim}
             />
           </ReferralSection>
 
           {isMatchingReferral && (
             <ReferralSection>
               {claimPeriod && (
-                <CountdownByCheckpoint 
-                  waitingClaimDuration={ROUND_DURATION}//ROUND_DURATION
-                  pickClaimDuration={ROUND_CLAIM_DURATION}//ROUND_CLAIM_DURATION
+                <CountdownByCheckpoint
+                  canClaim={canClaim}
+                  waitingClaimDuration={ROUND_DURATION} //ROUND_DURATION
+                  pickClaimDuration={ROUND_CLAIM_DURATION} //ROUND_CLAIM_DURATION
                   startDate={new Date(claimPeriod.start)}
                   finishDate={new Date(claimPeriod.end)}
                   onChange={(inClaim) => setClaimActive(inClaim)}
                   onFinish={() => setClaimRoundFinished(true)}
                 />
-              )} 
+              )}
               <div className="referral-title-row">
                 <div className="text-start">
-                  <div className="title">Claim</div>
+                  <div className="title">Earnings withdrawal</div>
                   <div className="subtitle pr-2">
-                    {isClaimRoundFinished ? "Claiming has been finished" : "You will be able to claim your commission every 2 weeks."}
+                    {isClaimRoundFinished
+                      ? "Claiming has been finished"
+                      : "You will be able to withdraw all your earnings every 2 weeks"}
                   </div>
                 </div>
 
@@ -169,7 +328,7 @@ export const Referrals = () => {
                   disabled={!isClaimActive}
                   tree={referralTree!}
                   logs={logs}
-                  address={address}
+                  address={account?.address}
                   claimed={claimed}
                   onClaim={fetchClaimed}
                 />
@@ -182,12 +341,13 @@ export const Referrals = () => {
               <div className="text-start">
                 <div className="title">Referrals</div>
                 <div className="subtitle">
-                  Code "<b>{pageReferralTree.referral!.toUpperCase()}</b>" with {(pageReferralTree?.fee || 0) / 100}% Fee
+                  Code "<b>{pageReferralTree.referral!.toUpperCase()}</b>" with{" "}
+                  {(pageReferralTree?.fee || 0) / 100}% Fee
                 </div>
               </div>
 
               {isMatchingReferral && (
-                <ReferralForm 
+                <ReferralForm
                   referralTree={referralTree!}
                   onSubmit={refertchReferralTree}
                 />

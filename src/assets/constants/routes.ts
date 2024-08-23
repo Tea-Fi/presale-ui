@@ -1,9 +1,9 @@
 const routes = {
-  'referral': 'Referral',
+  referral: "Referral",
   /* Use an access code */
-  'login': 'Log In',
-  'buy': 'Buy',
-  'claim': 'Claim'
-}
+  login: "Log In",
+  buy: "Buy",
+  claim: "Claim",
+};
 
-export default routes
+export default routes;

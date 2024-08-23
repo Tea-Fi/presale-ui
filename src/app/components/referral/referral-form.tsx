@@ -38,7 +38,7 @@ interface FormFieldProps {
 }
 
 const FormField: React.FC<FormFieldProps & React.PropsWithChildren> = (
-  props
+  props,
 ) => {
   return (
     <div className="referral-form-field">
@@ -68,6 +68,7 @@ interface Props {
 
 export const ReferralForm: React.FC<Props> = (props) => {
   const account = useAccount();
+
   const { signMessageAsync } = useSignMessage();
 
   const [showForm, setShowform] = React.useState(false);
@@ -76,8 +77,8 @@ export const ReferralForm: React.FC<Props> = (props) => {
 
   const isDisabled = React.useMemo(
     () => (props.referralTree.fee ?? 0) <= 10,
-    [props.referralTree.fee]
-  )
+    [props.referralTree.fee],
+  );
 
   const validationSchema = React.useMemo(
     () =>
@@ -88,7 +89,7 @@ export const ReferralForm: React.FC<Props> = (props) => {
           .min(10)
           .max(props.referralTree.fee! - 10),
       }),
-    [props.referralTree]
+    [props.referralTree],
   );
 
   const toggleForm = React.useCallback(() => {
@@ -101,7 +102,7 @@ export const ReferralForm: React.FC<Props> = (props) => {
 
       setShowform(false);
     },
-    []
+    [],
   );
 
   const validate = React.useCallback(async (values: ReferralPayload) => {
@@ -119,7 +120,7 @@ export const ReferralForm: React.FC<Props> = (props) => {
 
     if (values.referralCode) {
       const codeExists = await referrals.referralCodeExists(
-        values.referralCode
+        values.referralCode,
       );
 
       if (codeExists) {
@@ -134,7 +135,7 @@ export const ReferralForm: React.FC<Props> = (props) => {
     async (values: ReferralPayload) => {
       setError(undefined);
 
-      if (!account.address) {
+      if (!account?.address) {
         setError("Wallet not connected");
         return;
       }
@@ -144,7 +145,7 @@ export const ReferralForm: React.FC<Props> = (props) => {
         setIsLoading(true);
         const signPayload = await referrals.generateSignature(
           account.address!,
-          values
+          values,
         );
 
         const signedMessage = await signMessageAsync({
@@ -167,22 +168,21 @@ export const ReferralForm: React.FC<Props> = (props) => {
         setIsLoading(false);
       }
     },
-    [props.onSubmit, account]
+    [props.onSubmit, account],
   );
 
   return (
     <>
-      <Button 
+      <Button
         disabled={isDisabled}
         onClick={toggleForm}
         className={cn(
-          'px-8 py-8',
-          'text-xl ',
-          'hover:bg-[#3a0c2a] transition-none',
-          !isDisabled 
-            ? 'bg-[#f716a2] text-secondary-foreground'
-            : ''
-        )}>
+          "px-8 py-8",
+          "text-xl ",
+          "hover:bg-[#3a0c2a] transition-none",
+          !isDisabled ? "bg-[#f716a2] text-secondary-foreground" : "",
+        )}
+      >
         Create Referral
       </Button>
 
@@ -235,9 +235,9 @@ export const ReferralForm: React.FC<Props> = (props) => {
                   type="submit"
                   disabled={isLoading}
                   className={cn(
-                    'px-8 py-4',
-                    'bg-[#f716a2] text-secondary-foreground',
-                    'hover:bg-[#3a0c2a] transition-none'
+                    "px-8 py-4",
+                    "bg-[#f716a2] text-secondary-foreground",
+                    "hover:bg-[#3a0c2a] transition-none",
                   )}
                 >
                   Create Sublead

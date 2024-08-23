@@ -9,20 +9,20 @@ import { wagmiConfig } from "../config";
 export async function getTokenAllowance(
   tokenAddress: string,
   ownerAddress: string,
-  spenderAddress: string
+  spenderAddress: string,
 ) {
   // updated provider with custom url for better testnet experience
   const provider = ethers.getDefaultProvider(
-    import.meta.env.VITE_PUBLIC_INFURA_URL
+    import.meta.env.VITE_PUBLIC_INFURA_URL,
   );
   const usdtErc20Contract = new ethers.Contract(
     tokenAddress,
     ERC20_ABI,
-    provider
+    provider,
   );
   const allowance = await usdtErc20Contract.allowance(
     ownerAddress,
-    spenderAddress
+    spenderAddress,
   );
   const numDecimals = await usdtErc20Contract.decimals();
   return ethers.formatUnits(allowance, numDecimals);
@@ -31,7 +31,7 @@ export async function getTokenAllowance(
 export async function setTokenApprove(
   tokenAddress: string,
   value: string,
-  decimal: number
+  decimal: number,
 ) {
   const provider = new ethers.BrowserProvider((window as any).ethereum);
   const signer = await provider.getSigner();
@@ -72,14 +72,14 @@ export type TPaymentTokenType = {
 
 export async function getPercentageRate(): Promise<bigint> {
   const provider = ethers.getDefaultProvider(
-    import.meta.env.VITE_PUBLIC_INFURA_URL
+    import.meta.env.VITE_PUBLIC_INFURA_URL,
   );
   const chainId = Number((await provider.getNetwork()).chainId);
 
   const presaleContract = new ethers.Contract(
     PRESALE_CONTRACT_ADDRESS[chainId],
     PRESALE_ABI,
-    provider
+    provider,
   );
 
   return await presaleContract.PERCENTAGE_RATE();
@@ -87,14 +87,14 @@ export async function getPercentageRate(): Promise<bigint> {
 
 export async function getTokensAvailable(): Promise<bigint> {
   const provider = ethers.getDefaultProvider(
-    import.meta.env.VITE_PUBLIC_INFURA_URL
+    import.meta.env.VITE_PUBLIC_INFURA_URL,
   );
   const chainId = Number((await provider.getNetwork()).chainId);
 
   const presaleContract = new ethers.Contract(
     PRESALE_CONTRACT_ADDRESS[chainId],
     PRESALE_ABI,
-    provider
+    provider,
   );
 
   return await presaleContract.tokensAvailableForPresale();
@@ -102,14 +102,14 @@ export async function getTokensAvailable(): Promise<bigint> {
 
 export async function getTotalSold(): Promise<bigint> {
   const provider = ethers.getDefaultProvider(
-    import.meta.env.VITE_PUBLIC_INFURA_URL
+    import.meta.env.VITE_PUBLIC_INFURA_URL,
   );
   const chainId = Number((await provider.getNetwork()).chainId);
 
   const presaleContract = new ethers.Contract(
     PRESALE_CONTRACT_ADDRESS[chainId],
     PRESALE_ABI,
-    provider
+    provider,
   );
 
   return await presaleContract.totalSold();
@@ -117,14 +117,14 @@ export async function getTotalSold(): Promise<bigint> {
 
 export async function getSaleOptionsCout(): Promise<bigint> {
   const provider = ethers.getDefaultProvider(
-    import.meta.env.VITE_PUBLIC_INFURA_URL
+    import.meta.env.VITE_PUBLIC_INFURA_URL,
   );
   const chainId = Number((await provider.getNetwork()).chainId);
 
   const presaleContract = new ethers.Contract(
     PRESALE_CONTRACT_ADDRESS[chainId],
     PRESALE_ABI,
-    provider
+    provider,
   );
 
   return await presaleContract.saleOptionsCount();
@@ -133,14 +133,14 @@ export async function getSaleOptionsCout(): Promise<bigint> {
 export async function getOptionInfo(optionId: number): Promise<TOption> {
   // updated provider with custom url for better testnet experience
   const provider = ethers.getDefaultProvider(
-    import.meta.env.VITE_PUBLIC_INFURA_URL
+    import.meta.env.VITE_PUBLIC_INFURA_URL,
   );
   const chainId = Number((await provider.getNetwork()).chainId);
 
   const presaleContract = new ethers.Contract(
     PRESALE_CONTRACT_ADDRESS[chainId],
     PRESALE_ABI,
-    provider
+    provider,
   );
 
   const optionInfo = (await presaleContract.saleOptions(optionId)) as TOption;
@@ -151,17 +151,17 @@ export async function getOptionInfo(optionId: number): Promise<TOption> {
 export async function getReferralInfo(referralId: number): Promise<TReferral> {
   // updated provider with custom url for better testnet experience
   const provider = ethers.getDefaultProvider(
-    import.meta.env.VITE_PUBLIC_INFURA_URL
+    import.meta.env.VITE_PUBLIC_INFURA_URL,
   );
   const chainId = Number((await provider.getNetwork()).chainId);
 
   const presaleContract = new ethers.Contract(
     PRESALE_CONTRACT_ADDRESS[chainId],
     PRESALE_ABI,
-    provider
+    provider,
   );
   const referralInfo = (await presaleContract.referrals(
-    referralId
+    referralId,
   )) as TReferral;
 
   return referralInfo;
@@ -169,22 +169,22 @@ export async function getReferralInfo(referralId: number): Promise<TReferral> {
 
 export async function getInputPriceQuote(
   token: Address,
-  amountsIn: bigint
+  amountsIn: bigint,
 ): Promise<bigint> {
   // updated provider with custom url for better testnet experience
   const provider = ethers.getDefaultProvider(
-    import.meta.env.VITE_PUBLIC_INFURA_URL
+    import.meta.env.VITE_PUBLIC_INFURA_URL,
   );
   const chainId = Number((await provider.getNetwork()).chainId);
 
   const presaleContract = new ethers.Contract(
     PRESALE_CONTRACT_ADDRESS[chainId],
     PRESALE_ABI,
-    provider
+    provider,
   );
   const priceQuote = (await presaleContract.inputPriceQuote(
     token,
-    amountsIn
+    amountsIn,
   )) as bigint;
 
   return priceQuote;
@@ -192,22 +192,22 @@ export async function getInputPriceQuote(
 
 export async function getInputPriceQuoteReversed(
   token: Address,
-  amountsIn: bigint
+  amountsIn: bigint,
 ): Promise<bigint> {
   // updated provider with custom url for better testnet experience
   const provider = ethers.getDefaultProvider(
-    import.meta.env.VITE_PUBLIC_INFURA_URL
+    import.meta.env.VITE_PUBLIC_INFURA_URL,
   );
   const chainId = Number((await provider.getNetwork()).chainId);
 
   const presaleContract = new ethers.Contract(
     PRESALE_CONTRACT_ADDRESS[chainId],
     PRESALE_ABI,
-    provider
+    provider,
   );
   const referralInfo = (await presaleContract.inputPriceQuoteReversed(
     token,
-    amountsIn
+    amountsIn,
   )) as bigint;
 
   return referralInfo;
@@ -276,7 +276,7 @@ export async function buyExactPresaleTokens({
 export async function getQuoteAmountsInForTeaTokens(
   optionId: number,
   tokenSell: Address,
-  amountsInHuman: string
+  amountsInHuman: string,
 ) {
   const provider = new ethers.BrowserProvider((window as any).ethereum);
 
@@ -290,13 +290,13 @@ export async function getQuoteAmountsInForTeaTokens(
   const presaleContract = new ethers.Contract(
     PRESALE_CONTRACT_ADDRESS[chainId],
     PRESALE_ABI,
-    signer
+    signer,
   );
 
   const payAmount = await presaleContract.getExactPayAmount(
     optionId,
     tokenSell,
-    parseEther(amountsInHuman)
+    parseEther(amountsInHuman),
   );
 
   return payAmount;
@@ -305,7 +305,7 @@ export async function getQuoteAmountsInForTeaTokens(
 export async function getQuoteAmountsOutForTeaTokens(
   optionId: number,
   tokenSell: Address,
-  amountsInHuman: string
+  amountsInHuman: string,
 ) {
   const provider = new ethers.BrowserProvider((window as any).ethereum);
   let decimals = 18;
@@ -324,13 +324,13 @@ export async function getQuoteAmountsOutForTeaTokens(
   const presaleContract = new ethers.Contract(
     PRESALE_CONTRACT_ADDRESS[chainId],
     PRESALE_ABI,
-    signer
+    signer,
   );
 
   const receiveAmount = await presaleContract.getExactReceiveAmount(
     optionId,
     tokenSell,
-    parseUnits(amountsInHuman, Number(decimals))
+    parseUnits(amountsInHuman, Number(decimals)),
   );
 
   return receiveAmount;

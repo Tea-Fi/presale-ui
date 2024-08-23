@@ -1,118 +1,118 @@
 .referral-form-backdrop {
-    display: grid;
-    place-content: center;
+  display: grid;
+  place-content: center;
 
-    position: fixed;
-    top: 0;
-    left: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
 
-    width: 100vw;
-    height: 100vh;
+  width: 100vw;
+  height: 100vh;
 
-    background-color: rgba($bg-base, 0.8);
-    backdrop-filter: blur(2px);
+  background-color: rgba($bg-base, 0.8);
+  backdrop-filter: blur(2px);
 
-    z-index: 10;
+  z-index: 10;
 }
 
 .referral-form {
-    background-color: $bg-popup;
-    width: 400px;
+  background-color: $bg-popup;
+  width: 400px;
 
-    max-height: 600px;
+  max-height: 600px;
 
-    border-radius: 1rem;
+  border-radius: 1rem;
 
-    padding: 1.5rem;
+  padding: 1.5rem;
 
-    display: flex;
+  display: flex;
 
-    flex-flow: column nowrap;
+  flex-flow: column nowrap;
 
-    justify-content: flex-start;
-    align-items: stretch;
+  justify-content: flex-start;
+  align-items: stretch;
 
-    gap: 1rem;
+  gap: 1rem;
 
-    position: relative;
+  position: relative;
 
-    .referral-form__error {
-        color: $color-danger;
-        font-size: 14px;
-    }
+  .referral-form__error {
+    color: $color-danger;
+    font-size: 14px;
+  }
 
-    .referral-form__close {
-        position: absolute;
+  .referral-form__close {
+    position: absolute;
 
-        top: 1rem;
-        right: 1rem;
-       
-        cursor: pointer;
-    }
+    top: 1rem;
+    right: 1rem;
 
-    & > button {
-        margin-top: 2rem;
-    }
+    cursor: pointer;
+  }
+
+  & > button {
+    margin-top: 2rem;
+  }
 }
 
 .referral-form-field {
+  display: flex;
+  flex-flow: column nowrap;
+
+  gap: 0.25rem;
+
+  text-align: left;
+
+  input {
+    width: 100%;
+  }
+
+  .referral-form-field__input {
+    border-radius: 0.5rem;
+    background-color: $color-input;
+
+    padding: 0.5rem;
+
+    transition: border 0.2s ease-in-out;
+
+    & > input {
+      background-color: transparent;
+
+      &:focus {
+        outline: none;
+      }
+    }
+
+    &:focus-within {
+      border: 2px solid $color-border;
+    }
+  }
+
+  .referral-form-field__label {
+    font-size: 16px;
+
+    color: $color-text;
+  }
+
+  .referral-form-field__error {
+    color: $color-danger;
+    font-size: 12px;
+  }
+
+  .referral-form__slider {
     display: flex;
-    flex-flow: column nowrap;
+    flex-flow: row;
 
-    gap: 0.25rem;
+    gap: 1rem;
 
-    text-align: left;
-
-    input {
-        width: 100%;
+    & > input[type="range"] {
+      flex-grow: 1;
+      accent-color: $color-brand;
     }
 
-    .referral-form-field__input {
-        border-radius: 0.5rem;
-        background-color: $color-input;
-
-        padding: 0.5rem;
-
-        transition: border 0.2s ease-in-out;
-
-        & > input {
-            background-color: transparent;
-
-            &:focus {
-                outline: none;
-            }
-        }
-
-        &:focus-within {
-            border: 2px solid $color-border;
-        }
+    & > div {
+      width: 4rem;
+      text-align: right;
     }
-
-    .referral-form-field__label {
-        font-size: 16px;
-
-        color: $color-text;
-    }
-
-    .referral-form-field__error {
-        color: $color-danger;
-        font-size: 12px;
-    }
-
-    .referral-form__slider {
-        display: flex;
-        flex-flow: row;
-
-        gap: 1rem;
-
-        & > input[type=range] {
-            flex-grow: 1;
-            accent-color: $color-brand;
-        }
-
-        & > div {
-            width: 4rem;
-            text-align: right;
-        }
-    }
+  }
 }

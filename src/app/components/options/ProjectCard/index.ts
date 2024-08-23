@@ -1,3 +1,3 @@
-import {ProjectCard} from './ProjectCard.tsx'
+import { ProjectCard } from "./ProjectCard.tsx";
 
-export default ProjectCard
+export default ProjectCard;

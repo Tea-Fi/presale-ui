@@ -165,7 +165,7 @@ export const Vortex = (props: VortexProps) => {
     ttl: number,
     radius: number,
     hue: number,
-    ctx: CanvasRenderingContext2D
+    ctx: CanvasRenderingContext2D,
   ) => {
     ctx.save();
     ctx.lineCap = "round";
@@ -187,7 +187,7 @@ export const Vortex = (props: VortexProps) => {
     canvas: HTMLCanvasElement,
     // prevent fkn vite error of '<variable> is declared but its value is never read'
     // @ts-ignore
-    ctx?: CanvasRenderingContext2D
+    ctx?: CanvasRenderingContext2D,
   ) => {
     const { innerWidth, innerHeight } = window;
 
@@ -200,7 +200,7 @@ export const Vortex = (props: VortexProps) => {
 
   const renderGlow = (
     canvas: HTMLCanvasElement,
-    ctx: CanvasRenderingContext2D
+    ctx: CanvasRenderingContext2D,
   ) => {
     ctx.save();
     ctx.filter = "blur(8px) brightness(200%)";
@@ -217,7 +217,7 @@ export const Vortex = (props: VortexProps) => {
 
   const renderToScreen = (
     canvas: HTMLCanvasElement,
-    ctx: CanvasRenderingContext2D
+    ctx: CanvasRenderingContext2D,
   ) => {
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
@@ -237,7 +237,9 @@ export const Vortex = (props: VortexProps) => {
   }, []);
 
   return (
-    <div className={cn("absolute min-h-screen w-full", props.containerClassName)}>
+    <div
+      className={cn("absolute min-h-screen w-full", props.containerClassName)}
+    >
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

@@ -1,14 +1,12 @@
-import {useReferralStore} from "../state/referal.store.ts";
+import { useReferralStore } from "../state/referal.store.ts";
 
 const useLoginInfo = () => {
-    const {referralCode, referralId} = useReferralStore();
-    const isLoggedIn = !!referralCode && !!referralId;
+  const { referralCode, referralId } = useReferralStore();
+  const isLoggedIn = !!referralCode && !!referralId;
 
-
-    return {
-        isLoggedIn
-    }
-}
-
+  return {
+    isLoggedIn,
+  };
+};
 
 export default useLoginInfo;

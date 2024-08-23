@@ -77,9 +77,8 @@ export const WalletProvider: FunctionComponent<{ children: ReactNode }> = ({
   const { isDisconnected } = useAccount();
   const { disconnect: fullDisconnect } = useDisconnect();
 
-  const [values, setValues] = useState<
-    Pick<WalletContext, keyof ContextValues>
-  >(initValues());
+  const [values, setValues] =
+    useState<Pick<WalletContext, keyof ContextValues>>(initValues());
 
   const [currenciesInfo, setCurrenciesInfo] =
     useState<Record<string, Currency>>(defaultCurrencies);
@@ -98,7 +97,7 @@ export const WalletProvider: FunctionComponent<{ children: ReactNode }> = ({
 
   function initValues() {
     const storedValues = window.localStorage.getItem(
-      METAMASK_ACCOUNT_LOCALSTORAGE_KEY
+      METAMASK_ACCOUNT_LOCALSTORAGE_KEY,
     );
     if (storedValues) {
       return JSON.parse(storedValues);
@@ -111,7 +110,7 @@ export const WalletProvider: FunctionComponent<{ children: ReactNode }> = ({
       try {
         if (!chainId) return;
         const provider = new JsonRpcProvider(
-          import.meta.env.VITE_PUBLIC_INFURA_URL
+          import.meta.env.VITE_PUBLIC_INFURA_URL,
         );
 
         const [ethBalance, usdtBalance, usdcBalance, wethBalance, wbtcBalance] =
@@ -120,22 +119,22 @@ export const WalletProvider: FunctionComponent<{ children: ReactNode }> = ({
             getFormattedBalanceOfErc20TokenHolder(
               USDT[chainId],
               address,
-              currenciesInfo.usdt.decimal
+              currenciesInfo.usdt.decimal,
             ),
             getFormattedBalanceOfErc20TokenHolder(
               USDC[chainId],
               address,
-              currenciesInfo.usdc.decimal
+              currenciesInfo.usdc.decimal,
             ),
             getFormattedBalanceOfErc20TokenHolder(
               WETH[chainId],
               address,
-              currenciesInfo.weth.decimal
+              currenciesInfo.weth.decimal,
             ),
             getFormattedBalanceOfErc20TokenHolder(
               WBTC[chainId],
               address,
-              currenciesInfo.wbtc.decimal
+              currenciesInfo.wbtc.decimal,
             ),
           ]);
 
@@ -173,7 +172,7 @@ export const WalletProvider: FunctionComponent<{ children: ReactNode }> = ({
         console.error("==>", err);
       }
     },
-    [chainId]
+    [chainId],
   );
 
   const updateUserBalance = useCallback(async () => {
@@ -227,16 +226,16 @@ export const WalletProvider: FunctionComponent<{ children: ReactNode }> = ({
   async function getFormattedBalanceOfErc20TokenHolder(
     contractAddress: string,
     address: string,
-    numDecimals: number
+    numDecimals: number,
   ) {
     // updated provider with custom url for better testnet experience
     const provider = new JsonRpcProvider(
-      import.meta.env.VITE_PUBLIC_INFURA_URL
+      import.meta.env.VITE_PUBLIC_INFURA_URL,
     );
     const usdtErc20Contract = new ethers.Contract(
       contractAddress,
       ERC20_ABI,
-      provider
+      provider,
     );
 
     try {
@@ -273,7 +272,7 @@ export const WalletProvider: FunctionComponent<{ children: ReactNode }> = ({
   useEffect(() => {
     window.localStorage.setItem(
       METAMASK_ACCOUNT_LOCALSTORAGE_KEY,
-      JSON.stringify(values)
+      JSON.stringify(values),
     );
   }, [values]);
 
@@ -290,7 +289,7 @@ export const WalletProvider: FunctionComponent<{ children: ReactNode }> = ({
       connections[0] && chainId
         ? `${connections[0].chainId}` !== SUPPORTED_NETWORK
         : false,
-    [connections, chainId, SUPPORTED_NETWORK]
+    [connections, chainId, SUPPORTED_NETWORK],
   );
 
   return (
