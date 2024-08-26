@@ -102,7 +102,7 @@ export function subtreeSum(
   }
 
   const subleadSum = Object.keys(node.subleads ?? {})
-    .map((key) => subtreeSum(logs, node.subleads?.[key], parent))
+    .map((key) => subtreeSum(logs, node.subleads?.[key], parent, factorTokens, tokenStatField))
     .filter((x) => !!x)
     .reduce((acc, e) => addStats(acc, e), emptyStat());
 
