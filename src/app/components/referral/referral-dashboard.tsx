@@ -17,22 +17,24 @@ import { DashboardPeriodSelector, PeriodFilter } from "./period-selector";
 import { DashboardBlock } from "./dashboard-card";
 
 import { Referral } from "../../utils/constants";
-import { ClaimAmount, ClaimRecord } from "../../utils/claim";
+import { ClaimAmount } from "../../utils/claim";
 import { parseHumanReadable } from "../../utils";
+import { useAccount, useChainId } from "wagmi";
+import { useLastClaims } from "../../hooks/useLastClaims";
 
 interface Props {
   tree: Referral;
   logs: EventLogWithTimestamp[];
-
   address: string;
-
   claimed: ClaimAmount[];
-  lastClaim?: ClaimRecord;
 }
 
 export const ReferralDashboard: React.FC<Props> = (props) => {
-  const [loading, setLoading] = React.useState(false);
+  const account = useAccount();
+  const chainId = useChainId();
+  const { data: lastClaim } = useLastClaims(chainId, account.address);
 
+  const [loading, setLoading] = React.useState(false);
   const [logs, setLogs] = React.useState<EventLogWithTimestamp[]>([]);
   const [unclaimedLogs, setUnclaimedLogs] = React.useState<
     EventLogWithTimestamp[]
@@ -156,16 +158,16 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
     if (period !== PeriodFilter.threeMonths && dateBoundary) {
       getFilterLogs({
         boundary: dateBoundary,
-        lastClaimDate: props.lastClaim?.period?.startDate,
+        lastClaimDate: lastClaim?.period?.startDate,
       });
     }
 
     if (period === PeriodFilter.threeMonths) {
       getFilterLogs({
-        lastClaimDate: props.lastClaim?.period?.startDate,
+        lastClaimDate: lastClaim?.period?.startDate,
       });
     }
-  }, [props.tree, props.logs, dateBoundary]);
+  }, [props.tree, props.logs, dateBoundary, lastClaim]);
 
   return (
     <article className="dashboard-container">

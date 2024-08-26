@@ -1,8 +1,11 @@
 import Countdown from "react-countdown";
 import { useEffect, useState } from "react";
-import { useClaimPeriod } from "../hooks/useClaimPeriod";
+import { ROUND_CLAIM_DURATION, ROUND_DURATION } from "../utils/constants";
+import { useGetPeriod } from "../hooks/useGetPeriod";
+import { useClaimActivePeriod } from "../hooks/useClaimActivePeriod";
+import { useChainId } from "wagmi";
+import { useClaimCheck } from "../hooks/useClaimCheck";
 
-type Time = string | number | Date | undefined;
 type TCheckpoint = {
   startClaimingRoundAt: number;
   finishClaimingRoundAt: number;
@@ -11,34 +14,29 @@ type TCheckpoint = {
 };
 
 export const CountdownByCheckpoint = ({
-  startDate,
-  finishDate,
-  waitingClaimDuration,
-  pickClaimDuration,
   className,
-  canClaim,
   onChange,
   onFinish,
 }: {
-  startDate?: Time;
-  finishDate?: Time;
-  waitingClaimDuration?: number;
-  pickClaimDuration?: number;
   className?: string;
-  canClaim: boolean;
   onChange?: (claimAvailable: boolean) => void;
   onFinish?: () => void;
 }) => {
-  const activePeriod = useClaimPeriod();
-  const startDateNormal = startDate
-    ? new Date(startDate).getTime()
+  const chainId = useChainId();
+  const { canClaim } = useClaimCheck();
+
+  const { data: claimPeriod } = useGetPeriod();
+  const startDateNormal = claimPeriod?.start
+    ? new Date(claimPeriod?.start).getTime()
     : Date.now();
-  const finishDateNormal = finishDate
-    ? new Date(finishDate).getTime()
+  const finishDateNormal = claimPeriod?.end
+    ? new Date(claimPeriod?.end).getTime()
     : startDateNormal + 60_000;
 
-  const waitingClaimDurationNormal = waitingClaimDuration ?? 40_000;
-  const pickClaimDurationNormal = pickClaimDuration ?? 20_000;
+  const { data: activePeriod, isLoading } = useClaimActivePeriod(chainId);
+
+  const waitingClaimDurationNormal = ROUND_DURATION ?? 40_000;
+  const pickClaimDurationNormal = ROUND_CLAIM_DURATION ?? 20_000;
 
   const [checkpoints, setCheckpoints] = useState<TCheckpoint[] | undefined>(
     undefined,
@@ -215,16 +213,17 @@ export const CountdownByCheckpoint = ({
         : inClaim
           ? getElapsedDateByTimestamp(now, claimRoundFinish)
           : getElapsedDateByTimestamp(now, waitingRoundFinish);
+
       const claimIsActive =
-        !activePeriod.loading &&
-        activePeriod.period &&
-        new Date(activePeriod.period.endDate).getTime() >= now &&
+        !isLoading &&
+        activePeriod &&
+        new Date(activePeriod.endDate).getTime() >= now &&
         canClaim;
 
       if (claimIsActive) {
         elapsed = getElapsedDateByTimestamp(
           now,
-          new Date(activePeriod.period!.endDate).getTime(),
+          new Date(activePeriod!.endDate).getTime(),
         );
       }
 
@@ -279,6 +278,8 @@ export const CountdownByCheckpoint = ({
       );
     }
   };
+
+  if (!claimPeriod) return <></>;
 
   return (
     <Countdown

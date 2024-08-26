@@ -65,3 +65,7 @@ export const investmentInfo: Record<string, InvestmentInfoOption> = {
     vested: "50% - vested linearly over 2 months",
   },
 };
+
+export const ONE_DAY_IN_MS = 86_400_000;
+export const ROUND_CLAIM_DURATION = ONE_DAY_IN_MS * 3;
+export const ROUND_DURATION = ONE_DAY_IN_MS * 14 - ROUND_CLAIM_DURATION;
