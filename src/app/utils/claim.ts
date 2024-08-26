@@ -15,11 +15,20 @@ export interface ClaimAmount {
   amountUsd: string;
 }
 
-export interface ClaimPeriod {
+export interface ClaimActivePeriod {
   id: number;
 
   startDate: Date;
   endDate: Date;
+}
+
+export interface ClaimPeriod {
+  start: string;
+  end: string;
+}
+export interface ClaimPeriodParsed {
+  start: Date;
+  end: Date;
 }
 
 export type CreateClaimPayload = CreateClaimDto & {
@@ -43,26 +52,18 @@ export interface ClaimRecord {
   createdAt: string;
 }
 
+export interface ClaimProof {
+  proof: string[];
+  nonce: number;
+  tokens: string[];
+  amounts: string[];
+  amountsUsd: string[];
+}
+
 export const getPeriod = async () => {
   return fetch(`${API_URL}/claim/period`)
     .then((res) => res.json())
     .then((res) => res as { start: string; end: string });
-};
-
-export const getClaimedAmount = async (wallet: string, chainId: number) => {
-  return fetch(
-    `${API_URL}/claim/amount?walletAddress=${wallet}&chainId=${chainId}`,
-  )
-    .then((res) => res.json())
-    .then((res) => res as ClaimAmount[]);
-};
-
-export const getLastClaim = async (wallet: string, chainId: number) => {
-  return fetch(
-    `${API_URL}/claim/last?walletAddress=${wallet}&chainId=${chainId}`,
-  )
-    .then((res) => res.json())
-    .then((res) => res as ClaimRecord | undefined);
 };
 
 export const createClaim = async (payload: CreateClaimDto) => {
@@ -111,42 +112,8 @@ export const getClaimActivePeriod = async (chainId: string) => {
   try {
     return await fetch(`${API_URL}/claim/period/active?chainId=${chainId}`)
       .then((res) => res.json())
-      .then((res) => res as ClaimPeriod | undefined);
+      .then((res) => res as ClaimActivePeriod | undefined);
   } catch (err) {
-    return;
-  }
-};
-
-export const getClaimForPeriod = async (
-  chainId: string,
-  periodId: number,
-  address: string,
-) => {
-  return fetch(
-    `${API_URL}/claim/period/claims?chainId=${chainId}&periodId=${periodId}&address=${address}`,
-  )
-    .then((res) => res.json())
-    .then((res) => res as ClaimAmount[]);
-};
-
-export const getClaimProof = async (chainId: string, address: string) => {
-  try {
-    return fetch(
-      `${API_URL}/claim/merkle-tree/proof?chainId=${chainId}&address=${address}`,
-    )
-      .then((res) => res.json())
-      .then(
-        (res) =>
-          res as {
-            proof: string[];
-            nonce: number;
-            tokens: string[];
-            amounts: string[];
-            amountsUsd: string[];
-          },
-      );
-  } catch (err) {
-    console.error(err);
     return;
   }
 };

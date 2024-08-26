@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Button } from "../ui";
 
 import Spinner from "../spinner";
@@ -16,26 +16,17 @@ import {
   WBTC,
   WETH,
 } from "../../utils/constants";
-import {
-  ClaimAmount,
-  createClaim,
-  CreateClaimDto,
-  getClaimActivePeriod,
-  getClaimForPeriod,
-  getClaimProof,
-} from "../../utils/claim";
+import { ClaimAmount, createClaim, CreateClaimDto } from "../../utils/claim";
 import { useAccount, useChainId } from "wagmi";
 import { getClient } from "@wagmi/core";
 import { toast } from "sonner";
 import { wagmiConfig } from "../../config";
-import {
-  readContract,
-  writeContract,
-  waitForTransactionReceipt,
-} from "@wagmi/core";
+import { writeContract, waitForTransactionReceipt } from "@wagmi/core";
 import { PRESALE_CLAIM_EARNING_FEES_ABI } from "../../utils/claim_abi";
 import { estimateContractGas, getGasPrice } from "viem/actions";
 import { formatEther } from "viem";
+import { useClaimProof } from "../../hooks/useClaimProof";
+import { useClaimCheck } from "../../hooks/useClaimCheck";
 
 interface Props {
   tree: Referral;
@@ -56,10 +47,10 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
   const [showConfirm, setConfirm] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
-  const [canClaim, setCanClaim] = React.useState<boolean>(false);
-  const [proof, setClaimProof] =
-    React.useState<Awaited<ReturnType<typeof getClaimProof>>>();
   const [gas, setGas] = React.useState<bigint>();
+  const { data: claimProof } = useClaimProof(chainId, account.address);
+
+  const { canClaim, refetchClaimCheck } = useClaimCheck();
 
   const tokenList = React.useMemo(
     () => ({
@@ -73,93 +64,9 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
     [chainId],
   );
 
-  const getProofAndCheck = React.useCallback(async () => {
-    if (!account?.address) {
-      setCanClaim(false);
-      return;
-    }
-
-    if (chainId === 1) {
-      // toast.error('Claim is not yet available on Mainnet');
-      setCanClaim(false);
-      return;
-    }
-
-    const period = await getClaimActivePeriod(chainId.toString());
-
-    if (!period) {
-      setCanClaim(false);
-      return;
-    }
-
-    const periodClaimes = await getClaimForPeriod(
-      chainId.toString(),
-      period.id,
-      account.address,
-    );
-
-    if (periodClaimes.length > 0) {
-      setCanClaim(false);
-      return;
-    }
-
-    const currentProof = await getClaimProof(
-      chainId.toString(),
-      account.address,
-    );
-
-    if (!currentProof) {
-      setCanClaim(false);
-      return;
-    }
-
-    const isBanned = (await readContract(wagmiConfig, {
-      abi: PRESALE_CLAIM_EARNING_FEES_ABI,
-      address: PRESALE_CLAIM_CONTRACT_ADDRESS[chainId] as `0x${string}`,
-      functionName: "batchCheckPausedAccounts",
-      args: [[account.address]],
-    })) as boolean[];
-
-    if (isBanned.some((x) => !!x)) {
-      setCanClaim(false);
-      return;
-    }
-
-    const canClaimFromContract = (await readContract(wagmiConfig, {
-      abi: PRESALE_CLAIM_EARNING_FEES_ABI,
-      address: PRESALE_CLAIM_CONTRACT_ADDRESS[chainId] as `0x${string}`,
-      args: [
-        account.address,
-        BigInt(currentProof.nonce),
-        currentProof.tokens,
-        currentProof.amounts.map((x) => BigInt(x)),
-        currentProof.proof,
-      ],
-      functionName: "isAccountAbleToClaim",
-    })) as boolean;
-
-    setCanClaim(canClaimFromContract);
-
-    if (!canClaimFromContract) {
-      return;
-    }
-
-    setTimeout(
-      () => {
-        getProofAndCheck();
-      },
-      new Date(period.endDate).getTime() - Date.now(),
-    );
-
-    setClaimProof(currentProof);
-  }, [account?.address, chainId, setCanClaim, setClaimProof]);
-
-  useEffect(() => {
-    getProofAndCheck();
-  }, [getProofAndCheck]);
-
   const toggleShowConfirm = React.useCallback(async () => {
-    if (!proof) {
+    debugger;
+    if (!claimProof) {
       return;
     }
 
@@ -171,37 +78,37 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
       functionName: "claim",
       account: account?.address,
       args: [
-        BigInt(proof.nonce),
-        proof.tokens,
-        proof.amounts.map((x) => BigInt(x)),
-        proof.proof,
+        BigInt(claimProof.nonce),
+        claimProof.tokens,
+        claimProof.amounts.map((x) => BigInt(x)),
+        claimProof.proof,
       ],
     });
 
+    debugger;
     setGas(gas * gasPrice);
     setConfirm((state) => !state);
-  }, [chainId, account?.address, proof]);
+  }, [chainId, account?.address, claimProof]);
 
   const cancel = React.useCallback(() => {
     setConfirm(false);
   }, []);
 
   const claim = React.useCallback(async () => {
-    if (!proof || !canClaim) {
+    if (!claimProof || !canClaim) {
       return;
     }
 
     try {
       setLoading(true);
-
       const hash = await writeContract(wagmiConfig, {
         abi: PRESALE_CLAIM_EARNING_FEES_ABI,
         address: PRESALE_CLAIM_CONTRACT_ADDRESS[chainId] as `0x${string}`,
         args: [
-          BigInt(proof.nonce),
-          proof.tokens,
-          proof.amounts.map((x) => BigInt(x)),
-          proof.proof,
+          BigInt(claimProof.nonce),
+          claimProof.tokens,
+          claimProof.amounts.map((x) => BigInt(x)),
+          claimProof.proof,
         ],
         functionName: "claim",
       });
@@ -220,15 +127,15 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
         walletAddress: props.address,
         chainId: chainId.toString(),
 
-        claims: proof.tokens.map((address, idx) => {
+        claims: claimProof.tokens.map((address, idx) => {
           const token = tokenList[address.toLowerCase()]!;
 
           return {
             token: token.symbol,
             tokenAddress: address,
 
-            amount: proof.amounts[idx].toString(),
-            amountUsd: proof.amountsUsd[idx].toString(),
+            amount: claimProof.amounts[idx].toString(),
+            amountUsd: claimProof.amountsUsd[idx].toString(),
           };
         }),
       } as CreateClaimDto;
@@ -241,17 +148,15 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
         );
 
         props.onClaim();
-        setCanClaim(false);
+        refetchClaimCheck();
       }
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
       setConfirm(false);
-
-      await getProofAndCheck();
     }
-  }, [props.address, proof, canClaim, getProofAndCheck]);
+  }, [props.address, claimProof, canClaim]);
 
   return (
     <>
@@ -262,9 +167,9 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
 
           ...(canClaim
             ? [
-                "text-xl bg-[#f716a2] text-secondary-foreground",
-                "hover:bg-[#3a0c2a] transition-none",
-              ]
+              "text-xl bg-[#f716a2] text-secondary-foreground",
+              "hover:bg-[#3a0c2a] transition-none",
+            ]
             : []),
         )}
         onClick={toggleShowConfirm}
@@ -283,9 +188,9 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
               <div>Amount to claim:</div>
 
               <div className="text-lg font-light grid grid-cols-2 gap-x-4 gap-y-1">
-                {proof?.tokens.map((x, idx) => {
+                {claimProof?.tokens.map((x, idx) => {
                   const token = tokenList[x.toLowerCase()];
-                  const amount = proof.amounts[idx];
+                  const amount = claimProof.amounts[idx];
 
                   return (
                     <React.Fragment key={`token-${token.symbol}`}>
