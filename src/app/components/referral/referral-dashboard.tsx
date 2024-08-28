@@ -206,7 +206,7 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
           />
 
           <DashboardBlock
-            title="Average Team Earning"
+            title="Direct Purchases"
             value={`$${usdFormatter.format(parseHumanReadable(info!.teamEarnings, 6, 2))}`}
             icon={<BarChart2 />}
           />
