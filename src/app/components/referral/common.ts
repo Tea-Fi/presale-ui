@@ -240,23 +240,22 @@ export function calculateEarningByToken(
   return commission;
 }
 
-export function calculateStats(logs: EventLog[], tokenKey = "tokenSoldAmount") {
-  const stats = {} as StatsMap;
 
-  for (const entry of logs) {
+export function calculateStats(logs: EventLog[], tokenKey = "tokenSoldAmount"): StatsMap {
+  return logs.reduce<StatsMap>((stats, entry) => {
     const args = entry.args as any;
-    const stat = stats[Number(args["referrerId"] as number)] ?? {
+
+    const referrerId = Number(args["referrerId"]);
+    stats[referrerId] = stats[referrerId] ?? {
       purchases: 0,
       soldInUsd: 0n,
       tokensSold: 0n,
     };
 
-    stat.purchases += 1;
-    stat.soldInUsd += BigInt(args["tokensSoldAmountInUsd"]);
-    stat.tokensSold += BigInt(args[tokenKey]);
+    stats[referrerId].purchases += 1;
+    stats[referrerId].soldInUsd += BigInt(args["tokensSoldAmountInUsd"]);
+    stats[referrerId].tokensSold += BigInt(args[tokenKey]);
 
-    stats[Number(args["referrerId"] as number)] = stat;
-  }
-
-  return stats;
+    return stats;
+  }, {});
 }
