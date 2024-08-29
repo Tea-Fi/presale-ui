@@ -65,7 +65,6 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
   );
 
   const toggleShowConfirm = React.useCallback(async () => {
-    debugger;
     if (!claimProof) {
       return;
     }
@@ -84,8 +83,6 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
         claimProof.proof,
       ],
     });
-
-    debugger;
     setGas(gas * gasPrice);
     setConfirm((state) => !state);
   }, [chainId, account?.address, claimProof]);
