@@ -12,14 +12,21 @@ export const useClaimCheck = () => {
   const account = useAccount();
   const chainId = useChainId();
 
-  const { data: claimProof, isLoading: isClaimProofLoading,mutate: refetchClaimProof } = useClaimProof(
-    chainId,
-    account.address,
-  );
-  const { data: period, isLoading: isActivePeriodLoading ,mutate: refetchClaimActivePeriod} =
-    useClaimActivePeriod(chainId);
-  const { data: periodClaims, isLoading: isPeriodClaimsLoading,mutate: refetchPeriodClaims } =
-    useClaimForPeriod(chainId, period?.id, account.address);
+  const {
+    data: claimProof,
+    isLoading: isClaimProofLoading,
+    mutate: refetchClaimProof,
+  } = useClaimProof(chainId, account.address);
+  const {
+    data: period,
+    isLoading: isActivePeriodLoading,
+    mutate: refetchClaimActivePeriod,
+  } = useClaimActivePeriod(chainId);
+  const {
+    data: periodClaims,
+    isLoading: isPeriodClaimsLoading,
+    mutate: refetchPeriodClaims,
+  } = useClaimForPeriod(chainId, period?.id, account.address);
   const isBanned = useIsBanned();
   const canClaimForContracts = useCanClaimForContracts();
 
@@ -28,7 +35,6 @@ export const useClaimCheck = () => {
     refetchClaimActivePeriod();
     refetchPeriodClaims();
   };
-  
   useEffect(() => {
     if (isClaimProofLoading || isActivePeriodLoading || isPeriodClaimsLoading)
       return;
@@ -47,6 +53,6 @@ export const useClaimCheck = () => {
 
   return {
     canClaim,
-    refetchClaimCheck
-  }
+    refetchClaimCheck,
+  };
 };
