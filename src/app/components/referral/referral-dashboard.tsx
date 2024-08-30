@@ -30,6 +30,15 @@ interface Props {
   address: string;
   claimed: ClaimAmount[];
 }
+interface DashboardInfo {
+  purchases: bigint;
+  teamSize: number;
+  earnings: bigint;
+  unclaimedEarnings: bigint;
+  directPurchases: bigint;
+  teamEarnings: bigint;
+  teamPurchases: number;
+}
 
 export const ReferralDashboard: React.FC<Props> = (props) => {
   const account = useAccount();
@@ -83,13 +92,29 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
     return list;
   }, [props.tree]);
 
-  const info = React.useMemo(() => {
-    if (isEmpty(logs) || !props.tree || !team || !props.address || !props.claimed || !referralTree) return;
+  const info: DashboardInfo = React.useMemo(() => {
+    if (
+      !props.tree ||
+      !team ||
+      !props.address ||
+      !props.claimed ||
+      !referralTree ||
+      isEmpty(logs)
+    ) {
+      return {
+        purchases: 0n,
+        teamSize: 0,
+        earnings: 0n,
+        unclaimedEarnings: 0n,
+        directPurchases: 0n,
+        teamEarnings: 0n,
+        teamPurchases: 0,
+      };
+    }
 
     const stats = calculateStats(logs);
     const myRefCodeStats = stats[referralTree?.id];
-
-    const myTeamStats = team.map((x) => stats[x.id]);
+    const myTeamStats = team.map((x) => stats[x.id]).filter(Boolean);
     const purchases = myTeamStats.reduce(
       (acc, e) => acc + (e?.purchases || 0),
       0,
@@ -190,7 +215,7 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
 
       {loading && <div>Loading</div>}
 
-      {!loading && !isEmpty(info) && (
+      {!loading && (
         <main>
           <DashboardBlock
             title="Total Purchases"
@@ -200,13 +225,13 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
 
           <DashboardBlock
             title="NO. of Purchases"
-            value={info.teamPurchases.toString()}
+            value={info.teamPurchases}
             icon={<ShoppingBag />}
           />
 
           <DashboardBlock
             title="My Team"
-            value={info.teamSize.toString()}
+            value={info.teamSize || team?.length}
             icon={<PersonStanding />}
           />
 
