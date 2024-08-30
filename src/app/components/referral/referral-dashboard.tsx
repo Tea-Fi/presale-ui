@@ -36,7 +36,10 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
 
   const chainId = useChainId();
   const { data: lastClaim } = useLastClaims(chainId, account.address);
-  const { data: referralTree } = useGetReferralTree({ address: account.address, chainId });
+  const { data: referralTree } = useGetReferralTree({
+    address: account.address,
+    chainId,
+  });
 
   const [loading, setLoading] = React.useState(false);
   const [logs, setLogs] = React.useState<EventLogWithTimestamp[]>([]);
@@ -81,13 +84,24 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
   }, [props.tree]);
 
   const info = React.useMemo(() => {
-    if (!logs || !props.tree || !team || !props.address || !props.claimed || !referralTree) return;
+    if (
+      !logs ||
+      !props.tree ||
+      !team ||
+      !props.address ||
+      !props.claimed ||
+      !referralTree
+    )
+      return;
 
     const stats = calculateStats(logs);
     const myRefCodeStats = stats[referralTree?.id];
 
     const myTeamStats = team.map((x) => stats[x.id]);
-    const purchases = myTeamStats.reduce((acc, e) => acc + (e?.purchases || 0), 0);
+    const purchases = myTeamStats.reduce(
+      (acc, e) => acc + (e?.purchases || 0),
+      0,
+    );
 
     const totalPurchasesUsd = myTeamStats.reduce(
       (acc, e) => acc + e.soldInUsd,
@@ -96,7 +110,7 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
     const averageTeamEarnings =
       purchases > 0 ? totalPurchasesUsd / BigInt(purchases) : 0n;
 
-    const directPurchases = BigInt(myRefCodeStats?.soldInUsd || 0)
+    const directPurchases = BigInt(myRefCodeStats?.soldInUsd || 0);
 
     const earnings = calculateCommission(props.tree, logs, {
       leavePrecision: true,

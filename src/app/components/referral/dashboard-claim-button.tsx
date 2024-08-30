@@ -164,9 +164,9 @@ export const DashboardClaimButton: React.FC<Props> = (props) => {
 
           ...(canClaim
             ? [
-              "text-xl bg-[#f716a2] text-secondary-foreground",
-              "hover:bg-[#3a0c2a] transition-none",
-            ]
+                "text-xl bg-[#f716a2] text-secondary-foreground",
+                "hover:bg-[#3a0c2a] transition-none",
+              ]
             : []),
         )}
         onClick={toggleShowConfirm}
