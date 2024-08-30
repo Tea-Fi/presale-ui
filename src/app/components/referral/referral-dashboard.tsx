@@ -87,7 +87,7 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
     const myRefCodeStats = stats[referralTree?.id];
 
     const myTeamStats = team.map((x) => stats[x.id]);
-    const purchases = myTeamStats.reduce((acc, e) => acc + e.purchases, 0);
+    const purchases = myTeamStats.reduce((acc, e) => acc + (e?.purchases || 0), 0);
 
     const totalPurchasesUsd = myTeamStats.reduce(
       (acc, e) => acc + e.soldInUsd,
