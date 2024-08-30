@@ -7,6 +7,7 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
+  Progress,
 } from "../components/ui";
 import {
   getOptionInfo,
@@ -14,7 +15,7 @@ import {
   getTokensAvailable,
 } from "../utils/presale";
 import { cn, parseHumanReadable } from "../utils";
-import { investmentInfo } from "../utils/constants";
+import { endOfPresaleDate, investmentInfo } from "../utils/constants";
 import { MdKeyboardArrowDown } from "react-icons/md";
 import { TeaCup } from "../../assets/icons";
 import { track } from "../utils/analytics";
@@ -22,6 +23,7 @@ import PresaleHeadline from "../components/presale-headline";
 import { ProjectInfoOption } from "../../types/options.ts";
 import { ProjectCard } from "../components/options/ProjectCard/ProjectCard.tsx";
 import { useReferralCode } from "../hooks/useReferralCode.ts";
+import { CountdownSmall } from "../components/countdown/countdown-sm.tsx";
 
 export const Options = () => {
   const [dropdownOpened, setDropdownOpened] = useState<boolean>(false);
@@ -100,10 +102,16 @@ export const Options = () => {
   }, []);
 
   if (!projectInfos) return null;
-
   return (
-    <div className="inline-flex flex-col justify-center w-full">
+    <div className="inline-flex flex-col justify-center items-center w-full">
       <PresaleHeadline />
+      <div className="mb-10">
+        <CountdownSmall centered />
+        <Progress
+          max={endOfPresaleDate.getDate()}
+          value={new Date().getDate()}
+        />
+      </div>
       <div className="flex flex-col-reverse lg-mt-0 lg:flex-row grow justify-center w-full items-center gap-8">
         <div className="w-96">
           <CardHoverEffect items={projectInfos} />
