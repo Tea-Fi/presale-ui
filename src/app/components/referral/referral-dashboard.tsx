@@ -84,15 +84,7 @@ export const ReferralDashboard: React.FC<Props> = (props) => {
   }, [props.tree]);
 
   const info = React.useMemo(() => {
-    if (
-      !logs ||
-      !props.tree ||
-      !team ||
-      !props.address ||
-      !props.claimed ||
-      !referralTree
-    )
-      return;
+    if (isEmpty(logs) || !props.tree || !team || !props.address || !props.claimed || !referralTree) return;
 
     const stats = calculateStats(logs);
     const myRefCodeStats = stats[referralTree?.id];
