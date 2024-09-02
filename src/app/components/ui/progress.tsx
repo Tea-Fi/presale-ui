@@ -5,17 +5,14 @@ type Props = {
   max?: number;
   value?: number;
   className?: string;
+  reverse?: boolean;
 };
 
-export const Progress: FC<Props> = ({ max, value, className }) => {
+export const Progress: FC<Props> = ({ max, value, className, reverse }) => {
   const ONE_HUNDRED_PERCENTS = 100;
   const MAX = max ?? ONE_HUNDRED_PERCENTS;
   const CURRENT = value ?? 0;
-
-  const currentInPerc =
-    max !== ONE_HUNDRED_PERCENTS
-      ? (CURRENT / MAX) * ONE_HUNDRED_PERCENTS
-      : CURRENT;
+  const currentInPerc = Math.min((CURRENT / MAX) * 100, 100);
 
   const Childdiv = {
     transition: "0.2s",
@@ -25,7 +22,8 @@ export const Progress: FC<Props> = ({ max, value, className }) => {
   return (
     <div
       className={cn(
-        "w-full h-3 rounded-full overflow-hidden bg-loader-parent inline-flex flex-row-reverse",
+        "w-full h-3 rounded-full overflow-hidden bg-loader-parent inline-flex",
+        reverse && "flex-row-reverse",
         className,
       )}
     >

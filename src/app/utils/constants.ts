@@ -82,3 +82,5 @@ export const investmentInfo: Record<string, InvestmentInfoOption> = {
 export const ONE_DAY_IN_MS = 86_400_000;
 export const ROUND_CLAIM_DURATION = ONE_DAY_IN_MS * 3;
 export const ROUND_DURATION = ONE_DAY_IN_MS * 14 - ROUND_CLAIM_DURATION;
+
+export const endOfPresaleDate = new Date("09/30/2024 23:59:59");
