@@ -105,11 +105,12 @@ export const Options = () => {
   return (
     <div className="inline-flex flex-col justify-center items-center w-full">
       <PresaleHeadline />
-      <div className="mb-10">
+      <div className="mb-10 flex flex-col">
         <CountdownSmall centered />
         <Progress
           max={endOfPresaleDate.getDate()}
           value={new Date().getDate()}
+          className="m-2"
         />
       </div>
       <div className="flex flex-col-reverse lg-mt-0 lg:flex-row grow justify-center w-full items-center gap-8">
