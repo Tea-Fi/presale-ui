@@ -22,7 +22,7 @@ export const Progress: FC<Props> = ({ max, value, className, reverse }) => {
   return (
     <div
       className={cn(
-        "w-full h-3 rounded-full overflow-hidden bg-loader-parent inline-flex",
+        "h-3 rounded-full overflow-hidden bg-loader-parent inline-flex",
         reverse && "flex-row-reverse",
         className,
       )}

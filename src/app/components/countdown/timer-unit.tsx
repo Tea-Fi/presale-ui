@@ -6,7 +6,7 @@ interface TimerUnitProps {
 }
 const TimerUnit = ({ value, endDots }: TimerUnitProps) => {
   const baseClasses =
-    "flex justify-center items-center text-white font-extrabold rounded-lg bg-[#3a0c2a] p-4 mx-2 text-2xl md:text-4xl";
+    " text-center whitespace-nowrap flex justify-center items-center text-white font-extrabold rounded-lg bg-[#3a0c2a] mx-2 p-4 text-2xl md:text-4xl w-16 md:w-24";
 
   return (
     <>
