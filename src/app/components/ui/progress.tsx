@@ -13,10 +13,9 @@ export const Progress: FC<Props> = ({ max, value, className, reverse }) => {
   const MAX = max ?? ONE_HUNDRED_PERCENTS;
   const CURRENT = value ?? 0;
   const currentInPerc = Math.min((CURRENT / MAX) * 100, 100);
-
   const Childdiv = {
     transition: "0.2s",
-    width: `${currentInPerc >= MAX ? MAX : currentInPerc}%`,
+    width: `${reverse ? ONE_HUNDRED_PERCENTS - currentInPerc : currentInPerc}%`,
   };
 
   return (
@@ -28,7 +27,7 @@ export const Progress: FC<Props> = ({ max, value, className, reverse }) => {
       )}
     >
       <div
-        className={`h-full rounded-full bg-loader-child`}
+        className={`h-full rounded-r-full bg-loader-child`}
         style={Childdiv}
       ></div>
     </div>

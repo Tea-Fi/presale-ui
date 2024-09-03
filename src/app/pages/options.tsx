@@ -111,6 +111,7 @@ export const Options = () => {
           max={endOfPresaleDate.getDate()}
           value={new Date().getDate()}
           className="m-2"
+          reverse
         />
       </div>
       <div className="flex flex-col-reverse lg-mt-0 lg:flex-row grow justify-center w-full items-center gap-8">
