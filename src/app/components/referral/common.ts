@@ -35,9 +35,12 @@ export const usdFormatter = Intl.NumberFormat("en-US", {
 export const getArg = <T>(log: EventLog, key: string) =>
   (log.args as Record<string, unknown>)[key] as T;
 
-export const getStat = (log: EventLog): ReferralStats => ({
+export const getStat = (
+  log: EventLog,
+  tokenStatField: string = "tokenSoldAmount",
+): ReferralStats => ({
   purchases: 1,
-  tokensSold: getArg(log, "tokenSoldAmount"),
+  tokensSold: getArg(log, tokenStatField),
   soldInUsd: getArg(log, "tokensSoldAmountInUsd"),
 });
 
@@ -73,6 +76,7 @@ export function subtreeSum(
   node?: Referral,
   parent?: Referral,
   factorTokens?: boolean,
+  tokenStatField: string = "tokenSoldAmount",
 ): ReferralStats {
   if (!node) {
     return emptyStat();
@@ -89,7 +93,7 @@ export function subtreeSum(
       return addStats(
         acc,
         factorStats(
-          getStat(e),
+          getStat(e, tokenStatField),
           BigInt(rootLog ? rootLog.fee - e.fee : e.fee),
           factorTokens,
         ),
@@ -101,7 +105,15 @@ export function subtreeSum(
   }
 
   const subleadSum = Object.keys(node.subleads ?? {})
-    .map((key) => subtreeSum(logs, node.subleads?.[key], parent))
+    .map((key) =>
+      subtreeSum(
+        logs,
+        node.subleads?.[key],
+        parent,
+        factorTokens,
+        tokenStatField,
+      ),
+    )
     .filter((x) => !!x)
     .reduce((acc, e) => addStats(acc, e), emptyStat());
 
@@ -141,6 +153,7 @@ export async function getReferralAmounts(
 interface CommissionOptions {
   factorTokens?: boolean;
   leavePrecision?: boolean;
+  tokenStatField?: string;
 }
 
 function mapLogs(referral: Referral, logs: EventLogWithTimestamp[]) {
@@ -169,7 +182,11 @@ export function calculateCommission(
     .reduce((acc, log) => {
       return addStats(
         acc,
-        factorStats(getStat(log), BigInt(log.fee), options?.factorTokens),
+        factorStats(
+          getStat(log, options?.tokenStatField),
+          BigInt(log.fee),
+          options?.factorTokens,
+        ),
       );
     }, emptyStat());
 
@@ -178,7 +195,13 @@ export function calculateCommission(
   const subtreeList = Object.keys(node.subleads ?? {})
     .map((key) => node.subleads?.[key])
     .map((x) => {
-      return subtreeSum(logs, x, node, options?.factorTokens);
+      return subtreeSum(
+        logs,
+        x,
+        node,
+        options?.factorTokens,
+        options?.tokenStatField,
+      );
     });
 
   const subtree = subtreeList.reduce((acc, e) => addStats(acc, e), emptyStat());

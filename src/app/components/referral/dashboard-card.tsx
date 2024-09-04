@@ -2,7 +2,7 @@ import React from "react";
 
 interface Props {
   title: string;
-  value: string;
+  value?: string | number;
   icon: React.ReactNode;
 }
 
@@ -13,7 +13,9 @@ export const DashboardBlock: React.FC<Props> = (props) => {
 
       <div className="dashboard-card__title">{props.title}</div>
 
-      <div className="dashboard-card__value">{props.value}</div>
+      {props.value && (
+        <div className="dashboard-card__value">{props.value}</div>
+      )}
     </div>
   );
 };

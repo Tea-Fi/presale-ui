@@ -95,13 +95,15 @@ export const ReferralTree: React.FC<Props> = (props) => {
     const data = [] as Node<any, string>[];
     const edges = [] as Edge<any>[];
 
-    const memo = {} as Record<number, ReferralStats>;
-
     const root = {
       code: props.tree.referral!,
       walletAddress: props.tree.wallet,
       fee: props.tree.fee,
-      stats: calculateCommission(props.tree, props.logs, memo),
+      stats: calculateCommission(props.tree, props.logs, {
+        factorTokens: false,
+        leavePrecision: true,
+        tokenStatField: "tokenReceivedAmount",
+      }),
       subleads: Object.keys(props.tree.subleads ?? {}).length,
       parent: "",
       level: 0,
@@ -131,7 +133,11 @@ export const ReferralTree: React.FC<Props> = (props) => {
         code: current.referral!,
         walletAddress: current.wallet!,
         fee: current.fee,
-        stats: calculateCommission(current, props.logs, memo),
+        stats: calculateCommission(current, props.logs, {
+          factorTokens: false,
+          leavePrecision: true,
+          tokenStatField: "tokenReceivedAmount",
+        }),
         subleads: Object.keys(current.subleads ?? {}).length,
         parent: current.parent,
         level: current.level,

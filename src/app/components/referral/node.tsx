@@ -4,7 +4,7 @@ import { Copy } from "lucide-react";
 
 import { ReferralStats, usdFormatter } from "./common";
 
-import { cn } from "../../utils";
+import { cn, parseHumanReadable } from "../../utils";
 
 interface ReferralNodeProps {
   code: string;
@@ -57,7 +57,7 @@ export const ReferralNode = (props: ReferralNodeProps) => {
       <div className="flex justify-between w-full">
         <div className={cn("text-[0.75rem] flex flex-col items-start")}>
           [{" "}
-          {`$${usdFormatter.format(Number((props?.stats?.soldInUsd ?? 0n) / BigInt(1e4)) / 100)}`}{" "}
+          {`$${usdFormatter.format(parseHumanReadable(props?.stats?.soldInUsd ?? 0n, 10, 2))}`}{" "}
           ]
         </div>
 
@@ -65,7 +65,8 @@ export const ReferralNode = (props: ReferralNodeProps) => {
       </div>
 
       <div className={cn("text-[0.75rem]")}>
-        Sold {`${usdFormatter.format(Number(props?.stats?.tokensSold))} $TEA`}
+        Sold{" "}
+        {`${usdFormatter.format(parseHumanReadable(props?.stats?.tokensSold ?? 0n, 18, 6))} $TEA`}
       </div>
     </div>
   );
