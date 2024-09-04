@@ -41,7 +41,6 @@ export const useClaimCheck = () => {
 
     const canClaim =
       !!account?.address &&
-      chainId !== 1 &&
       !!period &&
       isEmpty(periodClaims) &&
       !!claimProof &&
