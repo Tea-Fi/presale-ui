@@ -39,6 +39,17 @@ export const useClaimCheck = () => {
     if (isClaimProofLoading || isActivePeriodLoading || isPeriodClaimsLoading)
       return;
 
+    console.log('Checks for claim: ', {
+      account: account?.address ?? 'missing',
+      period: period ?? {},
+      hasClaimsForPeriod: isEmpty(periodClaims),
+      proof: claimProof,
+      isBanned: isBanned,
+      canClaimForContracts
+    })
+
+    console.log(period, claimProof, periodClaims);
+
     const canClaim =
       !!account?.address &&
       !!period &&

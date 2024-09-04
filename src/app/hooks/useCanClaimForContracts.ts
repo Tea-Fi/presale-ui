@@ -38,7 +38,10 @@ export const useCanClaimForContracts = () => {
 
     fetchCanClaimForContracts(claimProof)
       .then((res) => setCanClaimForContracts(res))
-      .catch(() => setCanClaimForContracts(false));
+      .catch((err) => {
+        console.error('Could not check claim in cotnract: ', err);
+        setCanClaimForContracts(false);
+      });
   }, [claimProof]);
 
   return canClaimForContracts;
