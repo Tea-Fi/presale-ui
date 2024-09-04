@@ -65,7 +65,8 @@ export const ReferralNode = (props: ReferralNodeProps) => {
       </div>
 
       <div className={cn("text-[0.75rem]")}>
-        Sold {`${usdFormatter.format(parseHumanReadable(props?.stats?.tokensSold ?? 0n, 18, 6))} $TEA`}
+        Sold{" "}
+        {`${usdFormatter.format(parseHumanReadable(props?.stats?.tokensSold ?? 0n, 18, 6))} $TEA`}
       </div>
     </div>
   );

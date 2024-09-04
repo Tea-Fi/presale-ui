@@ -2,7 +2,7 @@ import { zeroAddress, Address } from "viem";
 import { InvestmentInfoOption } from "../../types/options.ts";
 
 type Currency = Record<number, Address>;
-type ChainAddress = Record<number, string>;
+export type ChainAddress = Record<number, string>;
 
 export const ETH = {
   1: zeroAddress,
@@ -29,14 +29,27 @@ export const DAI = {
   11155111: "0xd9a5daceab9eb14cf9178e6b90ed0b38081e4fa8",
 } as Currency;
 
+export enum ChainIds {
+  MAINNET = 1,
+  SEPOLIA = 11155111,
+}
+
+/**
+ * @description contracts for TEA token buy process
+ * @param:
+ */
+
 export const PRESALE_CONTRACT_ADDRESS = {
-  1: "0x75A3605F0Fc6aa02ef6c63E0cC8d9c31278DbF43",
-  11155111: "0x388C8acA8F2C0a206edF9855D1C993E13Dd492ce",
+  [ChainIds.MAINNET]: "0x75A3605F0Fc6aa02ef6c63E0cC8d9c31278DbF43",
+  [ChainIds.SEPOLIA]: "0x388C8acA8F2C0a206edF9855D1C993E13Dd492ce",
 } as ChainAddress;
 
+/**
+ * @description contracts for ambassadors to be able to get their earning back from the referral Code
+ */
 export const PRESALE_CLAIM_CONTRACT_ADDRESS = {
-  // 1: "0x75A3605F0Fc6aa02ef6c63E0cC8d9c31278DbF43",
-  11155111: "0x9ae49dd651e2ae88b8d4bd06cf3861dd39ee67c5",
+  1: "0x34B46a81AA2CC745Cf8e77E5A0B2CC0F2d3Dc9D4",
+  11155111: "0x89398421f3593392a09FAd1A676C9a347ED42750",
 } as ChainAddress;
 
 export interface Referral {
@@ -65,3 +78,9 @@ export const investmentInfo: Record<string, InvestmentInfoOption> = {
     vested: "50% - vested linearly over 2 months",
   },
 };
+
+export const ONE_DAY_IN_MS = 86_400_000;
+export const ROUND_CLAIM_DURATION = ONE_DAY_IN_MS * 3;
+export const ROUND_DURATION = ONE_DAY_IN_MS * 14 - ROUND_CLAIM_DURATION;
+
+export const endOfPresaleDate = new Date("09/30/2024 23:59:59");

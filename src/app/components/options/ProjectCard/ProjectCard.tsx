@@ -20,7 +20,7 @@ export const ProjectCard = ({ info }: ProjectCardProps) => {
           </span>
         </div>
       </div>
-      <Progress value={info.max - info.value} max={info.max} />
+      <Progress value={info.value} max={info.max} reverse />
     </div>
   );
 };

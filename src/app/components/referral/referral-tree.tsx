@@ -102,7 +102,7 @@ export const ReferralTree: React.FC<Props> = (props) => {
       stats: calculateCommission(props.tree, props.logs, {
         factorTokens: false,
         leavePrecision: true,
-        tokenStatField: 'tokenReceivedAmount',
+        tokenStatField: "tokenReceivedAmount",
       }),
       subleads: Object.keys(props.tree.subleads ?? {}).length,
       parent: "",
@@ -136,7 +136,7 @@ export const ReferralTree: React.FC<Props> = (props) => {
         stats: calculateCommission(current, props.logs, {
           factorTokens: false,
           leavePrecision: true,
-          tokenStatField: 'tokenReceivedAmount',
+          tokenStatField: "tokenReceivedAmount",
         }),
         subleads: Object.keys(current.subleads ?? {}).length,
         parent: current.parent,
