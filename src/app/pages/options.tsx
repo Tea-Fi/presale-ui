@@ -15,7 +15,11 @@ import {
   getTokensAvailable,
 } from "../utils/presale";
 import { cn, parseHumanReadable } from "../utils";
-import { endOfPresaleDate, investmentInfo } from "../utils/constants";
+import {
+  endOfPresaleDate,
+  investmentInfo,
+  startOfPresaleDate,
+} from "../utils/constants";
 import { MdKeyboardArrowDown } from "react-icons/md";
 import { TeaCup } from "../../assets/icons";
 import { track } from "../utils/analytics";
@@ -108,8 +112,9 @@ export const Options = () => {
       <div className="mb-10 flex flex-col">
         <CountdownSmall centered />
         <Progress
-          max={endOfPresaleDate.getDate()}
-          value={new Date().getDate()}
+          max={endOfPresaleDate.getTime()}
+          min={startOfPresaleDate.getTime()}
+          value={new Date().getTime()}
           className="m-2"
           reverse
         />
