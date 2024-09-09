@@ -5,9 +5,10 @@ import TimerUnit from "./timer-unit.tsx";
 import { endOfPresaleDate } from "../../utils/constants.ts";
 
 interface CountdownProps {
+  className?: string;
   centered: boolean;
 }
-export const CountdownSmall = ({ centered }: CountdownProps) => {
+export const CountdownSmall = ({ className, centered }: CountdownProps) => {
   const { setFinished } = useCountdownStore();
 
   const TimerCompletion = () => (
@@ -38,7 +39,11 @@ export const CountdownSmall = ({ centered }: CountdownProps) => {
 
       return (
         <div
-          className={cn("flex mb-4", centered && "items-center justify-center")}
+          className={cn(
+            className,
+            "flex mb-4",
+            centered && "items-center justify-center",
+          )}
         >
           <TimerUnit value={`${d} D`} />
           <TimerUnit value={h} endDots />
