@@ -109,8 +109,15 @@ export const Options = () => {
   return (
     <div className="inline-flex flex-col justify-center items-center w-full">
       <PresaleHeadline />
-      <div className="mb-10 flex flex-col">
-        <CountdownSmall centered />
+      <div className="mb-10 flex flex-col outer-glow">
+        <h2
+          className={cn(
+            "text-zinc-100 font-bold  text-lg md:text-2xl uppercase tracking-wide mb-3 text-center z-10",
+          )}
+        >
+          Presale ends in
+        </h2>
+        <CountdownSmall centered className="" />
         <Progress
           max={endOfPresaleDate.getTime()}
           min={startOfPresaleDate.getTime()}
