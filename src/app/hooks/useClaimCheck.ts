@@ -54,5 +54,7 @@ export const useClaimCheck = () => {
   return {
     canClaim,
     refetchClaimCheck,
+    isLoading:
+      isClaimProofLoading || isActivePeriodLoading || isPeriodClaimsLoading,
   };
 };
