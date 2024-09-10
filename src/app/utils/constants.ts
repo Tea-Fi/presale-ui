@@ -84,3 +84,5 @@ export const ROUND_CLAIM_DURATION = ONE_DAY_IN_MS * 3;
 export const ROUND_DURATION = ONE_DAY_IN_MS * 14 - ROUND_CLAIM_DURATION;
 
 export const endOfPresaleDate = new Date("09/30/2024 23:59:59");
+
+export const startOfPresaleDate = new Date("01/07/2024 00:00:00");

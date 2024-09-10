@@ -1,10 +1,10 @@
 import Countdown from "react-countdown";
 import { useEffect, useState } from "react";
 import { ROUND_CLAIM_DURATION, ROUND_DURATION } from "../utils/constants";
-import { useGetPeriod } from "../hooks/useGetPeriod";
 import { useClaimActivePeriod } from "../hooks/useClaimActivePeriod";
 import { useChainId } from "wagmi";
 import { useClaimCheck } from "../hooks/useClaimCheck";
+import { ClaimPeriodParsed } from "../utils/claim";
 
 type TCheckpoint = {
   startClaimingRoundAt: number;
@@ -17,21 +17,18 @@ export const CountdownByCheckpoint = ({
   className,
   onChange,
   onFinish,
+  claimPeriod,
 }: {
   className?: string;
+  claimPeriod: ClaimPeriodParsed;
   onChange?: (claimAvailable: boolean) => void;
   onFinish?: () => void;
 }) => {
   const chainId = useChainId();
   const { canClaim } = useClaimCheck();
 
-  const { data: claimPeriod } = useGetPeriod();
-  const startDateNormal = claimPeriod?.start
-    ? new Date(claimPeriod?.start).getTime()
-    : Date.now();
-  const finishDateNormal = claimPeriod?.end
-    ? new Date(claimPeriod?.end).getTime()
-    : startDateNormal + 60_000;
+  const startDateNormal = claimPeriod.start.getTime();
+  const finishDateNormal = claimPeriod.end.getTime();
 
   const { data: activePeriod, isLoading } = useClaimActivePeriod(chainId);
 

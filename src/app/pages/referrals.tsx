@@ -21,6 +21,7 @@ import { PRESALE_ABI } from "../utils/presale_abi";
 import { ReactFlowProvider } from "@xyflow/react";
 import { useFetchClaimed } from "../hooks/useFetchClaimed";
 import { useGetReferralTree } from "../hooks/useGetReferralTree";
+import { useGetPeriod } from "../hooks/useGetPeriod";
 interface SectionProps {
   title?: string;
 }
@@ -54,6 +55,7 @@ export const Referrals = () => {
   const { data: referralTree, mutate: refetchReferralTree } =
     useGetReferralTree({ address: account.address });
   const [logs, setLogs] = useState<EventLogWithTimestamp[]>();
+  const { data: claimPeriod } = useGetPeriod();
 
   const fetchAndSetClaimsAndLogs = async () => {
     try {
@@ -139,10 +141,13 @@ export const Referrals = () => {
           </ReferralSection>
 
           <ReferralSection>
-            <CountdownByCheckpoint
-              onChange={(inClaim) => setClaimActive(inClaim)}
-              onFinish={() => setClaimRoundFinished(true)}
-            />
+            {claimPeriod && (
+              <CountdownByCheckpoint
+                claimPeriod={claimPeriod}
+                onChange={(inClaim) => setClaimActive(inClaim)}
+                onFinish={() => setClaimRoundFinished(true)}
+              />
+            )}
             <div className="referral-title-row">
               <div className="text-start">
                 <div className="title">Earnings withdrawal</div>
