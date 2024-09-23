@@ -1,3 +1,5 @@
+import { Currency } from "../app/utils/constants";
+
 export type ProjectInfoOption = {
   title: string;
   description: string;
@@ -10,4 +12,5 @@ export type InvestmentInfoOption = {
   id: number;
   tge: string;
   vested: string;
+  address?: Currency;
 };

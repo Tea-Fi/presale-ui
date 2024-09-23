@@ -17,7 +17,7 @@ import {
 import { cn, parseHumanReadable } from "../utils";
 import {
   endOfPresaleDate,
-  investmentInfo,
+  INVESTMENT_INFO,
   startOfPresaleDate,
 } from "../utils/constants";
 import { MdKeyboardArrowDown } from "react-icons/md";
@@ -34,10 +34,10 @@ export const Options = () => {
   const code = useReferralCode();
 
   const defaultProjectInfos: ProjectInfoOption[] = Object.keys(
-    investmentInfo,
+    INVESTMENT_INFO,
   ).map((price) => ({
     title: `$${price} / $TEA`,
-    description: `${investmentInfo[price].tge} and ${investmentInfo[price].vested}`,
+    description: `${INVESTMENT_INFO[price].tge} and ${INVESTMENT_INFO[price].vested}`,
     link: `/${code}/buy?opt=${price}`,
     max: 0,
     value: 0,
@@ -78,14 +78,14 @@ export const Options = () => {
 
           if (
             optionsInfo[i].presaleToken == ZeroAddress ||
-            investmentInfo[price] == undefined
+            INVESTMENT_INFO[price] == undefined
           ) {
             continue;
           }
 
           optionsInfoObj.push({
             title: `$${price} / $TEA`,
-            description: `${investmentInfo[price].tge} and ${investmentInfo[price].vested}`,
+            description: `${INVESTMENT_INFO[price].tge} and ${INVESTMENT_INFO[price].vested}`,
             link: `/${code}/buy?opt=${price}`,
             max: maxPerOption,
             value: sold,
