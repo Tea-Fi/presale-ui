@@ -28,7 +28,7 @@ import {
   getSaleOptionsCout,
   getTokensAvailable,
 } from "../utils/presale";
-import { PRESALE_CONTRACT_ADDRESS, investmentInfo } from "../utils/constants";
+import { PRESALE_CONTRACT_ADDRESS, INVESTMENT_INFO } from "../utils/constants";
 import { useReadContract } from "wagmi";
 
 import Spinner from "./spinner";
@@ -47,7 +47,7 @@ import { useParams } from "react-router-dom";
 export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
   const search = window.location.search;
   const urlParams = new URLSearchParams(search);
-  const investment = urlParams.get("opt") || Object.keys(investmentInfo)[0];
+  const investment = urlParams.get("opt") || Object.keys(INVESTMENT_INFO)[0];
   const { code } = useParams();
   const { data } = useGetReferral(code);
 
@@ -100,7 +100,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
   useEffect(() => {
     const fetchBalance = async () => {
       try {
-        const investmentIndex = Object.keys(investmentInfo).findIndex(
+        const investmentIndex = Object.keys(INVESTMENT_INFO).findIndex(
           (key) => key === investment,
         );
 
@@ -119,7 +119,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
     if (investment && investment) {
       fetchBalance();
     }
-  }, [investmentInfo, investment]);
+  }, [INVESTMENT_INFO, investment]);
 
   const approveToken = async (token: Address) => {
     try {
@@ -185,7 +185,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
 
   const handleBuy = async (token: Address, value: string) => {
     try {
-      console.info("optionId", investmentInfo[investment].id);
+      console.info("optionId", INVESTMENT_INFO[investment].id);
       console.info("referralId", data?.id);
       console.info("tokenSell", token);
       console.info("buyAmountHuman", value);
@@ -207,14 +207,14 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
         const amountInETH = await readContract(wagmiConfig, {
           abi: PRESALE_ABI,
           address: PRESALE_CONTRACT_ADDRESS[chainId] as Address,
-          args: [investmentInfo[investment].id, token, buyAmount],
+          args: [INVESTMENT_INFO[investment].id, token, buyAmount],
           functionName: "getExactPayAmount",
         });
 
         hash = await writeContract(wagmiConfig, {
           abi: PRESALE_ABI,
           address: PRESALE_CONTRACT_ADDRESS[chainId] as Address,
-          args: [investmentInfo[investment].id, data?.id, buyAmount],
+          args: [INVESTMENT_INFO[investment].id, data?.id, buyAmount],
           value: amountInETH as bigint,
           functionName: "buyExactPresaleTokensETH",
         });
@@ -222,7 +222,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
         hash = await writeContract(wagmiConfig, {
           abi: PRESALE_ABI,
           address: PRESALE_CONTRACT_ADDRESS[chainId] as Address,
-          args: [investmentInfo[investment].id, data?.id, token, buyAmount],
+          args: [INVESTMENT_INFO[investment].id, data?.id, token, buyAmount],
           functionName: "buyExactPresaleTokens",
         });
       }
@@ -292,7 +292,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
 
   const getTeaBalance = async () => {
     if (!account.address) return { value: 0n, decimals: 18 };
-    const optionInfo = await getOptionInfo(investmentInfo[investment].id);
+    const optionInfo = await getOptionInfo(INVESTMENT_INFO[investment].id);
     const teaToken = optionInfo.presaleToken;
 
     const balance = await getBalance(wagmiConfig, {
@@ -390,7 +390,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
         abi: PRESALE_ABI,
         address: PRESALE_CONTRACT_ADDRESS[chainId] as Address,
         args: [
-          investmentInfo[investment].id,
+          INVESTMENT_INFO[investment].id,
           selectedToken.address,
           parseUnits(value, selectedToken.decimals),
         ],
@@ -419,7 +419,7 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
         abi: PRESALE_ABI,
         address: PRESALE_CONTRACT_ADDRESS[chainId] as Address,
         args: [
-          investmentInfo[investment].id,
+          INVESTMENT_INFO[investment].id,
           selectedToken.address,
           parseUnits(value, 18),
         ],
@@ -441,10 +441,10 @@ export const SwapContainer = ({ tokenList }: { tokenList: Token[] }) => {
           TEA price ${investment}
         </span>
         <span className="text-zinc-500 text-base">
-          {investmentInfo[investment].tge}
+          {INVESTMENT_INFO[investment].tge}
         </span>
         <span className="text-zinc-500 text-base">
-          {investmentInfo[investment].vested}
+          {INVESTMENT_INFO[investment].vested}
         </span>
       </div>
 
