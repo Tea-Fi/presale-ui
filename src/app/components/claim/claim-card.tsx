@@ -31,8 +31,7 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
   const tgeAmount = calculateTgeAmount(parsedBalance, tge);
   const { data } = useVestingInfo(address);
   const hasTGEStarted = isTGEStarted(data?.dateStart);
-  const hasVested = data && data?.tokensForVesting >= 0n;
-
+  const hasVested = data && data?.tokensForVesting > 0n;
 
 
   const claimValue = parsedBalance - tgeAmount;
@@ -48,10 +47,9 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
               <SlIcon name="check-circle" className="m-2" /> {"Claimed"}
             </Button>
           </CardDescription>
-
         </>
       }
-      {parsedBalance > 0 &&
+      {(!hasVested || parsedBalance > 0) &&
         <CardDescription className="flex flex-col justify-between  gap-3 items-center h-52">
           <span className="text-lg">{parsedBalance} $TEA</span>
           <span className="text-base">

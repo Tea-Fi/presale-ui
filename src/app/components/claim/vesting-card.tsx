@@ -27,7 +27,7 @@ export const VestingCard: React.FC<ClaimCardProps> = ({
   claimableValue = 0n,
   onClaimCallback,
 }) => {
-  if (!vestingInfo) return;
+  if (!vestingInfo || vestingInfo.tokensForVesting == 0n) return;
 
   const totalVested = parseHumanReadable(vestingInfo.tokensForVesting, 18, 2);
   const totalVestingClaimed = parseHumanReadable(
@@ -36,7 +36,6 @@ export const VestingCard: React.FC<ClaimCardProps> = ({
     2,
   );
 
-  console.log({ vestingInfo });
 
   const totalLeftVesting =
     parseHumanReadable(claimableValue, 18, 2) + totalVestingClaimed;
