@@ -8,6 +8,7 @@ import { SlIcon } from "@shoelace-style/shoelace/dist/react";
 
 interface TokenVestingProps {
   balance: bigint;
+  vestingValue: bigint;
   address: `0x${string}`;
   disabled?: boolean;
   onClaimCallback: () => Promise<void>;
@@ -15,6 +16,7 @@ interface TokenVestingProps {
 
 export const ClaimButton: React.FC<TokenVestingProps> = ({
   balance,
+  vestingValue,
   address,
   disabled,
   onClaimCallback,
@@ -23,13 +25,13 @@ export const ClaimButton: React.FC<TokenVestingProps> = ({
     isTokenBalanceAllowed,
     isLoading: isTokenApprovalLoading,
     handleTokenApprove,
-  } = useTokenApproval(address, balance);
+  } = useTokenApproval(address, vestingValue);
 
   const {
     isClaimed,
     isLoading: isTokenVestingLoading,
     handleTokenVest,
-  } = useClaimToken(address, balance);
+  } = useClaimToken(address, vestingValue);
 
   const handleClaimButtonClick = useCallback(async () => {
     await handleTokenVest();
@@ -40,15 +42,7 @@ export const ClaimButton: React.FC<TokenVestingProps> = ({
   const btnClassName =
     "w-full hover:bg-[#3a0c2a] bg-[#f716a2] disabled:bg-[#616161] text-secondary-foreground";
 
-  if (isTokenApprovalLoading) {
-    return (
-      <Button className={btnClassName} disabled>
-        {"Requesting approval"}
-      </Button>
-    );
-  }
-
-  if (isTokenVestingLoading) {
+  if (isTokenVestingLoading || isTokenApprovalLoading) {
     return (
       <Button className={btnClassName} disabled>
         <Spinner className="m-auto" />

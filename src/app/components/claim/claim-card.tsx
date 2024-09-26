@@ -16,9 +16,9 @@ const isTGEStarted = (date?: Date) => {
   const today = new Date();
   return today >= date;
 };
-const calculateTgeAmount = (balance?: number, tge?: bigint) => {
-  if (!balance || !tge) return 0;
-  return (balance * Number(tge)) / 100;
+const calculateClaimAmount = (balance?: bigint, tge?: bigint) => {
+  if (!balance || !tge) return 0n;
+  return (balance * tge) / 100n;
 };
 
 
@@ -28,13 +28,13 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
 }) => {
   const { balance, tge, price, address } = investmentInfo;
   const parsedBalance = parseHumanReadable(balance, 18, 1);
-  const tgeAmount = calculateTgeAmount(parsedBalance, tge);
   const { data } = useVestingInfo(address);
   const hasTGEStarted = isTGEStarted(data?.dateStart);
   const hasVested = data && data?.tokensForVesting > 0n;
 
+  const claimValue = calculateClaimAmount(balance, tge);
+  const vestingValue = balance - claimValue;
 
-  const claimValue = parsedBalance - tgeAmount;
   return (
     <Card className={cn("w-64 h-80", hasVested && parsedBalance === 0 && 'bg-[#262626] border-0')}>
       <CardTitle>{price} / $TEA</CardTitle>
@@ -54,11 +54,12 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
           <span className="text-lg">{parsedBalance} $TEA</span>
           <span className="text-base">
             {hasTGEStarted ? "Claim now " : "Claim at TGE "}({data?.claimPercent}
-            %): {tgeAmount} $TEA
+            %): {parseHumanReadable(claimValue, 18, 2)} $TEA
           </span>
-          <span className="text-sm">{claimValue.toFixed(2)} $TEA will be added to your ongoing vesting</span>
+          {hasVested && <span className="text-sm">{parseHumanReadable(vestingValue, 18, 2)} $TEA will be added to your ongoing vesting</span>}
           <ClaimButton
             balance={balance}
+            vestingValue={vestingValue}
             address={address as Address}
             disabled={!isTGEStarted}
             onClaimCallback={onClaimCallback}

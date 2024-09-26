@@ -21,6 +21,10 @@ function formatDateToDDMMYY(date?: Date) {
   return `${day}.${month}.${year}`;
 }
 
+const formatNumber = (num: number) => {
+  return Number.isInteger(num) ? num : num.toFixed(2);
+};
+
 export const VestingCard: React.FC<ClaimCardProps> = ({
   vestingInfo,
   tokenAddress,
@@ -59,7 +63,7 @@ export const VestingCard: React.FC<ClaimCardProps> = ({
       <div className="flex justify-between text-sm">
         <span className="text-[#f716a2]">Vested</span>
         <span>
-          {totalLeftVesting.toFixed(2)}/{totalVested} $TEA
+          {formatNumber(totalLeftVesting)}/{totalVested} $TEA
         </span>
       </div>
       <div className="flex justify-between text-sm mt-2 mb-5">
