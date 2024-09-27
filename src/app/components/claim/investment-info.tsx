@@ -15,6 +15,7 @@ export const InvestmentInfo: React.FC<InvestmentInfoProps> = ({
   const { data: vestingInfo, refetch: refetchVestingInfo } = useVestingInfo(
     investmentInfo.address,
   );
+
   const { data, refetch: refetchUserUnlockReward } = useGetUserUnlockReward(
     investmentInfo.address,
   );

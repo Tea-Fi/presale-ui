@@ -1,7 +1,7 @@
 export function parseHumanReadable(
   value: bigint,
   decimals: number = 18,
-  accurancy: number = 0,
+  accurancy: number = 0
 ): number {
   if (value == 0n) {
     return 0;
@@ -9,8 +9,11 @@ export function parseHumanReadable(
     return Number(value);
   }
 
-  const accurancyNormal = accurancy > decimals ? decimals : accurancy;
-  const divisionWithAcc = value / BigInt(10 ** (decimals - accurancyNormal));
+  const parsed = Number(value) / 10 ** decimals;
 
-  return Number(divisionWithAcc) / 10 ** accurancyNormal;
+  const trimmed = parsed.toLocaleString("en-US", {
+    maximumFractionDigits: accurancy,
+  });
+
+  return Number(trimmed.replace(",", ""));
 }

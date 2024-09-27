@@ -19,7 +19,6 @@ export const useClaimToken = (
   const [isError, setError] = useState<TransactionExecutionError>();
   const chainId = useChainId();
 
-
   const handleWriteContract = async () => {
     try {
       setIsLoading(true);
