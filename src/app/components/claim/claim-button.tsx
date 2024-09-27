@@ -16,7 +16,6 @@ interface TokenVestingProps {
 
 export const ClaimButton: React.FC<TokenVestingProps> = ({
   balance,
-  vestingValue,
   address,
   disabled,
   onClaimCallback,
