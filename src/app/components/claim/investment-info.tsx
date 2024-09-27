@@ -28,6 +28,7 @@ export const InvestmentInfo: React.FC<InvestmentInfoProps> = ({
   return (
     <>
       <ClaimCard
+        vestingInfo={vestingInfo}
         investmentInfo={investmentInfo}
         onClaimCallback={onClaimCallback}
       />

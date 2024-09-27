@@ -1,5 +1,5 @@
 import { Address } from "viem";
-import { useVestingInfo } from "../../hooks/useVestingInfo";
+import { VestingInfo } from "../../hooks/useVestingInfo";
 import { cn, parseHumanReadable } from "../../utils";
 import { Button, Card, CardDescription, CardTitle } from "../ui";
 import { ClaimButton } from "./claim-button";
@@ -7,6 +7,7 @@ import { InvestmentInfoType } from "../../hooks/useInvestmentInfos";
 import { SlIcon } from "@shoelace-style/shoelace/dist/react";
 
 interface ClaimCardProps {
+  vestingInfo?: VestingInfo;
   investmentInfo: InvestmentInfoType;
   onClaimCallback: () => Promise<void>;
 }
@@ -24,13 +25,13 @@ const calculateClaimAmount = (balance?: bigint, tge?: bigint) => {
 
 export const ClaimCard: React.FC<ClaimCardProps> = ({
   investmentInfo,
+  vestingInfo,
   onClaimCallback,
 }) => {
   const { balance, tge, price, address } = investmentInfo;
   const parsedBalance = parseHumanReadable(balance, 18, 1);
-  const { data } = useVestingInfo(address);
-  const hasTGEStarted = isTGEStarted(data?.dateStart);
-  const hasVested = data && data?.tokensForVesting > 0n;
+  const hasTGEStarted = isTGEStarted(vestingInfo?.dateStart);
+  const hasVested = vestingInfo && vestingInfo?.tokensForVesting > 0n;
 
   const claimValue = calculateClaimAmount(balance, tge);
   const vestingValue = balance - claimValue;
@@ -53,7 +54,7 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
         <CardDescription className="flex flex-col justify-between  gap-3 items-center h-52">
           <span className="text-lg">{parsedBalance} $TEA</span>
           <span className="text-base">
-            {hasTGEStarted ? "Claim now " : "Claim at TGE "}({data?.claimPercent}
+            {hasTGEStarted ? "Claim now " : "Claim at TGE "}({vestingInfo?.claimPercent}
             %): {parseHumanReadable(claimValue, 18, 2)} $TEA
           </span>
           {hasVested && <span className="text-sm">{parseHumanReadable(vestingValue, 18, 2)} $TEA will be added to your ongoing vesting</span>}

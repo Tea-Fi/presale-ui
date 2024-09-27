@@ -25,13 +25,13 @@ export const ClaimButton: React.FC<TokenVestingProps> = ({
     isTokenBalanceAllowed,
     isLoading: isTokenApprovalLoading,
     handleTokenApprove,
-  } = useTokenApproval(address, vestingValue);
+  } = useTokenApproval(address, balance);
 
   const {
     isClaimed,
     isLoading: isTokenVestingLoading,
     handleTokenVest,
-  } = useClaimToken(address, vestingValue);
+  } = useClaimToken(address, balance);
 
   const handleClaimButtonClick = useCallback(async () => {
     await handleTokenVest();
