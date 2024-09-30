@@ -1,3 +1,6 @@
+import { Address } from "viem";
+
+import { useSubgraphInfo } from "../../hooks/useSubgraphInfo";
 import { VestingInfo } from "../../hooks/useVestingInfo";
 import { parseHumanReadable } from "../../utils";
 import { Card, CardDescription, CardTitle } from "../ui";
@@ -32,44 +35,41 @@ export const VestingCard: React.FC<ClaimCardProps> = ({
   onClaimCallback,
 }) => {
   if (!vestingInfo || vestingInfo.tokensForVesting == 0n) return;
-
-  const totalVested = parseHumanReadable(vestingInfo.tokensForVesting, 18, 2);
-  const totalVestingClaimed = parseHumanReadable(
-    vestingInfo.totalVestingClaimed,
-    18,
-    2,
+  const { claimed, totalVested, totalAmount } = useSubgraphInfo(
+    tokenAddress as Address
   );
 
-
-  const totalLeftVesting =
-    parseHumanReadable(claimableValue, 18, 2) + totalVestingClaimed;
   const dateEnd = formatDateToDDMMYY(vestingInfo.dateEnd);
+
+  const parsedTotalVested = parseHumanReadable(totalVested, 18, 2);
+  const parsedClaimed = parseHumanReadable(claimed, 18, 2);
+  const parsedTotalAmount = parseHumanReadable(totalAmount, 18, 2);
 
   return (
     <Card className="w-64 h-[32-rem]">
       <CardTitle>Vesting Claim</CardTitle>
       <CardDescription className="flex flex-col gap-3 items-center">
         <span>
-          Vesting of {vestingInfo.vestingPercent}% = {totalVested} $TEA
+          Vesting of {vestingInfo.vestingPercent}% = {parsedTotalAmount} $TEA
         </span>
         <span>until {dateEnd}</span>
       </CardDescription>
       <CardDiagram></CardDiagram>
       <ProgressBar
-        value1={totalVestingClaimed}
-        value2={totalLeftVesting}
-        maxValue={totalVested}
+        value1={parsedClaimed}
+        value2={parsedTotalVested}
+        maxValue={parsedTotalAmount}
       />
       <div className="flex justify-between text-sm">
         <span className="text-[#f716a2]">Vested</span>
         <span>
-          {formatNumber(totalLeftVesting)}/{totalVested} $TEA
+          {formatNumber(parsedTotalVested)}/{parsedTotalAmount} $TEA
         </span>
       </div>
       <div className="flex justify-between text-sm mt-2 mb-5">
         <span className="text-[#f716a2]">Claimed</span>
         <span>
-          {totalVestingClaimed}/{totalVested} $TEA
+          {parsedClaimed}/{parsedTotalAmount} $TEA
         </span>
       </div>
       <VestingButton

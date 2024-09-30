@@ -51,7 +51,12 @@ export const ClaimButton: React.FC<TokenVestingProps> = ({
 
   if (isClaimed) {
     return (
-      <Button className={cn("w-full disabled:bg-[#35232D] border-solid border-2 border-[#f716a2] text-[#f716a2]")} disabled>
+      <Button
+        className={cn(
+          "w-full disabled:bg-[#35232D] border-solid border-2 border-[#f716a2] text-[#f716a2]"
+        )}
+        disabled
+      >
         <SlIcon name="check-circle" className="m-2" /> {"Claimed"}
       </Button>
     );

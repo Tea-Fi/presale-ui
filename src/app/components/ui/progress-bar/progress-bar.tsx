@@ -47,7 +47,6 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
           title={`Value 2: ${value2}`}
           onHoverChange={setIsHoveringValue2}
         />
-
       </div>
     </div>
   );
