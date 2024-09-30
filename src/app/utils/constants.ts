@@ -45,7 +45,7 @@ export const PRESALE_CONTRACT_ADDRESS = {
 } as ChainAddress;
 
 export const VESTING_CONTRACT_ADDRESS = {
-  [ChainIds.SEPOLIA]: "0x1b8034f4423aFF73c377C16cd95eAa08cFf84A83",
+  [ChainIds.SEPOLIA]: "0xF788A456C59303f58d2Bd6A435Eee4d40E2d2313",
 } as ChainAddress;
 
 /**

@@ -1,5 +1,7 @@
+import { Address } from "viem";
 import { useGetUserUnlockReward } from "../../hooks/useGetUserUnlockReward";
 import { InvestmentInfoType } from "../../hooks/useInvestmentInfos";
+import { useSubgraphInfo } from "../../hooks/useSubgraphInfo";
 import { useVestingInfo } from "../../hooks/useVestingInfo";
 import { ClaimCard } from "./claim-card";
 import { VestingCard } from "./vesting-card";
@@ -13,17 +15,22 @@ export const InvestmentInfo: React.FC<InvestmentInfoProps> = ({
   refetchInvestmentInfo,
 }) => {
   const { data: vestingInfo, refetch: refetchVestingInfo } = useVestingInfo(
-    investmentInfo.address,
+    investmentInfo.address
   );
 
   const { data, refetch: refetchUserUnlockReward } = useGetUserUnlockReward(
-    investmentInfo.address,
+    investmentInfo.address
   );
 
+  const { refetchInfo } = useSubgraphInfo(investmentInfo.address as Address);
+
   const onClaimCallback = async () => {
-    await refetchInvestmentInfo();
-    await refetchVestingInfo();
-    await refetchUserUnlockReward();
+    await Promise.all([
+      refetchInfo(),
+      refetchInvestmentInfo(),
+      refetchVestingInfo(),
+      refetchUserUnlockReward(),
+    ]);
   };
 
   return (
