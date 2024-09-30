@@ -14,6 +14,7 @@ export default defineConfig({
     strictPort: true,
     host: true,
     origin: "http://localhost:8080",
+    open: true,
   },
   build: {
     modulePreload: {

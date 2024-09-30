@@ -1,7 +1,7 @@
 import { zeroAddress, Address } from "viem";
 import { InvestmentInfoOption } from "../../types/options.ts";
 
-type Currency = Record<number, Address>;
+export type Currency = Record<number, Address>;
 export type ChainAddress = Record<number, string>;
 
 export const ETH = {
@@ -44,6 +44,10 @@ export const PRESALE_CONTRACT_ADDRESS = {
   [ChainIds.SEPOLIA]: "0x388C8acA8F2C0a206edF9855D1C993E13Dd492ce",
 } as ChainAddress;
 
+export const VESTING_CONTRACT_ADDRESS = {
+  [ChainIds.SEPOLIA]: "0xF788A456C59303f58d2Bd6A435Eee4d40E2d2313",
+} as ChainAddress;
+
 /**
  * @description contracts for ambassadors to be able to get their earning back from the referral Code
  */
@@ -60,8 +64,7 @@ export interface Referral {
   subleads: { [key: string]: Referral };
   percentageLogs: { createdAt: string; fee: number }[];
 }
-
-export const investmentInfo: Record<string, InvestmentInfoOption> = {
+export const INVESTMENT_INFO: Record<string, InvestmentInfoOption> = {
   "0.16": {
     id: 0,
     tge: "10% - released at TGE",
