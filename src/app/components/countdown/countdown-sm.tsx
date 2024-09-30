@@ -11,16 +11,11 @@ interface CountdownProps {
 export const CountdownSmall = ({ className, centered }: CountdownProps) => {
   const { setFinished } = useCountdownStore();
 
-  const TimerCompletion = () => (
-    <span className="text-white">Presale countdown has ended</span>
-  );
-
   const renderer = ({
     days,
     hours,
     minutes,
     seconds,
-    completed,
   }: {
     days: number;
     hours: number;
@@ -28,30 +23,26 @@ export const CountdownSmall = ({ className, centered }: CountdownProps) => {
     seconds: number;
     completed: boolean;
   }) => {
-    if (completed) {
-      return <TimerCompletion />;
-    } else {
-      // Render a countdown
-      const d = days;
-      const h = hours < 10 ? `0${hours}` : hours;
-      const m = minutes < 10 ? `0${minutes}` : minutes;
-      const s = seconds < 10 ? `0${seconds}` : seconds;
+    // Render a countdown
+    const d = days;
+    const h = hours < 10 ? `0${hours}` : hours;
+    const m = minutes < 10 ? `0${minutes}` : minutes;
+    const s = seconds < 10 ? `0${seconds}` : seconds;
 
-      return (
-        <div
-          className={cn(
-            className,
-            "flex mb-4",
-            centered && "items-center justify-center",
-          )}
-        >
-          <TimerUnit value={`${d} D`} />
-          <TimerUnit value={h} endDots />
-          <TimerUnit value={m} endDots />
-          <TimerUnit value={s} />
-        </div>
-      );
-    }
+    return (
+      <div
+        className={cn(
+          className,
+          "flex mb-4",
+          centered && "items-center justify-center"
+        )}
+      >
+        <TimerUnit value={`${d} D`} />
+        <TimerUnit value={h} endDots />
+        <TimerUnit value={m} endDots />
+        <TimerUnit value={s} />
+      </div>
+    );
   };
 
   return (

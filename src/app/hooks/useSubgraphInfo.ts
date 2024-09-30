@@ -25,6 +25,11 @@ export const useSubgraphInfo = (tokenAddress?: `0x${string}`) => {
     refetch: refetchVests,
   } = useSubgraphVest(account.address, tokenAddress);
 
+  console.log("log => ", {
+    claimData,
+    vestData,
+  });
+
   const totalVestedUnlock = useMemo(() => {
     return (
       vestData?.vests?.reduce(
