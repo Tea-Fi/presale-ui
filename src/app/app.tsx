@@ -1,4 +1,11 @@
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
+import { useAccountEffect } from "wagmi";
+
 import { Layout } from "./components/layout";
 import { Login } from "./pages/login";
 import { Buy } from "./pages/buy";
@@ -8,15 +15,20 @@ import { useWalletContext } from "./providers/wallet.context";
 import { WrongNetwork } from "./components/wrong-network";
 import { Referrals } from "./pages/referrals";
 import { Options } from "./pages/options";
-import { useAccountEffect } from "wagmi";
 import { track } from "./utils/analytics";
 import { CodeNotFound } from "./pages/code-not-found.tsx";
 import ProtectedRoutes from "./utils/ProtectedRoutes.tsx";
 import AmbassadorProtectedRoutes from "./utils/AmbassadorProtectedRoutes.tsx";
 import ClaimProtectedRoutes from "./utils/ClaimProtectedRoutes.tsx";
+import { useReferralCode } from "./hooks/useReferralCode.ts";
+import { useMemo } from "react";
+import { endOfPresaleDate } from "./utils/constants.ts";
+import { useIsPresaleEnded } from "./hooks/useIsPresaleEnded.ts";
 
 export function App() {
   const { chainId, unsupportedChain } = useWalletContext();
+  const code = useReferralCode();
+  const isFinished = useIsPresaleEnded();
 
   useAccountEffect({
     onConnect(data) {
@@ -31,6 +43,12 @@ export function App() {
     },
   });
 
+  const haveAccessToBuy = useMemo(
+    () => !isFinished && endOfPresaleDate.getTime() > new Date().getTime(),
+
+    [isFinished]
+  );
+
   if (chainId && unsupportedChain) {
     return <WrongNetwork />;
   }
@@ -42,7 +60,16 @@ export function App() {
           <Route path="/" element={<Login />} />
 
           <Route element={<ProtectedRoutes />}>
-            <Route path="/:code/buy" element={<Buy />} />
+            <Route
+              path="/:code/buy"
+              element={
+                haveAccessToBuy ? (
+                  <Buy />
+                ) : (
+                  <Navigate to={`/${code}/options`} replace={true} />
+                )
+              }
+            />
             <Route path="/:code/options" element={<Options />} />
 
             <Route element={<ClaimProtectedRoutes />}>
