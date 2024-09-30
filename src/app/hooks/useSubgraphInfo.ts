@@ -8,17 +8,22 @@ import { useGetUserUnlockReward } from "./useGetUserUnlockReward";
 export const useSubgraphInfo = (tokenAddress?: `0x${string}`) => {
   const account = useAccount();
 
-  const { data: availableForClaim, isLoading: isUserUnlockRewardLoading } =
-    useGetUserUnlockReward(tokenAddress);
+  const {
+    data: availableForClaim,
+    isLoading: isUserUnlockRewardLoading,
+    refetch,
+  } = useGetUserUnlockReward(tokenAddress);
 
-  const { data: claimData, loading: isClaimDataLoading } = useSubgraphClaim(
-    account.address,
-    tokenAddress
-  );
-  const { data: vestData, loading: isVestDataLoading } = useSubgraphVest(
-    account.address,
-    tokenAddress
-  );
+  const {
+    data: claimData,
+    loading: isClaimDataLoading,
+    refetch: refetchClaims,
+  } = useSubgraphClaim(account.address, tokenAddress);
+  const {
+    data: vestData,
+    loading: isVestDataLoading,
+    refetch: refetchVests,
+  } = useSubgraphVest(account.address, tokenAddress);
 
   const totalVestedUnlock = useMemo(() => {
     return (
@@ -59,10 +64,19 @@ export const useSubgraphInfo = (tokenAddress?: `0x${string}`) => {
     return claimed + availableForClaim.userUnlockReward;
   }, [claimed, availableForClaim]);
 
+  const refetchInfo = async () => {
+    try {
+      await Promise.all([refetch(), refetchClaims(), refetchVests()]);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return {
     claimed,
     totalAmount,
     totalVested,
+    refetchInfo,
     isLoading:
       isClaimDataLoading && isVestDataLoading && isUserUnlockRewardLoading,
   };
