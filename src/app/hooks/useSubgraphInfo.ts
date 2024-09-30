@@ -1,78 +1,69 @@
 import { useMemo } from "react";
+import { useAccount } from "wagmi";
+
 import { useSubgraphClaim } from "./useSubgraphClaim";
 import { useSubgraphVest } from "./useSubgraphVest";
 import { useGetUserUnlockReward } from "./useGetUserUnlockReward";
-import { useAccount } from "wagmi";
 
 export const useSubgraphInfo = (tokenAddress?: `0x${string}`) => {
-    const account = useAccount();
+  const account = useAccount();
 
-    const { data, isLoading: isUserUnlockRewardLoading } =
-        useGetUserUnlockReward(tokenAddress);
+  const { data: availableForClaim, isLoading: isUserUnlockRewardLoading } =
+    useGetUserUnlockReward(tokenAddress);
 
-    console.log(account.address);
+  const { data: claimData, loading: isClaimDataLoading } = useSubgraphClaim(
+    account.address,
+    tokenAddress
+  );
+  const { data: vestData, loading: isVestDataLoading } = useSubgraphVest(
+    account.address,
+    tokenAddress
+  );
 
-    const { data: claimData, loading: isClaimDataLoading } = useSubgraphClaim(
-        tokenAddress,
-        account.address,
+  const totalVestedUnlock = useMemo(() => {
+    return (
+      vestData?.vests?.reduce(
+        (acc, currentValue) => acc + BigInt(currentValue.vestedUnlock),
+        0n
+      ) || 0n
     );
-    const { data: vestData, loading: isVestDataLoading } = useSubgraphVest(
-        tokenAddress,
-        account.address,
+  }, [vestData]);
+
+  const claimed = useMemo(() => {
+    const amount =
+      claimData?.claims?.reduce(
+        (acc, currentValue) => acc + BigInt(currentValue.amountGet),
+        0n
+      ) || 0n;
+
+    return amount + totalVestedUnlock;
+  }, [claimData, totalVestedUnlock]);
+
+  const totalInitialUnlock = useMemo(() => {
+    return (
+      vestData?.vests?.reduce(
+        (acc, currentValue) => acc + BigInt(currentValue.initialUnlock),
+        0n
+      ) || 0n
     );
+  }, [vestData]);
 
-    console.log({ claimData, vestData });
+  const totalAmount = useMemo(() => {
+    return vestData?.vests?.[0]?.amountBurn
+      ? BigInt(vestData?.vests?.[0]?.amountBurn) - totalInitialUnlock
+      : 0n;
+  }, [vestData, totalInitialUnlock]);
 
-    const totalAmountGet = useMemo(() => {
-        return (
-            claimData?.claims?.reduce(
-                (acc, currentValue) => acc + BigInt(currentValue.amountGet),
-                0n,
-            ) || 0n
-        );
-    }, [claimData]);
+  const totalVested = useMemo(() => {
+    if (!availableForClaim) return claimed;
+    return claimed + availableForClaim.userUnlockReward;
+  }, [claimed, availableForClaim]);
 
-    const totalInitialUnlock = useMemo(() => {
-        return (
-            vestData?.vests?.reduce(
-                (acc, currentValue) => acc + BigInt(currentValue.initialUnlock),
-                0n,
-            ) || 0n
-        );
-    }, [vestData]);
-
-
-
-    const totalAmount = useMemo(() => {
-        return vestData?.vests?.[0]?.amountBurn ? BigInt(vestData?.vests?.[0]?.amountBurn) - totalInitialUnlock : 0n
-
-    }, [vestData, totalInitialUnlock]);
-
-    const totalClaimed = useMemo(() => {
-        return totalAmountGet;
-    }, [totalAmountGet]);
-
-    const totalVested = useMemo(() => {
-        // console.log({ totalVestedUnlock, data });
-        if (!data) return 0n;
-        return totalAmountGet + data.userUnlockReward;
-    }, [totalClaimed, data]);
-
-    console.log({
-        tokenAddress,
-        totalAmountGet,
-        totalAmount,
-        totalInitialUnlock,
-        totalClaimed,
-        totalVested,
-    });
-
-    return {
-        totalClaimed,
-        totalInitialUnlock,
-        totalVested,
-        totalAmount,
-        isLoading:
-            isClaimDataLoading && isVestDataLoading && isUserUnlockRewardLoading,
-    };
+  return {
+    claimed,
+    totalAmount,
+    totalVested,
+    isLoading:
+      isClaimDataLoading && isVestDataLoading && isUserUnlockRewardLoading,
+  };
 };

@@ -1,6 +1,4 @@
-// claimsHook.ts
-import { gql } from "@apollo/client";
-import { useQuery } from "@apollo/client/react/hooks";
+import { gql, useQuery } from "@apollo/client";
 
 interface Claim {
   id: string;
@@ -15,8 +13,8 @@ interface ClaimsResponse {
 }
 
 export const CLAIMS_QUERY = gql`
-  query claims($from: Bytes!, $token: Bytes!) {
-    claims(from: $from, token: $token) {
+  query claims($from: String!, $token: String!) {
+    claims(where: { from: $from, token: $token }) {
       id
       token
       from
@@ -27,14 +25,12 @@ export const CLAIMS_QUERY = gql`
 `;
 
 export const useSubgraphClaim = (
-  tokenAddress?: `0x${string}`,
-  fromAddress?: `0x${string}`,
+  from?: `0x${string}`,
+  token?: `0x${string}`
 ) => {
   const data = useQuery<ClaimsResponse>(CLAIMS_QUERY, {
-    variables: { from: fromAddress, token: tokenAddress },
+    variables: { from, token },
   });
-
-  console.log(data);
 
   return data;
 };

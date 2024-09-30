@@ -1,10 +1,11 @@
 import { Address } from "viem";
+import { SlIcon } from "@shoelace-style/shoelace/dist/react";
+
 import { VestingInfo } from "../../hooks/useVestingInfo";
-import { cn, parseHumanReadable } from "../../utils";
+import { cn, parseHumanReadable, truncateAddress } from "../../utils";
 import { Button, Card, CardDescription, CardTitle } from "../ui";
 import { ClaimButton } from "./claim-button";
 import { InvestmentInfoType } from "../../hooks/useInvestmentInfos";
-import { SlIcon } from "@shoelace-style/shoelace/dist/react";
 
 interface ClaimCardProps {
   vestingInfo?: VestingInfo;
@@ -39,20 +40,20 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
     <Card
       className={cn(
         "w-64 h-80",
-        hasVested && parsedBalance === 0 && "bg-[#262626] border-0",
+        hasVested && parsedBalance === 0 && "bg-[#262626] border-0"
       )}
     >
       <CardTitle>{price} / $TEA</CardTitle>
       {hasVested && parsedBalance == 0 && (
         <>
           <CardDescription className="flex flex-col justify-between gap-3 items-center h-52">
-            <span>{investmentInfo.address}</span>
+            <span>{truncateAddress(investmentInfo.address || "")}</span>
 
             <span>You have already claimed your tokens</span>
             <span>Check the vesting process below</span>
             <Button
               className={cn(
-                "w-full disabled:bg-[#35232D] border-solid border-2 border-[#f716a2] text-[#f716a2]",
+                "w-full disabled:bg-[#35232D] border-solid border-2 border-[#f716a2] text-[#f716a2]"
               )}
               disabled
             >

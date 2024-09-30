@@ -19,7 +19,7 @@ export const Claim = () => {
         Total Bought: {loading ? <Spinner /> : `${totalSoldTeaPerAccount} $TEA`}
       </span>
 
-      <div className="flex gap-4 mt-10 flex-wrap justify-center">
+      <div className="flex gap-4 mt-10 flex-wrap justify-center mb-4">
         {!loading &&
           investmentInfos.map((investmentInfo, index) => (
             <div key={index} className="flex flex-col gap-4 ">

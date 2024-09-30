@@ -1,7 +1,7 @@
 export function parseHumanReadable(
   value: bigint,
   decimals: number = 18,
-  accurancy: number = 0
+  accuracy: number = 0
 ): number {
   if (value == 0n) {
     return 0;
@@ -12,8 +12,8 @@ export function parseHumanReadable(
   const parsed = Number(value) / 10 ** decimals;
 
   const trimmed = parsed.toLocaleString("en-US", {
-    maximumFractionDigits: accurancy,
+    maximumFractionDigits: accuracy,
   });
 
-  return Number(trimmed.replace(",", ""));
+  return Number(trimmed.replaceAll(",", ""));
 }

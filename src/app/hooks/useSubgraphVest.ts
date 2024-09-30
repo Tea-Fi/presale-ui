@@ -1,6 +1,5 @@
 // claimsHook.ts
-import { gql } from "@apollo/client";
-import { useQuery } from "@apollo/client/react/hooks";
+import { gql, useQuery } from "@apollo/client";
 
 interface Vesting {
   token: string;
@@ -28,10 +27,7 @@ export const VESTS_QUERY = gql`
   }
 `;
 
-export const useSubgraphVest = (
-  tokenAddress?: `0x${string}`,
-  fromAddress?: `0x${string}`,
-) =>
+export const useSubgraphVest = (from?: `0x${string}`, token?: `0x${string}`) =>
   useQuery<VestingsResponse>(VESTS_QUERY, {
-    variables: { from: fromAddress, token: tokenAddress },
+    variables: { from, token },
   });
