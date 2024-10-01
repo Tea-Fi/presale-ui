@@ -76,13 +76,15 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
               your ongoing vesting
             </span>
           )}
-          <ClaimButton
-            balance={balance}
-            vestingValue={vestingValue}
-            address={address as Address}
-            disabled={!isTGEStarted}
-            onClaimCallback={onClaimCallback}
-          />
+          {window.location.hostname !== "presale.tea-fi.com" && (
+            <ClaimButton
+              balance={balance}
+              vestingValue={vestingValue}
+              address={address as Address}
+              disabled={!isTGEStarted}
+              onClaimCallback={onClaimCallback}
+            />
+          )}
         </CardDescription>
       )}
     </Card>
