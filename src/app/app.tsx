@@ -21,8 +21,6 @@ import ProtectedRoutes from "./utils/ProtectedRoutes.tsx";
 import AmbassadorProtectedRoutes from "./utils/AmbassadorProtectedRoutes.tsx";
 import ClaimProtectedRoutes from "./utils/ClaimProtectedRoutes.tsx";
 import { useReferralCode } from "./hooks/useReferralCode.ts";
-import { useMemo } from "react";
-import { endOfPresaleDate } from "./utils/constants.ts";
 import { useIsPresaleEnded } from "./hooks/useIsPresaleEnded.ts";
 
 export function App() {
@@ -43,12 +41,6 @@ export function App() {
     },
   });
 
-  const haveAccessToBuy = useMemo(
-    () => !isFinished && endOfPresaleDate.getTime() > new Date().getTime(),
-
-    [isFinished]
-  );
-
   if (chainId && unsupportedChain) {
     return <WrongNetwork />;
   }
@@ -63,10 +55,10 @@ export function App() {
             <Route
               path="/:code/buy"
               element={
-                haveAccessToBuy ? (
-                  <Buy />
-                ) : (
+                isFinished ? (
                   <Navigate to={`/${code}/options`} replace={true} />
+                ) : (
+                  <Buy />
                 )
               }
             />

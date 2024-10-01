@@ -28,12 +28,12 @@ import { ProjectInfoOption } from "../../types/options.ts";
 import { ProjectCard } from "../components/options/ProjectCard/ProjectCard.tsx";
 import { useReferralCode } from "../hooks/useReferralCode.ts";
 import { CountdownSmall } from "../components/countdown/countdown-sm.tsx";
-import { useCountdownStore } from "../state/countdown.store.ts";
+import { useIsPresaleEnded } from "../hooks/useIsPresaleEnded.ts";
 
 export const Options = () => {
   const [dropdownOpened, setDropdownOpened] = useState<boolean>(false);
   const code = useReferralCode();
-  const { isFinished } = useCountdownStore();
+  const isFinished = useIsPresaleEnded();
 
   const defaultProjectInfos: ProjectInfoOption[] = Object.keys(
     INVESTMENT_INFO

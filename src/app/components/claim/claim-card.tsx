@@ -1,10 +1,10 @@
-// import { Address } from "viem";
+import { Address } from "viem";
 import { SlIcon } from "@shoelace-style/shoelace/dist/react";
 
 import { VestingInfo } from "../../hooks/useVestingInfo";
 import { cn, parseHumanReadable, truncateAddress } from "../../utils";
 import { Button, Card, CardDescription, CardTitle } from "../ui";
-// import { ClaimButton } from "./claim-button";
+import { ClaimButton } from "./claim-button";
 import { InvestmentInfoType } from "../../hooks/useInvestmentInfos";
 
 interface ClaimCardProps {
@@ -26,9 +26,9 @@ const calculateClaimAmount = (balance?: bigint, tge?: bigint) => {
 export const ClaimCard: React.FC<ClaimCardProps> = ({
   investmentInfo,
   vestingInfo,
-  // onClaimCallback,
+  onClaimCallback,
 }) => {
-  const { balance, tge, price } = investmentInfo;
+  const { balance, tge, price, address } = investmentInfo;
   const parsedBalance = parseHumanReadable(balance, 18, 1);
   const hasTGEStarted = isTGEStarted(vestingInfo?.dateStart);
   const hasVested = vestingInfo && vestingInfo?.tokensForVesting > 0n;
@@ -39,8 +39,9 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
   return (
     <Card
       className={cn(
-        "w-64 h-80",
-        hasVested && parsedBalance === 0 && "bg-[#262626] border-0"
+        "w-64",
+        hasVested && parsedBalance === 0 && "bg-[#262626] border-0",
+        hasTGEStarted && "h-80"
       )}
     >
       <CardTitle>{price} / $TEA</CardTitle>
@@ -63,7 +64,12 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
         </>
       )}
       {(!hasVested || parsedBalance > 0) && (
-        <CardDescription className="flex flex-col justify-between  gap-3 items-center h-52">
+        <CardDescription
+          className={cn(
+            "flex flex-col justify-between  gap-3 items-center",
+            hasTGEStarted ? "h-52" : "pb-3"
+          )}
+        >
           <span className="text-lg">{parsedBalance} $TEA</span>
           <span className="text-base">
             {hasTGEStarted ? "Claim now " : "Claim at TGE "}(
@@ -76,13 +82,15 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
               your ongoing vesting
             </span>
           )}
-          {/* <ClaimButton
-            balance={balance}
-            vestingValue={vestingValue}
-            address={address as Address}
-            disabled={!isTGEStarted}
-            onClaimCallback={onClaimCallback}
-          /> */}
+          {hasTGEStarted && (
+            <ClaimButton
+              balance={balance}
+              vestingValue={vestingValue}
+              address={address as Address}
+              disabled={!isTGEStarted}
+              onClaimCallback={onClaimCallback}
+            />
+          )}
         </CardDescription>
       )}
     </Card>
