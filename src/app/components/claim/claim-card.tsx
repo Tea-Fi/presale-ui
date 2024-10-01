@@ -1,10 +1,10 @@
-// import { Address } from "viem";
+import { Address } from "viem";
 import { SlIcon } from "@shoelace-style/shoelace/dist/react";
 
 import { VestingInfo } from "../../hooks/useVestingInfo";
 import { cn, parseHumanReadable, truncateAddress } from "../../utils";
 import { Button, Card, CardDescription, CardTitle } from "../ui";
-// import { ClaimButton } from "./claim-button";
+import { ClaimButton } from "./claim-button";
 import { InvestmentInfoType } from "../../hooks/useInvestmentInfos";
 
 interface ClaimCardProps {
@@ -26,9 +26,9 @@ const calculateClaimAmount = (balance?: bigint, tge?: bigint) => {
 export const ClaimCard: React.FC<ClaimCardProps> = ({
   investmentInfo,
   vestingInfo,
-  // onClaimCallback,
+  onClaimCallback,
 }) => {
-  const { balance, tge, price } = investmentInfo;
+  const { balance, tge, price, address } = investmentInfo;
   const parsedBalance = parseHumanReadable(balance, 18, 1);
   const hasTGEStarted = isTGEStarted(vestingInfo?.dateStart);
   const hasVested = vestingInfo && vestingInfo?.tokensForVesting > 0n;
@@ -76,13 +76,13 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
               your ongoing vesting
             </span>
           )}
-          {/* <ClaimButton
+          <ClaimButton
             balance={balance}
             vestingValue={vestingValue}
             address={address as Address}
             disabled={!isTGEStarted}
             onClaimCallback={onClaimCallback}
-          /> */}
+          />
         </CardDescription>
       )}
     </Card>
