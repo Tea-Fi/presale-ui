@@ -36,11 +36,14 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
   const claimValue = calculateClaimAmount(balance, tge);
   const vestingValue = balance - claimValue;
 
+  // const withButton = window.location.hostname !== "presale.tea-fi.com";
+
   return (
     <Card
       className={cn(
-        "w-64 h-80",
-        hasVested && parsedBalance === 0 && "bg-[#262626] border-0"
+        "w-64",
+        hasVested && parsedBalance === 0 && "bg-[#262626] border-0",
+        hasTGEStarted && "h-80"
       )}
     >
       <CardTitle>{price} / $TEA</CardTitle>
@@ -63,7 +66,12 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
         </>
       )}
       {(!hasVested || parsedBalance > 0) && (
-        <CardDescription className="flex flex-col justify-between  gap-3 items-center h-52">
+        <CardDescription
+          className={cn(
+            "flex flex-col justify-between  gap-3 items-center",
+            hasTGEStarted ? "h-52" : "pb-3"
+          )}
+        >
           <span className="text-lg">{parsedBalance} $TEA</span>
           <span className="text-base">
             {hasTGEStarted ? "Claim now " : "Claim at TGE "}(
@@ -76,7 +84,7 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
               your ongoing vesting
             </span>
           )}
-          {window.location.hostname !== "presale.tea-fi.com" && (
+          {hasTGEStarted && (
             <ClaimButton
               balance={balance}
               vestingValue={vestingValue}
