@@ -36,8 +36,6 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
   const claimValue = calculateClaimAmount(balance, tge);
   const vestingValue = balance - claimValue;
 
-  // const withButton = window.location.hostname !== "presale.tea-fi.com";
-
   return (
     <Card
       className={cn(
