@@ -3,7 +3,7 @@ export {
   WALLET_CONNECT_PROJECT_ID,
   ALCHEMY_PROVIDER_KEY,
   INFURA_URL,
-  SUPPORTED_NETWORK,
+  SUPPORTED_NETWORKS,
 } from "./env";
 export { ChainId } from "./chain-ids";
 export { type Token } from "./token-type";

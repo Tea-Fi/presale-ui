@@ -83,6 +83,8 @@ export const useSubgraphInfo = (tokenAddress?: `0x${string}`) => {
     claimed,
     totalAmount,
     totalVested,
+    totalInitialUnlock,
+    totalAmountBurn,
     refetchInfo,
     isLoading:
       isClaimDataLoading && isVestDataLoading && isUserUnlockRewardLoading,

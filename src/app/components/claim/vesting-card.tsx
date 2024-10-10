@@ -4,9 +4,10 @@ import { useSubgraphInfo } from "../../hooks/useSubgraphInfo";
 import { VestingInfo } from "../../hooks/useVestingInfo";
 import { parseHumanReadable } from "../../utils";
 import { Card, CardDescription, CardTitle } from "../ui";
-import { CardDiagram } from "../ui/card";
 import ProgressBar from "../ui/progress-bar/progress-bar";
 import { VestingButton } from "./vesting-button";
+import { VestingChart } from "./vesting-chart";
+import { VESTING_PERIOD_MONTHS } from "../../utils/constants";
 
 interface ClaimCardProps {
   vestingInfo?: VestingInfo;
@@ -35,14 +36,24 @@ export const VestingCard: React.FC<ClaimCardProps> = ({
   onClaimCallback,
 }) => {
   if (!vestingInfo || vestingInfo.tokensForVesting == 0n) return;
-  const { claimed, totalVested, totalAmount } = useSubgraphInfo(
-    tokenAddress as Address
-  );
+  const {
+    claimed,
+    totalVested,
+    totalAmount,
+    totalInitialUnlock,
+    totalAmountBurn,
+  } = useSubgraphInfo(tokenAddress as Address);
 
   const dateEnd = formatDateToDDMMYY(vestingInfo.dateEnd);
 
   const parsedTotalVested = parseHumanReadable(totalVested, 18, 2);
+  const parsedTotalInitialUnlocked = parseHumanReadable(
+    totalInitialUnlock,
+    18,
+    2
+  );
   const parsedClaimed = parseHumanReadable(claimed, 18, 2);
+  const parsedTotalAmountBurn = parseHumanReadable(totalAmountBurn, 18, 2);
   const parsedTotalAmount = parseHumanReadable(totalAmount, 18, 2);
 
   return (
@@ -54,7 +65,12 @@ export const VestingCard: React.FC<ClaimCardProps> = ({
         </span>
         <span>until {dateEnd}</span>
       </CardDescription>
-      <CardDiagram></CardDiagram>
+      <VestingChart
+        min={parsedTotalInitialUnlocked}
+        max={parsedTotalAmountBurn}
+        months={VESTING_PERIOD_MONTHS[vestingInfo.claimPercent]}
+        dateStart={vestingInfo.dateStart}
+      />
       <ProgressBar
         value1={parsedClaimed}
         value2={parsedTotalVested}

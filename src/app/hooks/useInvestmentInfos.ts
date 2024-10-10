@@ -1,12 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getChainId, getAccount, readContract } from "@wagmi/core";
-import { PRESALE_ABI } from "../utils/presale_abi";
-import { PRESALE_CONTRACT_ADDRESS } from "../utils/constants";
+import { TOKENS_ADDRESSES, TOKENS_TGE } from "../utils/constants";
 import { wagmiConfig } from "../config";
 import { Address, erc20Abi } from "viem";
 import { parseHumanReadable } from "../utils";
 import { INVESTMENT_INFO } from "../utils/constants";
-import { useReadContracts } from "wagmi";
 
 export interface InvestmentInfoType {
   price: string;
@@ -15,7 +13,6 @@ export interface InvestmentInfoType {
   balance: bigint;
   address?: `0x${string}`;
 }
-type SaleOption = [bigint, bigint, bigint, Address, bigint, bigint];
 
 const defaultInvestmentInfos = Object.keys(INVESTMENT_INFO).map((price) => ({
   price: `$${price}`,
@@ -30,53 +27,25 @@ export const useInvestmentInfos = () => {
   >();
   const [loading, setLoading] = useState<boolean>(true);
   const [investmentInfos, setInvestmentInfos] = useState<InvestmentInfoType[]>(
-    defaultInvestmentInfos,
+    defaultInvestmentInfos
   );
 
   const chainId = getChainId(wagmiConfig);
   const account = getAccount(wagmiConfig);
 
-  const { data, isLoading } = useReadContracts({
-    contracts: [
-      {
-        abi: PRESALE_ABI,
-        address: PRESALE_CONTRACT_ADDRESS[chainId] as Address,
-        functionName: "saleOptions",
-        args: [investmentInfos[0].optionId],
-      },
-      {
-        abi: PRESALE_ABI,
-        address: PRESALE_CONTRACT_ADDRESS[chainId] as Address,
-        functionName: "saleOptions",
-        args: [investmentInfos[1].optionId],
-      },
-      {
-        abi: PRESALE_ABI,
-        address: PRESALE_CONTRACT_ADDRESS[chainId] as Address,
-        functionName: "saleOptions",
-        args: [investmentInfos[2].optionId],
-      },
-    ],
-  });
-
-  const saleOptions = useMemo(
-    () => data?.map((res) => res.result as SaleOption),
-    [data],
-  );
-
   const fetchBalance = useCallback(async () => {
-    if (isLoading || !saleOptions || !investmentInfos) return;
+    if (!investmentInfos) return;
 
     try {
       const balances = await Promise.all(
-        saleOptions.map((info) =>
+        TOKENS_ADDRESSES.map((address) =>
           readContract(wagmiConfig, {
             abi: erc20Abi,
-            address: info[3], // presaleToken address in contract struct
+            address, // presaleToken address in contract struct
             functionName: "balanceOf",
             args: [account?.address as Address],
-          }),
-        ),
+          })
+        )
       );
 
       return balances;
@@ -84,11 +53,11 @@ export const useInvestmentInfos = () => {
       console.error("Error fetching options info:", error);
       return;
     }
-  }, [account, investmentInfos, isLoading]);
+  }, [account, investmentInfos]);
 
   const handleOptionsInfo = useCallback(async () => {
     const balances = await fetchBalance();
-    if (!balances || !saleOptions) return;
+    if (!balances) return;
 
     let totalBalance = 0;
     const updatedInfo = investmentInfos.map((info, i) => {
@@ -98,13 +67,13 @@ export const useInvestmentInfos = () => {
       return {
         ...info,
         balance: balances[i],
-        tge: saleOptions?.[i][0],
-        address: saleOptions?.[i][3],
+        tge: TOKENS_TGE?.[i],
+        address: TOKENS_ADDRESSES?.[i],
       };
     });
 
     setTotalSoldTeaPerAccount(
-      Number(totalBalance.toFixed(2)).toLocaleString("en-US"),
+      Number(totalBalance.toFixed(2)).toLocaleString("en-US")
     );
     setInvestmentInfos(updatedInfo);
     setLoading(false);
@@ -114,7 +83,7 @@ export const useInvestmentInfos = () => {
     if (account) {
       handleOptionsInfo();
     }
-  }, [account.address, chainId, saleOptions]);
+  }, [account.address, chainId]);
 
   return {
     totalSoldTeaPerAccount,

@@ -32,6 +32,7 @@ export const DAI = {
 export enum ChainIds {
   MAINNET = 1,
   SEPOLIA = 11155111,
+  POLYGON = 137,
 }
 
 /**
@@ -45,8 +46,16 @@ export const PRESALE_CONTRACT_ADDRESS = {
 } as ChainAddress;
 
 export const VESTING_CONTRACT_ADDRESS = {
-  [ChainIds.SEPOLIA]: "0xF788A456C59303f58d2Bd6A435Eee4d40E2d2313",
+  [ChainIds.POLYGON]: "0x7aCc4321c727fb64C9041a778aDd0BF101EE6fce",
 } as ChainAddress;
+
+export const TOKENS_ADDRESSES = [
+  "0xc2ab1d5240f49DB75B2ce6C1205B567791416cA1",
+  "0x244bfbe555E6e415451005901dB7cAB90A71B359",
+  "0x42B0C6f18BFa65b0d47cf1D9a2b65538b6417b14",
+] as `0x${string}`[];
+
+export const TOKENS_TGE = [10n, 30n, 50n] as bigint[];
 
 /**
  * @description contracts for ambassadors to be able to get their earning back from the referral Code
@@ -81,6 +90,12 @@ export const INVESTMENT_INFO: Record<string, InvestmentInfoOption> = {
     vested: "50% - vested linearly over 2 months",
   },
 };
+
+export const VESTING_PERIOD_MONTHS = {
+  10: 12,
+  30: 6,
+  50: 2,
+} as Record<number, number>;
 
 export const ONE_DAY_IN_MS = 86_400_000;
 export const ROUND_CLAIM_DURATION = ONE_DAY_IN_MS * 3;
