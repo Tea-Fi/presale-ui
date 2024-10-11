@@ -25,12 +25,9 @@ export const InvestmentInfo: React.FC<InvestmentInfoProps> = ({
   const { refetchInfo } = useSubgraphInfo(investmentInfo.address as Address);
 
   const onClaimCallback = async () => {
-    await Promise.all([
-      refetchInfo(),
-      refetchInvestmentInfo(),
-      refetchVestingInfo(),
-      refetchUserUnlockReward(),
-    ]);
+    await Promise.all([refetchInvestmentInfo(), refetchUserUnlockReward()]);
+    await refetchInfo();
+    await refetchVestingInfo();
   };
 
   return (

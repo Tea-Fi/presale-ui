@@ -12,7 +12,7 @@ import { PRESALE_VESTING_ABI } from "../utils/vesting_abi";
 
 export const useClaimToken = (
   tokenAddress: `0x${string}`,
-  tokenAmount: bigint,
+  tokenAmount: bigint
 ) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isClaimed, setIsClaimed] = useState<boolean>(false);
@@ -31,6 +31,7 @@ export const useClaimToken = (
       const transactionReceipt = await waitForTransactionReceipt(wagmiConfig, {
         hash,
       });
+
       if (transactionReceipt.status == "success") {
         setIsClaimed(true);
       }
@@ -45,7 +46,7 @@ export const useClaimToken = (
   };
 
   const handleTokenVest = useCallback(async () => {
-    await handleWriteContract();
+    return handleWriteContract();
   }, []);
 
   return { isClaimed, isLoading, isError, handleTokenVest };

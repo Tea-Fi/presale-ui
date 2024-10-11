@@ -7,7 +7,8 @@ export const ALCHEMY_PROVIDER_KEY =
 export const INFURA_URL =
   import.meta.env.VITE_PUBLIC_INFURA_URL ??
   "https://eth-mainnet.public.blastapi.io";
-export const SUPPORTED_NETWORK =
-  import.meta.env.VITE_PUBLIC_SUPPORTED_NETWORK ?? 1;
+export const SUPPORTED_NETWORKS = JSON.parse(
+  import.meta.env.VITE_PUBLIC_SUPPORTED_NETWORK ?? "[137, 11155111]"
+);
 export const API_URL =
   import.meta.env.VITE_API_URL ?? "https://presale-api.tea-fi.com";
