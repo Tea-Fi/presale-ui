@@ -7,7 +7,7 @@ export const useNextClaimTime = (tokenAddress: string) => {
   );
 
   // const nextClaimTime = lastClaimTimestamp + 24 * 60 * 60 * 1000 - 1000; // This value should be used in production
-  const nextClaimTime = lastClaimTimestamp + 0.5 * 60 * 1000; // Setup for 5 minutes for testing purposes
+  const nextClaimTime = lastClaimTimestamp + 0.5 * 60 * 1000; // Setup for 0.5 minutes for testing purposes
 
   const isClaimTimeLocked = Date.now() < nextClaimTime;
 

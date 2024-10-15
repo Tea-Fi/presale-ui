@@ -38,7 +38,7 @@ export const useInvestmentInfos = () => {
 
     try {
       const balances = await Promise.all(
-        TOKENS_ADDRESSES.map((address) =>
+        (TOKENS_ADDRESSES[chainId] || []).map((address) =>
           readContract(wagmiConfig, {
             abi: erc20Abi,
             address, // presaleToken address in contract struct
@@ -53,7 +53,7 @@ export const useInvestmentInfos = () => {
       console.error("Error fetching options info:", error);
       return;
     }
-  }, [account, investmentInfos]);
+  }, [account, investmentInfos, chainId]);
 
   const handleOptionsInfo = useCallback(async () => {
     const balances = await fetchBalance();
@@ -61,14 +61,14 @@ export const useInvestmentInfos = () => {
 
     let totalBalance = 0;
     const updatedInfo = investmentInfos.map((info, i) => {
-      const balance = parseHumanReadable(balances[i], 18, 2);
+      const balance = parseHumanReadable(balances[i] || 0n, 18, 2);
       totalBalance += balance;
 
       return {
         ...info,
-        balance: balances[i],
+        balance: balances[i] || 0n,
         tge: TOKENS_TGE?.[i],
-        address: TOKENS_ADDRESSES?.[i],
+        address: TOKENS_ADDRESSES[chainId]?.[i],
       };
     });
 

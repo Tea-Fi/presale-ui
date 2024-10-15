@@ -49,11 +49,13 @@ export const VESTING_CONTRACT_ADDRESS = {
   [ChainIds.POLYGON]: "0x7aCc4321c727fb64C9041a778aDd0BF101EE6fce",
 } as ChainAddress;
 
-export const TOKENS_ADDRESSES = [
-  "0xc2ab1d5240f49DB75B2ce6C1205B567791416cA1",
-  "0x244bfbe555E6e415451005901dB7cAB90A71B359",
-  "0x42B0C6f18BFa65b0d47cf1D9a2b65538b6417b14",
-] as `0x${string}`[];
+export const TOKENS_ADDRESSES = {
+  [ChainIds.POLYGON]: [
+    "0xc2ab1d5240f49DB75B2ce6C1205B567791416cA1",
+    "0x244bfbe555E6e415451005901dB7cAB90A71B359",
+    "0x42B0C6f18BFa65b0d47cf1D9a2b65538b6417b14",
+  ],
+} as Record<number, `0x${string}`[]>;
 
 export const TOKENS_TGE = [10n, 30n, 50n] as bigint[];
 
