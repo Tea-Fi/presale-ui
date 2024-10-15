@@ -30,7 +30,8 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
 }) => {
   const { balance, tge, price, address } = investmentInfo;
   const parsedBalance = parseHumanReadable(balance, 18, 1);
-  const hasTGEStarted = isTGEStarted(vestingInfo?.dateStart);
+  const hasTGEStarted = false;
+  // const hasTGEStarted = isTGEStarted(vestingInfo?.dateStart);
   const hasVested = vestingInfo && vestingInfo?.tokensForVesting > 0n;
 
   const claimValue = calculateClaimAmount(balance, tge);
