@@ -13,8 +13,8 @@ export const Layout = () => {
   const { referralId, setReferralCode } = useReferralStore();
   const { code } = useParams();
 
-  const { pathname } = useLocation();
-  const { status } = useUserContext();
+    const {pathname} = useLocation();
+    const {status} = useUserContext();
 
   useLayoutEffect(() => {
     if (status === LoginStatus.LOGGED_OUT) {
