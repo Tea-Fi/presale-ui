@@ -14,6 +14,7 @@ interface ClaimCardProps {
   tokenAddress?: string;
   claimableValue?: bigint;
   onClaimCallback: () => Promise<void>;
+  claimPercent: number;
 }
 
 function formatDateToDDMMYY(date?: Date) {
@@ -34,24 +35,17 @@ export const VestingCard: React.FC<ClaimCardProps> = ({
   tokenAddress,
   claimableValue = 0n,
   onClaimCallback,
+  claimPercent,
 }) => {
   if (!vestingInfo || vestingInfo.tokensForVesting == 0n) return;
-  const {
-    claimed,
-    totalVested,
-    totalAmount,
-    totalInitialUnlock,
-    totalAmountBurn,
-  } = useSubgraphInfo(tokenAddress as Address);
+  const { claimed, totalVested, totalAmount, totalInitialUnlock, totalAmountBurn } = useSubgraphInfo(
+    tokenAddress as Address
+  );
 
   const dateEnd = formatDateToDDMMYY(vestingInfo.dateEnd);
 
   const parsedTotalVested = parseHumanReadable(totalVested, 18, 2);
-  const parsedTotalInitialUnlocked = parseHumanReadable(
-    totalInitialUnlock,
-    18,
-    2
-  );
+  const parsedTotalInitialUnlocked = parseHumanReadable(totalInitialUnlock, 18, 2);
   const parsedClaimed = parseHumanReadable(claimed, 18, 2);
   const parsedTotalAmountBurn = parseHumanReadable(totalAmountBurn, 18, 2);
   const parsedTotalAmount = parseHumanReadable(totalAmount, 18, 2);
@@ -68,14 +62,10 @@ export const VestingCard: React.FC<ClaimCardProps> = ({
       <VestingChart
         min={parsedTotalInitialUnlocked}
         max={parsedTotalAmountBurn}
-        months={VESTING_PERIOD_MONTHS[vestingInfo.claimPercent]}
+        months={VESTING_PERIOD_MONTHS[claimPercent]}
         dateStart={vestingInfo.dateStart}
       />
-      <ProgressBar
-        value1={parsedClaimed}
-        value2={parsedTotalVested}
-        maxValue={parsedTotalAmount}
-      />
+      <ProgressBar value1={parsedClaimed} value2={parsedTotalVested} maxValue={parsedTotalAmount} />
       <div className="flex justify-between text-sm">
         <span className="text-[#f716a2]">Vested</span>
         <span>
@@ -88,11 +78,7 @@ export const VestingCard: React.FC<ClaimCardProps> = ({
           {parsedClaimed}/{parsedTotalAmount} $TEA
         </span>
       </div>
-      <VestingButton
-        tokenAddress={tokenAddress!}
-        claimableValue={claimableValue}
-        onClaimCallback={onClaimCallback}
-      />
+      <VestingButton tokenAddress={tokenAddress!} claimableValue={claimableValue} onClaimCallback={onClaimCallback} />
     </Card>
   );
 };

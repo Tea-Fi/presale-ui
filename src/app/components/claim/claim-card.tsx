@@ -11,6 +11,7 @@ interface ClaimCardProps {
   vestingInfo?: VestingInfo;
   investmentInfo: InvestmentInfoType;
   onClaimCallback: () => Promise<void>;
+  claimPercent: number;
 }
 
 const isTGEStarted = (date?: Date) => {
@@ -23,7 +24,7 @@ const calculateClaimAmount = (balance?: bigint, tge?: bigint) => {
   return (balance * tge) / 100n;
 };
 
-export const ClaimCard: React.FC<ClaimCardProps> = ({ investmentInfo, vestingInfo, onClaimCallback }) => {
+export const ClaimCard: React.FC<ClaimCardProps> = ({ investmentInfo, vestingInfo, onClaimCallback, claimPercent }) => {
   const { balance, tge, price, address } = investmentInfo;
   const parsedBalance = parseHumanReadable(balance, 18, 1);
   const hasTGEStarted = false;
@@ -58,7 +59,7 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({ investmentInfo, vestingInf
         >
           <span className="text-lg">{parsedBalance} $TEA</span>
           <span className="text-base">
-            {hasTGEStarted ? "Claim now " : "Claim after TGE "}({vestingInfo?.claimPercent}
+            {hasTGEStarted ? "Claim now " : "Claim after TGE "}({claimPercent}
             %): <br />
             {parseHumanReadable(claimValue, 18, 2)} $TEA
           </span>
