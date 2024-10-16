@@ -1,4 +1,5 @@
 import Spinner from "../components/spinner";
+
 import { useInvestmentInfos } from "../hooks/useInvestmentInfos";
 import { InvestmentInfo } from "../components/claim/investment-info";
 

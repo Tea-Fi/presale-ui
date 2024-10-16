@@ -3,8 +3,6 @@ import { Link, NavLink, useLocation } from "react-router-dom";
 import { Wallet } from "./wallet";
 import { TeaSwapLogoAsset } from "../../assets/icons";
 import { cn } from "../utils";
-import { getChainId } from "@wagmi/core";
-import { wagmiConfig, ChainId } from "../config";
 import { Button } from "./ui";
 import "react-circular-progressbar/dist/styles.css";
 import { GiHamburgerMenu } from "react-icons/gi";
@@ -31,8 +29,6 @@ export const TopBar = ({
   const { pathname } = useLocation();
   const { setOpened } = useMobileMenuDrawer();
 
-  const chainId = getChainId(wagmiConfig);
-
   const { setOpen } = useConnectWalletModal();
   const { isConnected } = useAccount();
   const { isAmbassador, ambassadorCode } = useIsAmbassador();
@@ -41,14 +37,14 @@ export const TopBar = ({
 
   const copyCode = React.useCallback(() => {
     navigator?.clipboard?.writeText(
-      `${window.location.origin}?r=${ambassadorCode}`,
+      `${window.location.origin}?r=${ambassadorCode}`
     );
 
     toast.custom((t) => (
       <div
         className={cn(
           "flex flex-row gap-4 items-center",
-          "px-8 py-4 min-h-20 text-center rounded-xl bg-[#282828]",
+          "px-8 py-4 min-h-20 text-center rounded-xl bg-[#282828]"
         )}
         onClick={() => toast.dismiss(t)}
       >
@@ -99,7 +95,7 @@ export const TopBar = ({
             to={`/${code}/options`}
             className={cn(
               "rounded-full h-full min-w-16 items-center inline-flex justify-center",
-              isBuyPageActive ? "border border-white/[0.2]" : "",
+              isBuyPageActive ? "border border-white/[0.2]" : ""
             )}
           >
             Buy
@@ -109,7 +105,7 @@ export const TopBar = ({
             onClick={handleNavToClaimClick}
             className={cn(
               "rounded-full h-full min-w-16 items-center inline-flex justify-center",
-              isClaimPageActive ? "border border-white/[0.2]" : "",
+              isClaimPageActive ? "border border-white/[0.2]" : ""
             )}
           >
             Claim
@@ -121,7 +117,7 @@ export const TopBar = ({
                 to={`/${code}/dashboard`}
                 className={cn(
                   "rounded-full h-full min-w-16 items-center hidden lg:inline-flex justify-center",
-                  isReferralTreePageActive ? "border border-white/[0.2]" : "",
+                  isReferralTreePageActive ? "border border-white/[0.2]" : ""
                 )}
               >
                 Dashboard: {ambassadorCode}
@@ -141,9 +137,7 @@ export const TopBar = ({
         </div>
 
         <span className={"w-[228px] items-center hidden lg:inline-flex"}>
-          <span className="text-white">
-            {chainId == ChainId.MAINNET ? "Mainnet" : "Sepolia"}
-          </span>
+          <span className="text-white">Polygon </span>
           &nbsp;
           <Wallet />
         </span>

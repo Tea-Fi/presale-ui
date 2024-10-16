@@ -59,7 +59,8 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({ investmentInfo, vestingInf
           <span className="text-lg">{parsedBalance} $TEA</span>
           <span className="text-base">
             {hasTGEStarted ? "Claim now " : "Claim after TGE "}({vestingInfo?.claimPercent}
-            %): {parseHumanReadable(claimValue, 18, 2)} $TEA
+            %): <br />
+            {parseHumanReadable(claimValue, 18, 2)} $TEA
           </span>
           {hasVested && (
             <span className="text-sm">

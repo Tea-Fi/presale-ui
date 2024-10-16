@@ -22,12 +22,14 @@ import { ReactFlowProvider } from "@xyflow/react";
 import { useFetchClaimed } from "../hooks/useFetchClaimed";
 import { useGetReferralTree } from "../hooks/useGetReferralTree";
 import { useGetPeriod } from "../hooks/useGetPeriod";
+import { WrongNetwork } from "../components/wrong-network";
+
 interface SectionProps {
   title?: string;
 }
 
 const ReferralSection: React.FC<SectionProps & React.PropsWithChildren> = (
-  props,
+  props
 ) => {
   return (
     <div className="referral-section">
@@ -42,7 +44,6 @@ export const Referrals = () => {
   const chainId = useChainId();
   const navigate = useNavigate();
   const client = getClient(wagmiConfig);
-
   const [isClaimActive, setClaimActive] = useState<boolean>(false);
 
   const [isClaimRoundFinished, setClaimRoundFinished] =
@@ -50,7 +51,7 @@ export const Referrals = () => {
 
   const { data: claimed, mutate: refetchClaimed } = useFetchClaimed(
     account.address,
-    chainId,
+    chainId
   );
   const { data: referralTree, mutate: refetchReferralTree } =
     useGetReferralTree({ address: account.address });
@@ -95,7 +96,7 @@ export const Referrals = () => {
           cache[log.blockNumber.toString()] = timestamp.getTime().toString();
 
           return { ...log, time: timestamp };
-        }),
+        })
       );
 
       localStorage.setItem("logs-timestamps", JSON.stringify(cache));
@@ -125,6 +126,10 @@ export const Referrals = () => {
         <Spinner />
       </div>
     );
+  }
+
+  if (chainId && ![1, 11155111].includes(chainId)) {
+    return <WrongNetwork networkName="Ethereum" />;
   }
 
   return (

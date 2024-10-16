@@ -25,11 +25,6 @@ export const useSubgraphInfo = (tokenAddress?: `0x${string}`) => {
     refetch: refetchVests,
   } = useSubgraphVest(account.address, tokenAddress);
 
-  console.log("log => ", {
-    claimData,
-    vestData,
-  });
-
   const totalVestedUnlock = useMemo(() => {
     return (
       vestData?.vests?.reduce(
@@ -58,11 +53,18 @@ export const useSubgraphInfo = (tokenAddress?: `0x${string}`) => {
     );
   }, [vestData]);
 
+  const totalAmountBurn = useMemo(() => {
+    return (
+      vestData?.vests?.reduce(
+        (acc, currentValue) => acc + BigInt(currentValue.amountBurn),
+        0n
+      ) || 0n
+    );
+  }, [vestData]);
+
   const totalAmount = useMemo(() => {
-    return vestData?.vests?.[0]?.amountBurn
-      ? BigInt(vestData?.vests?.[0]?.amountBurn) - totalInitialUnlock
-      : 0n;
-  }, [vestData, totalInitialUnlock]);
+    return totalAmountBurn - totalInitialUnlock;
+  }, [totalAmountBurn, totalInitialUnlock]);
 
   const totalVested = useMemo(() => {
     if (!availableForClaim) return claimed;
@@ -81,6 +83,8 @@ export const useSubgraphInfo = (tokenAddress?: `0x${string}`) => {
     claimed,
     totalAmount,
     totalVested,
+    totalInitialUnlock,
+    totalAmountBurn,
     refetchInfo,
     isLoading:
       isClaimDataLoading && isVestDataLoading && isUserUnlockRewardLoading,

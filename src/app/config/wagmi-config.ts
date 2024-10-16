@@ -1,44 +1,41 @@
 import { getDefaultConfig } from "connectkit";
-import { Chain, mainnet, sepolia } from "viem/chains";
+import { polygon, sepolia, mainnet } from "viem/chains";
 import { createConfig, http } from "wagmi";
+import { Chain, HttpTransport } from "viem";
+
 import {
   ALCHEMY_PROVIDER_KEY,
   WALLET_CONNECT_PROJECT_ID,
-  SUPPORTED_NETWORK,
+  SUPPORTED_NETWORKS,
 } from "./env";
-import { HttpTransport } from "viem";
-
-const chains = {
-  1: [mainnet],
-  11155111: [sepolia],
-} as Record<number, [Chain, ...Chain[]]>;
 
 const transports = {
-  1: {
-    [mainnet.id]: http(
-      `https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_PROVIDER_KEY}`,
-      { batch: true },
-    ),
-  },
-  11155111: {
-    [sepolia.id]: http(
-      `https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_PROVIDER_KEY}`,
-      { batch: true },
-    ),
-  },
-} as Record<number, Record<number, HttpTransport>>;
+  [polygon.id]: http(
+    `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_PROVIDER_KEY}`,
+    { batch: true }
+  ),
+  [mainnet.id]: http(
+    `https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_PROVIDER_KEY}`,
+    { batch: true }
+  ),
+  [sepolia.id]: http(
+    `https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_PROVIDER_KEY}`,
+    { batch: true }
+  ),
+} as Record<number, HttpTransport>;
+
+const chains = {
+  1: mainnet,
+  11155111: sepolia,
+  137: polygon,
+} as Record<number, Chain>;
 
 export const wagmiConfig = createConfig(
   getDefaultConfig({
     // Your dApps chains
-    chains: chains[+SUPPORTED_NETWORK] || [mainnet],
+    chains: SUPPORTED_NETWORKS.map((chain: number) => chains[chain]),
 
-    transports: transports[+SUPPORTED_NETWORK] || {
-      [mainnet.id]: http(
-        `https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_PROVIDER_KEY}`,
-        { batch: true },
-      ),
-    },
+    transports,
 
     // Required API Keys
     walletConnectProjectId: WALLET_CONNECT_PROJECT_ID,
@@ -49,5 +46,5 @@ export const wagmiConfig = createConfig(
     appDescription: "Tea-Fi Presale",
     appUrl: "https://presale.tea-fi.com",
     appIcon: "https://presale.tea-fi.com/favicon.svg",
-  }),
+  })
 );
