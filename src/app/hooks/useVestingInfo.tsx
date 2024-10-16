@@ -17,11 +17,7 @@ export const useVestingInfo = (token?: Address) => {
     isLoading: isVestingTokensLoading,
     refetch: refetchVestingTokens,
   } = useVestingTokens(token);
-  const {
-    data: vestingUser,
-    isLoading: isVestingUserLoading,
-    refetch: refetchVestingUser,
-  } = useVestingUsers(token);
+  const { data: vestingUser, isLoading: isVestingUserLoading, refetch: refetchVestingUser } = useVestingUsers(token);
 
   const vestingInfoData: VestingInfo | undefined = useMemo(() => {
     if (!vestingTokens || !vestingUser) return;

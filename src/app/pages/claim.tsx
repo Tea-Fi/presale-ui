@@ -2,6 +2,7 @@ import Spinner from "../components/spinner";
 
 import { useInvestmentInfos } from "../hooks/useInvestmentInfos";
 import { InvestmentInfo } from "../components/claim/investment-info";
+import { TOKENS_TGE } from "../utils/constants";
 
 export const Claim = () => {
   const { totalSoldTeaPerAccount, loading, investmentInfos, refetchInvestmentInfo } = useInvestmentInfos();
@@ -17,7 +18,11 @@ export const Claim = () => {
         {!loading &&
           investmentInfos.map((investmentInfo, index) => (
             <div key={index} className="flex flex-col gap-4 ">
-              <InvestmentInfo investmentInfo={investmentInfo} refetchInvestmentInfo={refetchInvestmentInfo} />
+              <InvestmentInfo
+                investmentInfo={investmentInfo}
+                claimPercent={Number(TOKENS_TGE[index])}
+                refetchInvestmentInfo={refetchInvestmentInfo}
+              />
             </div>
           ))}
       </div>
