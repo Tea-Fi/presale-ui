@@ -26,7 +26,7 @@ const calculateClaimAmount = (balance?: bigint, tge?: bigint) => {
 
 export const ClaimCard: React.FC<ClaimCardProps> = ({ investmentInfo, vestingInfo, onClaimCallback, claimPercent }) => {
   const { balance, tge, price, address } = investmentInfo;
-  const parsedBalance = parseHumanReadable(balance, 18, 1);
+  const parsedBalance = parseHumanReadable(balance, 18, 6);
   const hasTGEStarted = false;
   // const hasTGEStarted = isTGEStarted(vestingInfo?.dateStart);
   const hasVested = vestingInfo && vestingInfo?.tokensForVesting > 0n;
@@ -61,11 +61,11 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({ investmentInfo, vestingInf
           <span className="text-base">
             {hasTGEStarted ? "Claim now " : "Claim after TGE "}({claimPercent}
             %): <br />
-            {parseHumanReadable(claimValue, 18, 2)} $TEA
+            {parseHumanReadable(claimValue, 18, 6)} $TEA
           </span>
           {hasVested && (
             <span className="text-sm">
-              {parseHumanReadable(vestingValue, 18, 2)} $TEA will be added to your ongoing vesting
+              {parseHumanReadable(vestingValue, 18, 6)} $TEA will be added to your ongoing vesting
             </span>
           )}
           {hasTGEStarted && (
