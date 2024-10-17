@@ -9,13 +9,8 @@ import { VestingCard } from "./vesting-card";
 interface InvestmentInfoProps {
   investmentInfo: InvestmentInfoType;
   refetchInvestmentInfo: () => Promise<void>;
-  claimPercent: number;
 }
-export const InvestmentInfo: React.FC<InvestmentInfoProps> = ({
-  investmentInfo,
-  refetchInvestmentInfo,
-  claimPercent,
-}) => {
+export const InvestmentInfo: React.FC<InvestmentInfoProps> = ({ investmentInfo, refetchInvestmentInfo }) => {
   const { data: vestingInfo, refetch: refetchVestingInfo } = useVestingInfo(investmentInfo.address);
 
   const { data, refetch: refetchUserUnlockReward } = useGetUserUnlockReward(investmentInfo.address);
@@ -30,15 +25,10 @@ export const InvestmentInfo: React.FC<InvestmentInfoProps> = ({
 
   return (
     <>
-      <ClaimCard
+      <ClaimCard vestingInfo={vestingInfo} investmentInfo={investmentInfo} onClaimCallback={onClaimCallback} />
+      <VestingCard
         vestingInfo={vestingInfo}
         investmentInfo={investmentInfo}
-        onClaimCallback={onClaimCallback}
-        claimPercent={claimPercent}
-      />
-      <VestingCard
-        claimPercent={claimPercent}
-        vestingInfo={vestingInfo}
         tokenAddress={investmentInfo.address}
         claimableValue={data?.userUnlockReward}
         onClaimCallback={onClaimCallback}
