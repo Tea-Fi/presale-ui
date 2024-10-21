@@ -36,16 +36,11 @@ export const TopBar = ({
   const code = useReferralCode();
 
   const copyCode = React.useCallback(() => {
-    navigator?.clipboard?.writeText(
-      `${window.location.origin}?r=${ambassadorCode}`
-    );
+    navigator?.clipboard?.writeText(`${window.location.origin}?r=${ambassadorCode}`);
 
     toast.custom((t) => (
       <div
-        className={cn(
-          "flex flex-row gap-4 items-center",
-          "px-8 py-4 min-h-20 text-center rounded-xl bg-[#282828]"
-        )}
+        className={cn("flex flex-row gap-4 items-center", "px-8 py-4 min-h-20 text-center rounded-xl bg-[#282828]")}
         onClick={() => toast.dismiss(t)}
       >
         <Check className="text-[#f716a2]" />
@@ -66,10 +61,7 @@ export const TopBar = ({
       {pathname.includes("/options") || !isMobile ? (
         <></>
       ) : (
-        <Link
-          to={`/${code}/options`}
-          className="inline-flex items-center gap-2 ml-5 mt-3 text-white"
-        >
+        <Link to={`/options`} className="inline-flex items-center gap-2 ml-5 mt-3 text-white">
           <IoIosArrowBack /> Back
         </Link>
       )}
@@ -92,7 +84,7 @@ export const TopBar = ({
 
         <div className="items-center gap-2 min-w-[100px] h-16 w-fit bg-black text-white rounded-full p-3 border dark:border-white/[0.2] hidden lg:inline-flex">
           <NavLink
-            to={`/${code}/options`}
+            to={`/options`}
             className={cn(
               "rounded-full h-full min-w-16 items-center inline-flex justify-center",
               isBuyPageActive ? "border border-white/[0.2]" : ""
@@ -101,7 +93,7 @@ export const TopBar = ({
             Buy
           </NavLink>
           <NavLink
-            to={`/${code}/claim`}
+            to={`/claim`}
             onClick={handleNavToClaimClick}
             className={cn(
               "rounded-full h-full min-w-16 items-center inline-flex justify-center",
@@ -114,7 +106,7 @@ export const TopBar = ({
           {isAmbassador && (
             <>
               <NavLink
-                to={`/${code}/dashboard`}
+                to={`/dashboard`}
                 className={cn(
                   "rounded-full h-full min-w-16 items-center hidden lg:inline-flex justify-center",
                   isReferralTreePageActive ? "border border-white/[0.2]" : ""

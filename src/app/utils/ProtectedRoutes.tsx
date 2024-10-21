@@ -3,7 +3,7 @@ import { useGetReferral } from "../hooks/useGetReferral.ts";
 
 const ProtectedRoutes = () => {
   const { code } = useParams();
-  const { data, error, isLoading } = useGetReferral(code);
+  const { error, isLoading } = useGetReferral(code);
 
   if (isLoading) return;
 
@@ -11,7 +11,8 @@ const ProtectedRoutes = () => {
     return <Navigate to="/code-not-found" />;
   }
 
-  return data ? <Outlet /> : <Navigate to="/" />;
+  return <Outlet />;
+  // return data ? <Outlet /> : <Navigate to="/" />;
 };
 
 export default ProtectedRoutes;

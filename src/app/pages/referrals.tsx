@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getClient } from "@wagmi/core";
 import "@xyflow/react/dist/style.css";
-import { useAccount, useAccountEffect, useChainId } from "wagmi";
+import { useAccount, useChainId } from "wagmi";
 import { wagmiConfig } from "../config";
 
 import { ReferralForm } from "../components/referral/referral-form";
@@ -10,7 +10,6 @@ import { ReferralDashboard } from "../components/referral/referral-dashboard";
 import { DashboardClaimButton } from "../components/referral/dashboard-claim-button";
 import { EventLogWithTimestamp } from "../components/referral/common";
 import { CountdownByCheckpoint } from "../components/countdown-by-checkpoints";
-import { useNavigate } from "react-router-dom";
 
 import Spinner from "../components/spinner";
 
@@ -28,9 +27,7 @@ interface SectionProps {
   title?: string;
 }
 
-const ReferralSection: React.FC<SectionProps & React.PropsWithChildren> = (
-  props
-) => {
+const ReferralSection: React.FC<SectionProps & React.PropsWithChildren> = (props) => {
   return (
     <div className="referral-section">
       {props.title && <div>{props.title}</div>}
@@ -42,19 +39,13 @@ const ReferralSection: React.FC<SectionProps & React.PropsWithChildren> = (
 export const Referrals = () => {
   const account = useAccount();
   const chainId = useChainId();
-  const navigate = useNavigate();
   const client = getClient(wagmiConfig);
   const [isClaimActive, setClaimActive] = useState<boolean>(false);
 
-  const [isClaimRoundFinished, setClaimRoundFinished] =
-    useState<boolean>(false);
+  const [isClaimRoundFinished, setClaimRoundFinished] = useState<boolean>(false);
 
-  const { data: claimed, mutate: refetchClaimed } = useFetchClaimed(
-    account.address,
-    chainId
-  );
-  const { data: referralTree, mutate: refetchReferralTree } =
-    useGetReferralTree({ address: account.address });
+  const { data: claimed, mutate: refetchClaimed } = useFetchClaimed(account.address, chainId);
+  const { data: referralTree, mutate: refetchReferralTree } = useGetReferralTree({ address: account.address });
   const [logs, setLogs] = useState<EventLogWithTimestamp[]>();
   const { data: claimPeriod } = useGetPeriod();
 
@@ -77,8 +68,7 @@ export const Referrals = () => {
       const processedLogs: EventLogWithTimestamp[] = await Promise.all(
         logs.map(async (log) => {
           let timestamp: Date;
-          let cachedTime: string | undefined =
-            cache[log.blockNumber.toString()];
+          let cachedTime: string | undefined = cache[log.blockNumber.toString()];
 
           if (Number.isNaN(Number(cachedTime))) {
             cachedTime = undefined;
@@ -114,11 +104,11 @@ export const Referrals = () => {
     fetchAndSetClaimsAndLogs();
   }, [account.address]);
 
-  useAccountEffect({
-    onDisconnect() {
-      navigate("/");
-    },
-  });
+  // useAccountEffect({
+  //   onDisconnect() {
+  //     navigate("/");
+  //   },
+  // });
 
   if (!referralTree || !account?.address || !claimed || !logs) {
     return (
@@ -137,12 +127,7 @@ export const Referrals = () => {
       {referralTree && account?.address && (
         <div className="flex flex-col gap-8">
           <ReferralSection>
-            <ReferralDashboard
-              address={account?.address}
-              tree={referralTree}
-              logs={logs}
-              claimed={claimed}
-            />
+            <ReferralDashboard address={account?.address} tree={referralTree} logs={logs} claimed={claimed} />
           </ReferralSection>
 
           <ReferralSection>
@@ -179,15 +164,11 @@ export const Referrals = () => {
               <div className="text-start">
                 <div className="title">Referrals</div>
                 <div className="subtitle">
-                  Code "<b>{referralTree.referral!.toUpperCase()}</b>" with{" "}
-                  {(referralTree?.fee || 0) / 100}% Fee
+                  Code "<b>{referralTree.referral!.toUpperCase()}</b>" with {(referralTree?.fee || 0) / 100}% Fee
                 </div>
               </div>
 
-              <ReferralForm
-                referralTree={referralTree!}
-                onSubmit={refetchReferralTree}
-              />
+              <ReferralForm referralTree={referralTree!} onSubmit={refetchReferralTree} />
             </div>
 
             <ReactFlowProvider>
