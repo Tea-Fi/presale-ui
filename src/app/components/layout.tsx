@@ -1,7 +1,7 @@
 import { /*React,*/ useLayoutEffect } from "react";
 import { TopBar } from "./top-bar";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { LoginStatus, useUserContext } from "../providers/user.context";
+import { useUserContext } from "../providers/user.context";
 import { BackgroundBeams } from "./ui";
 import { MobileDrawerMenu } from "./mobile-drawer-menu";
 import { RevokeApprovalDialog } from "./revoke-approval-dialog";
