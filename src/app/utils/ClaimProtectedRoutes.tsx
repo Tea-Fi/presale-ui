@@ -9,7 +9,6 @@ const ClaimProtectedRoutes = () => {
   if (chainId && chainId !== 137) {
     return <WrongNetwork networkName="Polygon" text="Claim is available only on Polygon" />;
   }
-  // return isConnected ? <Outlet /> : <Navigate to="/" />;
   return <Outlet />;
 };
 
