@@ -15,7 +15,6 @@ import React from "react";
 import { useIsAmbassador } from "../hooks/useIsAmbassador.ts";
 import { useModal as useConnectWalletModal } from "connectkit";
 import { useAccount } from "wagmi";
-import { useReferralCode } from "../hooks/useReferralCode.ts";
 
 export const TopBar = ({
   isBuyPageActive,
@@ -32,8 +31,6 @@ export const TopBar = ({
   const { setOpen } = useConnectWalletModal();
   const { isConnected } = useAccount();
   const { isAmbassador, ambassadorCode } = useIsAmbassador();
-
-  const code = useReferralCode();
 
   const copyCode = React.useCallback(() => {
     navigator?.clipboard?.writeText(`${window.location.origin}?r=${ambassadorCode}`);

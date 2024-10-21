@@ -7,13 +7,10 @@ import { cn } from "../utils";
 import { toast } from "sonner";
 import React from "react";
 import { Check, Copy } from "lucide-react";
-import { useReferralCode } from "../hooks/useReferralCode.ts";
 import { useAccount } from "wagmi";
 import { useIsAmbassador } from "../hooks/useIsAmbassador.ts";
 
 export const MobileDrawerMenu = () => {
-  const code = useReferralCode();
-
   const { isAmbassador, ambassadorCode } = useIsAmbassador();
 
   const { setOpen } = useModal();
