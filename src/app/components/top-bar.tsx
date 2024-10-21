@@ -55,10 +55,10 @@ export const TopBar = ({
 
   return (
     <div>
-      {pathname.includes("/options") || !isMobile ? (
+      {pathname.includes("/") || !isMobile ? (
         <></>
       ) : (
-        <Link to={`/options`} className="inline-flex items-center gap-2 ml-5 mt-3 text-white">
+        <Link to={`/`} className="inline-flex items-center gap-2 ml-5 mt-3 text-white">
           <IoIosArrowBack /> Back
         </Link>
       )}
@@ -81,7 +81,7 @@ export const TopBar = ({
 
         <div className="items-center gap-2 min-w-[100px] h-16 w-fit bg-black text-white rounded-full p-3 border dark:border-white/[0.2] hidden lg:inline-flex">
           <NavLink
-            to={`/options`}
+            to={`/`}
             className={cn(
               "rounded-full h-full min-w-16 items-center inline-flex justify-center",
               isBuyPageActive ? "border border-white/[0.2]" : ""

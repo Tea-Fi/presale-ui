@@ -5,7 +5,6 @@ import { InvestmentInfo } from "../components/claim/investment-info";
 
 export const Claim = () => {
   const { totalSoldTeaPerAccount, loading, investmentInfos, refetchInvestmentInfo } = useInvestmentInfos();
-  console.log("log => investmentInfos", investmentInfos);
 
   return (
     <div className="claim flex flex-col mx-auto">

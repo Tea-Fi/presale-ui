@@ -82,6 +82,7 @@ export const Options = () => {
   }, []);
 
   if (!projectInfos) return null;
+
   return (
     <div className="inline-flex flex-col justify-center items-center w-full">
       <PresaleHeadline />
