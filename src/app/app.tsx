@@ -1,13 +1,8 @@
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  Navigate,
-} from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import { useAccountEffect } from "wagmi";
 
 import { Layout } from "./components/layout";
-import { Login } from "./pages/login";
+// import { Login } from "./pages/login";
 import { Buy } from "./pages/buy";
 import { Claim } from "./pages/claim";
 import { NotFound } from "./pages/not-found";
@@ -20,12 +15,12 @@ import { CodeNotFound } from "./pages/code-not-found.tsx";
 import ProtectedRoutes from "./utils/ProtectedRoutes.tsx";
 import AmbassadorProtectedRoutes from "./utils/AmbassadorProtectedRoutes.tsx";
 import ClaimProtectedRoutes from "./utils/ClaimProtectedRoutes.tsx";
-import { useReferralCode } from "./hooks/useReferralCode.ts";
+// import { useReferralCode } from "./hooks/useReferralCode.ts";
 import { useIsPresaleEnded } from "./hooks/useIsPresaleEnded.ts";
 
 export function App() {
   const { chainId, unsupportedChain } = useWalletContext();
-  const code = useReferralCode();
+  // const code = useReferralCode();
   const isFinished = useIsPresaleEnded();
 
   useAccountEffect({
@@ -49,27 +44,18 @@ export function App() {
     <Router basename="/">
       <Routes>
         <Route element={<Layout />}>
-          <Route path="/" element={<Login />} />
+          {/* <Route path="/" element={<Login />} /> */}
 
           <Route element={<ProtectedRoutes />}>
-            <Route
-              path="/:code/buy"
-              element={
-                isFinished ? (
-                  <Navigate to={`/${code}/options`} replace={true} />
-                ) : (
-                  <Buy />
-                )
-              }
-            />
-            <Route path="/:code/options" element={<Options />} />
+            <Route path="/buy" element={isFinished ? <Navigate to={`/options`} replace={true} /> : <Buy />} />
+            <Route path="/options" element={<Options />} />
 
             <Route element={<ClaimProtectedRoutes />}>
-              <Route path="/:code/claim" element={<Claim />} />
+              <Route path="/claim" element={<Claim />} />
             </Route>
 
             <Route element={<AmbassadorProtectedRoutes />}>
-              <Route path="/:code/dashboard" element={<Referrals />} />
+              <Route path="/dashboard" element={<Referrals />} />
             </Route>
           </Route>
           <Route path="/code-not-found" element={<CodeNotFound />} />
