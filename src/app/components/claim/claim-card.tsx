@@ -26,8 +26,9 @@ const calculateClaimAmount = (balance?: bigint, tge?: bigint) => {
 export const ClaimCard: React.FC<ClaimCardProps> = ({ investmentInfo, vestingInfo, onClaimCallback }) => {
   const { balance, tge, price, address } = investmentInfo;
   const parsedBalance = parseHumanReadable(balance, 18, 6);
-  const hasTGEStarted = false;
-  // const hasTGEStarted = isTGEStarted(vestingInfo?.dateStart);
+  // const hasTGEStarted = false;
+
+  const hasTGEStarted = isTGEStarted(vestingInfo?.dateStart);
   const hasVested = vestingInfo && vestingInfo?.tokensForVesting > 0n;
 
   const claimValue = calculateClaimAmount(balance, tge);
