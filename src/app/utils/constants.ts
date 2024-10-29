@@ -47,7 +47,7 @@ export const PRESALE_CONTRACT_ADDRESS = {
 
 export const VESTING_CONTRACT_ADDRESS = {
   // DEV
-  [ChainIds.POLYGON]: "0x322019cb4dbffd5d92cCb19b574afDb5e8Dd47f0",
+  [ChainIds.POLYGON]: "0x3C3520467f34e93b577959feaDdbd3105D1fDcF5",
 } as ChainAddress;
 
 // PROD
