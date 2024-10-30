@@ -3,25 +3,12 @@ import { polygon, sepolia, mainnet } from "viem/chains";
 import { createConfig, http } from "wagmi";
 import { Chain, HttpTransport } from "viem";
 
-import {
-  ALCHEMY_PROVIDER_KEY,
-  WALLET_CONNECT_PROJECT_ID,
-  SUPPORTED_NETWORKS,
-} from "./env";
+import { ALCHEMY_PROVIDER_KEY, WALLET_CONNECT_PROJECT_ID, SUPPORTED_NETWORKS } from "./env";
 
 const transports = {
-  [polygon.id]: http(
-    `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_PROVIDER_KEY}`,
-    { batch: true }
-  ),
-  [mainnet.id]: http(
-    `https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_PROVIDER_KEY}`,
-    { batch: true }
-  ),
-  [sepolia.id]: http(
-    `https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_PROVIDER_KEY}`,
-    { batch: true }
-  ),
+  [polygon.id]: http(`https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_PROVIDER_KEY}`, { batch: true }),
+  [mainnet.id]: http(`https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_PROVIDER_KEY}`, { batch: true }),
+  [sepolia.id]: http(`https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_PROVIDER_KEY}`, { batch: true }),
 } as Record<number, HttpTransport>;
 
 const chains = {
