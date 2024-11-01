@@ -47,7 +47,7 @@ const useLogin = (inputCode?: string) => {
           return;
         }
         setDialogOpen(false);
-        setTimeout(() => navigate(`/${referralCode}/options`), 250);
+        setTimeout(() => navigate(`/options`), 250);
         break;
 
       case LoginStatus.LOGGED_OUT:

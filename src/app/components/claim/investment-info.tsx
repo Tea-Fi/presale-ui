@@ -10,17 +10,10 @@ interface InvestmentInfoProps {
   investmentInfo: InvestmentInfoType;
   refetchInvestmentInfo: () => Promise<void>;
 }
-export const InvestmentInfo: React.FC<InvestmentInfoProps> = ({
-  investmentInfo,
-  refetchInvestmentInfo,
-}) => {
-  const { data: vestingInfo, refetch: refetchVestingInfo } = useVestingInfo(
-    investmentInfo.address
-  );
+export const InvestmentInfo: React.FC<InvestmentInfoProps> = ({ investmentInfo, refetchInvestmentInfo }) => {
+  const { data: vestingInfo, refetch: refetchVestingInfo } = useVestingInfo(investmentInfo.address);
 
-  const { data, refetch: refetchUserUnlockReward } = useGetUserUnlockReward(
-    investmentInfo.address
-  );
+  const { data, refetch: refetchUserUnlockReward } = useGetUserUnlockReward(investmentInfo.address);
 
   const { refetchInfo } = useSubgraphInfo(investmentInfo.address as Address);
 
@@ -32,13 +25,10 @@ export const InvestmentInfo: React.FC<InvestmentInfoProps> = ({
 
   return (
     <>
-      <ClaimCard
-        vestingInfo={vestingInfo}
-        investmentInfo={investmentInfo}
-        onClaimCallback={onClaimCallback}
-      />
+      <ClaimCard vestingInfo={vestingInfo} investmentInfo={investmentInfo} onClaimCallback={onClaimCallback} />
       <VestingCard
         vestingInfo={vestingInfo}
+        investmentInfo={investmentInfo}
         tokenAddress={investmentInfo.address}
         claimableValue={data?.userUnlockReward}
         onClaimCallback={onClaimCallback}

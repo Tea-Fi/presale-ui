@@ -23,13 +23,11 @@ const calculateClaimAmount = (balance?: bigint, tge?: bigint) => {
   return (balance * tge) / 100n;
 };
 
-export const ClaimCard: React.FC<ClaimCardProps> = ({
-  investmentInfo,
-  vestingInfo,
-  onClaimCallback,
-}) => {
+export const ClaimCard: React.FC<ClaimCardProps> = ({ investmentInfo, vestingInfo, onClaimCallback }) => {
   const { balance, tge, price, address } = investmentInfo;
-  const parsedBalance = parseHumanReadable(balance, 18, 1);
+  const parsedBalance = parseHumanReadable(balance, 18, 6);
+  // const hasTGEStarted = false;
+
   const hasTGEStarted = isTGEStarted(vestingInfo?.dateStart);
   const hasVested = vestingInfo && vestingInfo?.tokensForVesting > 0n;
 
@@ -37,13 +35,7 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
   const vestingValue = balance - claimValue;
 
   return (
-    <Card
-      className={cn(
-        "w-64",
-        hasVested && parsedBalance === 0 && "bg-[#262626] border-0",
-        hasTGEStarted && "h-80"
-      )}
-    >
+    <Card className={cn("w-64", hasVested && parsedBalance === 0 && "bg-[#262626] border-0", hasTGEStarted && "h-80")}>
       <CardTitle>{price} / $TEA</CardTitle>
       {hasVested && parsedBalance == 0 && (
         <>
@@ -53,9 +45,7 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
             <span>You have already claimed your tokens</span>
             <span>Check the vesting process below</span>
             <Button
-              className={cn(
-                "w-full disabled:bg-[#35232D] border-solid border-2 border-[#f716a2] text-[#f716a2]"
-              )}
+              className={cn("w-full disabled:bg-[#35232D] border-solid border-2 border-[#f716a2] text-[#f716a2]")}
               disabled
             >
               <SlIcon name="check-circle" className="m-2" /> {"Claimed"}
@@ -65,21 +55,17 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
       )}
       {(!hasVested || parsedBalance > 0) && (
         <CardDescription
-          className={cn(
-            "flex flex-col justify-between  gap-3 items-center",
-            hasTGEStarted ? "h-52" : "pb-3"
-          )}
+          className={cn("flex flex-col justify-between  gap-3 items-center", hasTGEStarted ? "h-52" : "pb-3")}
         >
           <span className="text-lg">{parsedBalance} $TEA</span>
           <span className="text-base">
-            {hasTGEStarted ? "Claim now " : "Claim at TGE "}(
-            {vestingInfo?.claimPercent}
-            %): {parseHumanReadable(claimValue, 18, 2)} $TEA
+            {hasTGEStarted ? "Claim now " : "Claim after TGE "}({Number(tge)}
+            %): <br />
+            {parseHumanReadable(claimValue, 18, 6)} $TEA
           </span>
           {hasVested && (
             <span className="text-sm">
-              {parseHumanReadable(vestingValue, 18, 2)} $TEA will be added to
-              your ongoing vesting
+              {parseHumanReadable(vestingValue, 18, 6)} $TEA will be added to your ongoing vesting
             </span>
           )}
           {hasTGEStarted && (

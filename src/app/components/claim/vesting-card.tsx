@@ -8,12 +8,14 @@ import ProgressBar from "../ui/progress-bar/progress-bar";
 import { VestingButton } from "./vesting-button";
 import { VestingChart } from "./vesting-chart";
 import { VESTING_PERIOD_MONTHS } from "../../utils/constants";
+import { InvestmentInfoType } from "../../hooks/useInvestmentInfos";
 
 interface ClaimCardProps {
   vestingInfo?: VestingInfo;
   tokenAddress?: string;
   claimableValue?: bigint;
   onClaimCallback: () => Promise<void>;
+  investmentInfo: InvestmentInfoType;
 }
 
 function formatDateToDDMMYY(date?: Date) {
@@ -34,6 +36,7 @@ export const VestingCard: React.FC<ClaimCardProps> = ({
   tokenAddress,
   claimableValue = 0n,
   onClaimCallback,
+  investmentInfo,
 }) => {
   if (!vestingInfo || vestingInfo.tokensForVesting == 0n) return;
   const { claimed, totalVested, totalAmount, totalInitialUnlock, totalAmountBurn } = useSubgraphInfo(
@@ -60,7 +63,7 @@ export const VestingCard: React.FC<ClaimCardProps> = ({
       <VestingChart
         min={parsedTotalInitialUnlocked}
         max={parsedTotalAmountBurn}
-        months={VESTING_PERIOD_MONTHS[vestingInfo.claimPercent]}
+        months={VESTING_PERIOD_MONTHS[Number(investmentInfo.tge)]}
         dateStart={vestingInfo.dateStart}
       />
       <ProgressBar value1={parsedClaimed} value2={parsedTotalVested} maxValue={parsedTotalAmount} />

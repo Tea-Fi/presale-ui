@@ -2,24 +2,10 @@ import React from "react";
 import { useEffect, useState } from "react";
 import { ZeroAddress } from "ethers/constants";
 // import { CardHoverEffect, Collapsible, CollapsibleContent, CollapsibleTrigger, Progress } from "../components/ui";
-import {
-  CardHoverEffect,
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-  Progress,
-} from "../components/ui";
-import {
-  getOptionInfo,
-  getSaleOptionsCout,
-  getTokensAvailable,
-} from "../utils/presale";
+import { CardHoverEffect, Collapsible, CollapsibleContent, CollapsibleTrigger, Progress } from "../components/ui";
+import { getOptionInfo, getSaleOptionsCout, getTokensAvailable } from "../utils/presale";
 import { cn, parseHumanReadable } from "../utils";
-import {
-  endOfPresaleDate,
-  INVESTMENT_INFO,
-  startOfPresaleDate,
-} from "../utils/constants";
+import { endOfPresaleDate, INVESTMENT_INFO, startOfPresaleDate } from "../utils/constants";
 import { MdKeyboardArrowDown } from "react-icons/md";
 import { TeaCup } from "../../assets/icons";
 import { track } from "../utils/analytics";
@@ -35,9 +21,7 @@ export const Options = () => {
   const code = useReferralCode();
   const isFinished = useIsPresaleEnded();
 
-  const defaultProjectInfos: ProjectInfoOption[] = Object.keys(
-    INVESTMENT_INFO
-  ).map((price) => ({
+  const defaultProjectInfos: ProjectInfoOption[] = Object.keys(INVESTMENT_INFO).map((price) => ({
     title: `$${price} / $TEA`,
     description: `${INVESTMENT_INFO[price].tge} and ${INVESTMENT_INFO[price].vested}`,
     link: `/${code}/buy?opt=${price}`,
@@ -45,8 +29,7 @@ export const Options = () => {
     value: 0,
   }));
 
-  const [projectInfos, setProjectInfos] =
-    useState<ProjectInfoOption[]>(defaultProjectInfos);
+  const [projectInfos, setProjectInfos] = useState<ProjectInfoOption[]>(defaultProjectInfos);
 
   const toggleDropdown = React.useCallback(() => {
     setDropdownOpened((state) => !state);
@@ -57,15 +40,9 @@ export const Options = () => {
   useEffect(() => {
     const handleOptionsInfo = async () => {
       try {
-        const [optionsCount, tokensAvailable] = await Promise.all([
-          getSaleOptionsCout(),
-          getTokensAvailable(),
-        ]);
+        const [optionsCount, tokensAvailable] = await Promise.all([getSaleOptionsCout(), getTokensAvailable()]);
 
-        const maxPerOption = parseHumanReadable(
-          tokensAvailable / optionsCount,
-          18
-        );
+        const maxPerOption = parseHumanReadable(tokensAvailable / optionsCount, 18);
 
         const optionsInfoQuery = [];
         for (let i = 0; i < optionsCount; i++) {
@@ -78,10 +55,7 @@ export const Options = () => {
           const price = parseHumanReadable(optionsInfo[i].price, 2, 2);
           const sold = parseHumanReadable(optionsInfo[i].sold, 18);
 
-          if (
-            optionsInfo[i].presaleToken == ZeroAddress ||
-            INVESTMENT_INFO[price] == undefined
-          ) {
+          if (optionsInfo[i].presaleToken == ZeroAddress || INVESTMENT_INFO[price] == undefined) {
             continue;
           }
 
@@ -108,23 +82,20 @@ export const Options = () => {
   }, []);
 
   if (!projectInfos) return null;
+
   return (
     <div className="inline-flex flex-col justify-center items-center w-full">
       <PresaleHeadline />
       <div className="mb-10 flex flex-col outer-glow">
         {isFinished ? (
           <h2
-            className={cn(
-              "text-zinc-100 font-bold  text-lg md:text-2xl uppercase tracking-wide mb-3 text-center z-10"
-            )}
+            className={cn("text-zinc-100 font-bold  text-lg md:text-2xl uppercase tracking-wide mb-3 text-center z-10")}
           >
             Presale ended!
           </h2>
         ) : (
           <h2
-            className={cn(
-              "text-zinc-100 font-bold  text-lg md:text-2xl uppercase tracking-wide mb-3 text-center z-10"
-            )}
+            className={cn("text-zinc-100 font-bold  text-lg md:text-2xl uppercase tracking-wide mb-3 text-center z-10")}
           >
             Presale ends in
           </h2>
@@ -141,10 +112,7 @@ export const Options = () => {
         )}
       </div>
       {isFinished ? (
-        <div className="ended-container">
-          Wait for Oct 16 TGE <br />
-          to start claiming your tokens
-        </div>
+        <div className="ended-container">Claim your tokens after TGE</div>
       ) : (
         <div className="flex flex-col-reverse lg-mt-0 lg:flex-row grow justify-center w-full items-center gap-8">
           <div className="w-96">
@@ -159,23 +127,16 @@ export const Options = () => {
                 <div className="inline-flex items-center justify-between py-3 px-2 min-w-72 border rounded-2xl border-white/20">
                   <div className="grow">Allocation Status</div>
 
-                  <MdKeyboardArrowDown
-                    className={cn(
-                      "transition-all",
-                      dropdownOpened ? "rotate-180" : ""
-                    )}
-                  />
+                  <MdKeyboardArrowDown className={cn("transition-all", dropdownOpened ? "rotate-180" : "")} />
                 </div>
               </CollapsibleTrigger>
 
               <CollapsibleContent className="inline-flex justify-center">
                 <div className="w-72">
                   {projectInfos && projectInfos.length ? (
-                    projectInfos.map(
-                      (info: ProjectInfoOption, index: number) => (
-                        <ProjectCard info={info} key={index} />
-                      )
-                    )
+                    projectInfos.map((info: ProjectInfoOption, index: number) => (
+                      <ProjectCard info={info} key={index} />
+                    ))
                   ) : (
                     <></>
                   )}
