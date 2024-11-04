@@ -9,11 +9,7 @@ interface ProgressBarProps {
   maxValue: number;
 }
 
-const ProgressBar: React.FC<ProgressBarProps> = ({
-  value1,
-  value2,
-  maxValue,
-}) => {
+const ProgressBar: React.FC<ProgressBarProps> = ({ value1, value2, maxValue }) => {
   const [isHoveringValue1, setIsHoveringValue1] = useState(false);
   const [isHoveringValue2, setIsHoveringValue2] = useState(false);
 
@@ -22,16 +18,8 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
 
   return (
     <div className="relative w-full mb-10" title={`Max Value: ${maxValue}`}>
-      <HoverTooltip
-        isVisible={isHoveringValue1}
-        percentage={value1Percentage}
-        leftOffset={0}
-      />
-      <HoverTooltip
-        isVisible={isHoveringValue2}
-        percentage={value2Percentage}
-        leftOffset={value1Percentage}
-      />
+      <HoverTooltip isVisible={isHoveringValue1} percentage={value1Percentage} leftOffset={0} />
+      <HoverTooltip isVisible={isHoveringValue2} percentage={value2Percentage} leftOffset={value1Percentage} />
       <div className="h-4 relative bg-[#222222] rounded-full z-0 overflow-hidden">
         <ProgressBarItem
           className="z-20"

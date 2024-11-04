@@ -8,17 +8,11 @@ interface ProgressBarItemProps {
   onHoverChange: (isHovering: boolean) => void;
 }
 
-const ProgressBarItem: React.FC<ProgressBarItemProps> = ({
-  className,
-  percentage,
-  color,
-  title,
-  onHoverChange,
-}) => {
+const ProgressBarItem: React.FC<ProgressBarItemProps> = ({ className, percentage, color, title, onHoverChange }) => {
   return (
     <div
       className={cn("absolute h-full", className)}
-      style={{ width: `${percentage}%`, backgroundColor: color }}
+      style={{ width: `${percentage}%`, backgroundColor: color, maxWidth: "100%" }}
       title={title}
       onMouseEnter={() => onHoverChange(true)}
       onMouseLeave={() => onHoverChange(false)}
